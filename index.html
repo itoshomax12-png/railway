@@ -1684,7 +1684,8 @@ function uiTick(){
   show('bRecall', ph==='load'&&G.aside&&G.aside.length);
   show('bDrink', ph==='load'&&cur&&cur.asked&&hasDrink(cur)&&!cur.drinkAsked);
   placeGuide(true); carInfo();
-  { const hold=ph==='load'&&holdNeeded(cur); $('iHold').style.display=hold?'':'none'; $('chips').classList.toggle('noHold',!hold); }
+  { const hold=ph==='load'&&holdNeeded(cur); $('iHold').style.display=hold?'':'none'; $('chips').classList.toggle('noHold',!hold);
+    $('bHold').style.display=hold?'':'none'; $('bCall').style.gridColumn=hold?'':'1 / -1'; }   // ⋯の中の「次の電車でご案内」も、乗れないとき（仕方がないとき）だけ
   { const asking=!(cur&&cur.asked); $('pLoad').classList.toggle('asking',asking);   // 人数を聞く前は「何名様ですか？」、聞いたら座る位置と「どうぞ」
     $('bAsk').disabled=!cur; $('bAsk').textContent=cur?'🗣 何名様ですか？':'（次のグループを待っています）'; }
   $('iAround').disabled=!(G.car&&spaceRows(G.car).size>0);
@@ -1715,7 +1716,7 @@ setInterval(uiTick,250);
 // ずれてもらう・反対側のベンチは映像で選んだグループに使うので、詰めてもらうは後半に出るので、映像の下のはしのまま
 const GUIDE=['bDrink','bFold','bNextWc','bAside','bRecall'];   // 詰めてもらうは映像の下のはしのまま
 const CTXORD=[...$('ctx').children].map(e=>e.id);
-// 「🚃 次の電車で」は、今のグループがこの電車に乗れないとき（定員をこえる・座る場所がない・希望の側が空いていない）だけ出す
+// 「🚃 次の電車で」（⋯の中もふくむ）は、今のグループがこの電車に乗れないとき（定員をこえる・座る場所がない・希望の側が空いていない）だけ出す
 function holdNeeded(g){
   const car=G&&G.car; if(!g||!g.asked||!car) return false;
   if(G.noRoom||heads(car)+g.size>CARCAP) return true;
