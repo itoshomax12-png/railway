@@ -1546,7 +1546,8 @@ function squeeze(){
   for(const id in car.groups){ const x=car.groups[id]; x.pos=Math.min(...x.segs.map(q=>q.s)); }
   const gained=freeReach(car)-before;
   sayCast('お手数ですが、皆さま少しずつお詰めいただけますでしょうか？');
-  G.t+=4; G.noRoom=false; render();
+  if(gained>0) G.t+=4;   // 詰めてもらえたときだけ4秒かかる（これ以上詰められないときは時間はそのまま）
+  G.noRoom=false; render();
   setTimeout(()=>sayGuest(gained>0?'（車内のゲストが少しずつ詰めてくれた）':'（これ以上は詰められない…）',true),700);
 }
 function freeReach(car){ let n=0; for(let r=0;r<2;r++){ const R=reach(car.rows[r],rowDoor(car,r)); if(R) n+=R.L; } return n; }
@@ -1713,7 +1714,7 @@ function holdNeeded(g){
 function carInfo(){ // カウンターの左：車内の様子
   if(!G.car) return; const n=heads(G.car), a=G.aside||[], c=G.car;
   const st=c.st, wc=c.wc, aSt=a.reduce((k,x)=>k+stN(x),0), aWc=a.filter(x=>x.wc).length;
-  const h=`<div>車内 <b>${n}</b>名<span style="opacity:.75">（あと${Math.max(0,CARCAP-n)}名）</span></div>`+
+  const h=`<div>車内 <b>${n}</b>名</div>`+
     `<div class="ci2"><span class="${st>=MAX_ST?'full':''}">👶 ${st}/${MAX_ST}台</span>　<span class="${wc>=MAX_WC?'full':''}">♿ ${wc}/${MAX_WC}台</span></div>`+
     (a.length?`<div class="ci2">横で待機 ${a.length}組${aSt||aWc?`（${aSt?'👶'+aSt:''}${aWc?'♿'+aWc:''}）`:''}</div>`:'');
   if($('carInfo').innerHTML!==h) $('carInfo').innerHTML=h;
