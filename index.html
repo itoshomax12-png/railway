@@ -230,7 +230,7 @@ body,button{font-family:"Zen Maru Gothic",system-ui,sans-serif;letter-spacing:.0
 #pLoad .chips{gap:6px}
 #pLoad .chip{min-height:48px;padding:6px 4px;font-size:15px;font-weight:800;border-radius:14px}
 /* 背の低いスマホでは「どうぞ」が画面からはみ出さないように少し小さく */
-@media (max-height:720px){ #pLoad .chip{min-height:40px;font-size:14px} #pLoad #askSlot{height:58px} }
+@media (max-height:720px){ #pLoad .chip{min-height:40px;font-size:14px} }
 .chip:disabled{opacity:.3}
 .ctx{display:flex;flex-wrap:wrap;gap:5px}
 .ctx>*{flex:1 1 100%}
@@ -360,9 +360,15 @@ html,body,#app{height:100%;height:100dvh}
 #pLoad.asking #bAsk{display:block;font-size:20px;font-weight:900}
 #pLoad.asking .gorow{height:calc(var(--chipsH) + 5px + 44px)}
 #pLoad{--chipsH:104px}
-@media (max-height:720px){ #pLoad{--chipsH:88px} }
+@media (max-height:720px){ #pLoad{--chipsH:88px} #pLoad #askSlot{height:58px} }
 #pLoad #ctx2 .btn{flex:1;display:block;min-height:0;padding:3px 6px;font-size:12.5px;line-height:1.2}
-#pLoad #ctx2:empty::after{content:'（案内のボタンはここに出ます）';margin:auto;font-size:11px;opacity:.45;text-align:center}
+/* 案内のボタンがないときは、車内の様子（人数・ベビーカー／車いすの台数・横で待っている方） */
+#pLoad #ctx2:empty{display:none}
+#pLoad #carInfo{display:none;flex:1;flex-direction:column;justify-content:center;gap:2px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:11px;padding:4px 8px;color:#fff;font-size:12px;font-weight:700;line-height:1.3;min-height:0;overflow:hidden}
+#pLoad #ctx2:empty + #carInfo{display:flex}
+#pLoad #carInfo b{font-size:17px;font-weight:900}
+#pLoad #carInfo .full{color:#ff8a80}
+#pLoad #carInfo .ci2{font-size:11.5px;opacity:.9;white-space:nowrap}
 /* あそびかた：画面の図＋番号 */
 .hw-tabs{display:flex;gap:4px;margin-bottom:8px;position:sticky;top:0;background:inherit;z-index:2}
 .hw-tabs button{flex:1;font:inherit;font-size:11.5px;font-weight:800;padding:6px 2px;border-radius:8px;border:1.5px solid var(--cream-d);background:#fff;color:var(--ink)}
@@ -488,7 +494,7 @@ html,body,#app{height:100%;height:100dvh}
   <!-- ローディング -->
   <div class="panel" id="pLoad">
     <div class="g2">
-      <div id="askSlot"><div id="ctx2"></div></div>
+      <div id="askSlot"><div id="ctx2"></div><div id="carInfo"></div></div>
       <div class="counter">
         <button id="bMinus">−</button>
         <div class="n"><span id="cN">0</span><small>カウンター</small></div>
@@ -1673,7 +1679,7 @@ function uiTick(){
   show('bAside', ph==='load'&&cur&&cur.anch&&!cur.waited&&!ol);
   show('bRecall', ph==='load'&&G.aside&&G.aside.length);
   show('bDrink', ph==='load'&&cur&&cur.asked&&hasDrink(cur)&&!cur.drinkAsked);
-  placeGuide(true);
+  placeGuide(true); carInfo();
   { const asking=!(cur&&cur.asked); $('pLoad').classList.toggle('asking',asking);   // 人数を聞く前は「何名様ですか？」、聞いたら座る位置と「どうぞ」
     $('bAsk').disabled=!cur; $('bAsk').textContent=cur?'🗣 何名様ですか？':'（次のグループを待っています）'; }
   $('iAround').disabled=!(G.car&&spaceRows(G.car).size>0);
@@ -1703,6 +1709,14 @@ setInterval(uiTick,250);
 // ずれてもらう・反対側のベンチは映像で選んだグループに使うので、詰めてもらうは後半に出るので、映像の下のはしのまま
 const GUIDE=['bDrink','bFold','bNextWc','bAside','bRecall'];   // 詰めてもらうは映像の下のはしのまま
 const CTXORD=[...$('ctx').children].map(e=>e.id);
+function carInfo(){ // カウンターの左：車内の様子
+  if(!G.car) return; const n=heads(G.car), a=G.aside||[], c=G.car;
+  const st=c.st, wc=c.wc, aSt=a.reduce((k,x)=>k+stN(x),0), aWc=a.filter(x=>x.wc).length;
+  const h=`<div>車内 <b>${n}</b>名<span style="opacity:.75">（あと${Math.max(0,CARCAP-n)}名）</span></div>`+
+    `<div class="ci2"><span class="${st>=MAX_ST?'full':''}">👶 ${st}/${MAX_ST}台</span>　<span class="${wc>=MAX_WC?'full':''}">♿ ${wc}/${MAX_WC}台</span></div>`+
+    (a.length?`<div class="ci2">横で待機 ${a.length}組${aSt||aWc?`（${aSt?'👶'+aSt:''}${aWc?'♿'+aWc:''}）`:''}</div>`:'');
+  if($('carInfo').innerHTML!==h) $('carInfo').innerHTML=h;
+}
 function placeGuide(on){
   const want=on?GUIDE.filter(id=>$(id).classList.contains('show')).slice(0,2):[];
   const box=$('ctx2'), now=[...box.children].map(e=>e.id);
