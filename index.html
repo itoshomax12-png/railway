@@ -1652,19 +1652,7 @@ $('bRecall').onclick=()=>{
 };
 $('bHold').onclick=()=>{
   if(G.phase!=='load'||!G.cur) return;
-  if(G.cur.want!=null && !G.cur.offered){
-    G.cur.offered=true;
-    sayCast('申し訳ございません、今の電車ではご希望の側が難しく…次の電車であればご希望通りにご案内できますが、いかがなさいますか？');
-    const g=G.cur;
-    setTimeout(()=>{
-      if(G.cur!==g) return;
-      if(Math.random()<0.55){
-        sayGuest('じゃあ、次の電車で待ちます！');
-        setTimeout(()=>{ if(G.cur!==g||G.phase!=='load') return; carryPush(g); G.cur=null; $('group').className='group walkout'; setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk); },700);
-      } else { g.want=null; sayGuest('どこでも大丈夫です、今ので乗ります！'); updHold(); }
-    },700);
-    return;
-  }
+  // 次の電車にするのは、人数制限・台数制限などキャスト側の事情で仕方がないときだけ（座る側の希望では使わない）
   { const t=carryPush(G.cur); sayCast(`申し訳ございません、${tripName(t)}でご案内いたします。こちらで少々お待ちください`); }
   G.cur=null;
   $('group').className='group walkout';
@@ -1716,11 +1704,10 @@ setInterval(uiTick,250);
 // ずれてもらう・反対側のベンチは映像で選んだグループに使うので、詰めてもらうは後半に出るので、映像の下のはしのまま
 const GUIDE=['bDrink','bFold','bNextWc','bAside','bRecall'];   // 詰めてもらうは映像の下のはしのまま
 const CTXORD=[...$('ctx').children].map(e=>e.id);
-// 「🚃 次の電車で」（⋯の中もふくむ）は、今のグループがこの電車に乗れないとき（定員をこえる・座る場所がない・希望の側が空いていない）だけ出す
+// 「🚃 次の電車で」（⋯の中もふくむ）は、今のグループがこの電車に乗れないとき（定員をこえる・座る場所がない）だけ出す。キャスト側の事情で仕方がないときだけ使う
 function holdNeeded(g){
   const car=G&&G.car; if(!g||!g.asked||!car) return false;
   if(G.noRoom||heads(car)+g.size>CARCAP) return true;
-  if(g.want!=null&&!g.offered&&!findSeat(car,g,'free',g.want)) return true;
   return !findSeat(car,Object.assign({},g,{noSplit:false}),'free');
 }
 function carInfo(){ // カウンターの左：車内の様子
@@ -1746,7 +1733,7 @@ let showLbl=false;
 $('bLbl').onclick=()=>{showLbl=!showLbl;$('bLbl').textContent=showLbl?'🏷 名前を隠す':'🏷 名前';};
 window.__showLbl=()=>showLbl;
 function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
-function updHold(){ const b=$('bHold'); if(!b) return; b.innerHTML = (G&&G.cur&&G.cur.want!=null&&!G.cur.offered&&G.cur.asked) ? '次の電車なら<br>ご希望通りに' : '次の電車で<br>ご案内'; }
+function updHold(){ const b=$('bHold'); if(!b) return; b.innerHTML = '次の電車で<br>ご案内'; }
 // 少人数のご案内：人数を指定して呼ぶのではなく、並んでいる方に前から順番に「何名様ですか？」と聞き、乗れそうな人数なら案内する
 let callI=-1;
 function callAsk(){
