@@ -364,6 +364,9 @@ html,body,#app{height:100%;height:100dvh}
 #pLoad.asking #bAsk{display:block;font-size:20px;font-weight:900}
 #pLoad.asking .gorow{height:calc(var(--chipsH) + 5px + 44px)}
 #pLoad{--chipsH:104px}
+/* サムアップを押せたとき：緑にして、へこんだ見た目に */
+#bThumb.done{background:#2f9e6e !important;border-color:#2f9e6e !important;color:#fff !important;transform:translateY(3px);box-shadow:none !important;animation:thumbPop .35s ease-out}
+@keyframes thumbPop{0%{transform:translateY(3px) scale(.94)}60%{transform:translateY(3px) scale(1.04)}100%{transform:translateY(3px) scale(1)}}
 @media (max-height:720px){ #pLoad{--chipsH:88px} #pLoad #askSlot{height:58px} }
 #pLoad #ctx2 .btn{flex:1;display:block;min-height:0;padding:3px 6px;font-size:12.5px;line-height:1.2}
 /* 案内のボタンがないときは、車内の様子（人数・ベビーカー／車いすの台数・横で待っている方） */
@@ -1164,7 +1167,7 @@ function start(){
   setTimeout(()=>{ if(!E3.ready){ E3.init($('cv')) || ($('nogl').style.display='flex'); } E3.setup(); newTrain(); },30);
 }
 function newTrain(){
-  G.trip++; G.set=(G.set+1)%3; G.s0=G.score;   // s0：この便が始まったときのスコア（便ごとの点数に使う）
+  G.trip++; G.set=(G.set+1)%3; thumbView(false); G.s0=G.score;   // s0：この便が始まったときのスコア（便ごとの点数に使う）
   G.car=newCar(); G.t=0; G.phase='arrive'; G.count=0; G.trainMiss=[]; G.trainOpe=[]; G.order=[]; G.gateOrder=0; G.ins='free';
   G.gates=Array.from({length:STN[st].gates},(_,i)=>i===0?'closed':'closed');
   G.depart=false; G.thumbed=false; G.go3=false; G.waitMsg=false; G.waitInt=false; G.checkQ=[]; G.checking=null; G.unloadOk=0; G.unloadN=0; G.called=false; G.fw=[]; G.aside=[]; G.warnedAnch=false; clearTimeout(G.uT); $('bCallOut').classList.remove('sel'); $('bExitL').style.display=(st==='awf'&&pos==='rear')?'':'none';
@@ -1362,11 +1365,13 @@ function runCheck(){
   E3.checkGate(i, ()=>{ clank(); setTimeout(()=>clank(),180); },
     ()=>{ G.gates[i]='ok'; G.checking=null; blip(1200); sayCast(`（ガチャガチャ）${nm}、ゲートOK！☝`); render(); runCheck(); });
 }
+// サムアップを押せたら、ボタンを「押した」見た目にする（次の電車でもとにもどす）
+function thumbView(on){ const b=$('bThumb'); b.classList.toggle('done',!!on); b.textContent=on?'👍 サムアップしました！（出発を待っています）':'👍 サムアップ'; }
 $('bThumb').onclick=()=>{
   if(G.phase!=='gate'||G.depart) return;
   if(G.thumbed) return;
   if(G.gates.some(x=>x!=='ok')){toast(G.checking!=null?'ゲートOKの確認中です':'まだ確認していないゲートがあります','bad');return;}
-  G.thumbed=true; if(VS) vsPush({thumbTrip:G.trip,score:G.score,heads:heads(G.car)}); sayCast('（出口ゲート付近へ）👍 ゲートOK！（ディスパッチャーへサムアップ）'); E3.thumb(true);
+  G.thumbed=true; thumbView(true); buzz(40); if(VS) vsPush({thumbTrip:G.trip,score:G.score,heads:heads(G.car)}); sayCast('（出口ゲート付近へ）👍 ゲートOK！（ディスパッチャーへサムアップ）'); E3.thumb(true);
   // 相方のローダーもゲートOK（サムアップ）してから、3秒後に出発
   const wait=()=>{
     if(G.phase!=='gate') return;
@@ -1703,7 +1708,7 @@ function uiTick(){
 setInterval(uiTick,250);
 // 人数を聞いたあとは「何名様ですか？」を消して、その場所に案内のボタンを出す（大事な順に2つまで。残りは今までどおり映像の下のはしに重ねる）
 // ずれてもらう・反対側のベンチは映像で選んだグループに使うので、詰めてもらうは後半に出るので、映像の下のはしのまま
-const GUIDE=['bDrink','bFold','bNextWc','bAside','bRecall'];   // 詰めてもらうは映像の下のはしのまま
+const GUIDE=['bFold','bNextWc','bAside','bRecall'];   // 詰めてもらう・フタのない飲み物は映像の下のはしのまま
 const CTXORD=[...$('ctx').children].map(e=>e.id);
 // 「🚃 次の電車で」（⋯の中もふくむ）は、今のグループがこの電車に乗れないとき（定員をこえる・座る場所がない）だけ出す。キャスト側の事情で仕方がないときだけ使う
 function holdNeeded(g){
