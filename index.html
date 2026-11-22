@@ -228,6 +228,10 @@ body,button{font-family:"Zen Maru Gothic",system-ui,sans-serif;letter-spacing:.0
 .chip.sel{background:var(--gold);color:#fff;border-color:var(--gold)}
 /* 座る位置のボタンは押しやすいように大きめ */
 #pLoad .chips{gap:6px}
+/* 「次の電車で」を出さないときは、残りの5つを広げる（上の段2つ・下の段3つ） */
+#pLoad .chips.noHold{grid-template-columns:repeat(6,1fr)}
+#pLoad .chips.noHold .chip{grid-column:span 2}
+#pLoad .chips.noHold #iFree,#pLoad .chips.noHold #iR{grid-column:span 3}
 #pLoad .chip{min-height:48px;padding:6px 4px;font-size:15px;font-weight:800;border-radius:14px}
 /* 背の低いスマホでは「どうぞ」が画面からはみ出さないように少し小さく */
 @media (max-height:720px){ #pLoad .chip{min-height:40px;font-size:14px} }
@@ -595,7 +599,7 @@ html,body,#app{height:100%;height:100dvh}
           <li><b>ゲート</b>：タップで開け閉め。ロードの最後にもう一度押すとゲート確認へ</li>
           <li><b>何名様ですか？</b>：ゲート前のグループに人数を聞く。聞くと、座る位置のボタンと「どうぞ」に入れ替わる</li>
           <li><b>カウンター</b>：＋1／−で数える</li>
-          <li><b>席の指示（左右）・次の電車で</b>：おまかせ（フロントは左詰め・リアは右詰め）／フロントは「右 →」・リアは「← 左」に寄せて座ってもらう／🚃次の電車でご案内</li>
+          <li><b>席の指示（左右）・次の電車で</b>：おまかせ（フロントは左詰め・リアは右詰め）／フロントは「右 →」・リアは「← 左」に寄せて座ってもらう／🚃次の電車でご案内（乗れないときだけ出る）</li>
           <li><b>席の指示（奥・手前）</b>：奥＝上のベンチ、手前＝下のベンチ。↻反対側へ＝ベビーカーグループの横へ</li>
           <li><b>⋯</b>：後ろの方に人数を聞く（乗れそうなら先にご案内）／次の電車でご案内</li>
           <li><b>どうぞ、ご乗車ください</b>：選んだ席の指示で乗ってもらう</li>
@@ -1680,6 +1684,7 @@ function uiTick(){
   show('bRecall', ph==='load'&&G.aside&&G.aside.length);
   show('bDrink', ph==='load'&&cur&&cur.asked&&hasDrink(cur)&&!cur.drinkAsked);
   placeGuide(true); carInfo();
+  { const hold=ph==='load'&&holdNeeded(cur); $('iHold').style.display=hold?'':'none'; $('chips').classList.toggle('noHold',!hold); }
   { const asking=!(cur&&cur.asked); $('pLoad').classList.toggle('asking',asking);   // 人数を聞く前は「何名様ですか？」、聞いたら座る位置と「どうぞ」
     $('bAsk').disabled=!cur; $('bAsk').textContent=cur?'🗣 何名様ですか？':'（次のグループを待っています）'; }
   $('iAround').disabled=!(G.car&&spaceRows(G.car).size>0);
@@ -1696,6 +1701,7 @@ function uiTick(){
   else if(ph==='load'&&cur){
     if(!cur.asked) t=$('bAsk');
     else if(hasDrink(cur)&&!cur.drinkAsked) t=$('bDrink');
+    else if(G.cur&&heads(G.car)+G.cur.size>CARCAP) t=$('iHold');
     else if(G.noRoom) t=$('bSqueeze');
     else if(!cur.foldAsked&&overLimit(cur)) t=overLimit(cur)==='st'?$('bFold'):$('bNextWc');
     else if(cur.anch&&G.queue.some(q=>!q.anch)&&!cur.waited) t=$('bAside');
@@ -1709,6 +1715,13 @@ setInterval(uiTick,250);
 // ずれてもらう・反対側のベンチは映像で選んだグループに使うので、詰めてもらうは後半に出るので、映像の下のはしのまま
 const GUIDE=['bDrink','bFold','bNextWc','bAside','bRecall'];   // 詰めてもらうは映像の下のはしのまま
 const CTXORD=[...$('ctx').children].map(e=>e.id);
+// 「🚃 次の電車で」は、今のグループがこの電車に乗れないとき（定員をこえる・座る場所がない・希望の側が空いていない）だけ出す
+function holdNeeded(g){
+  const car=G&&G.car; if(!g||!g.asked||!car) return false;
+  if(G.noRoom||heads(car)+g.size>CARCAP) return true;
+  if(g.want!=null&&!g.offered&&!findSeat(car,g,'free',g.want)) return true;
+  return !findSeat(car,Object.assign({},g,{noSplit:false}),'free');
+}
 function carInfo(){ // カウンターの左：車内の様子
   if(!G.car) return; const n=heads(G.car), a=G.aside||[], c=G.car;
   const st=c.st, wc=c.wc, aSt=a.reduce((k,x)=>k+stN(x),0), aWc=a.filter(x=>x.wc).length;
