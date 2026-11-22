@@ -229,6 +229,8 @@ body,button{font-family:"Zen Maru Gothic",system-ui,sans-serif;letter-spacing:.0
 /* 座る位置のボタンは押しやすいように大きめ */
 #pLoad .chips{gap:6px}
 #pLoad .chip{min-height:48px;padding:6px 4px;font-size:15px;font-weight:800;border-radius:14px}
+/* 背の低いスマホでは「どうぞ」が画面からはみ出さないように少し小さく */
+@media (max-height:720px){ #pLoad .chip{min-height:40px;font-size:14px} #pLoad #askSlot{height:58px} }
 .chip:disabled{opacity:.3}
 .ctx{display:flex;flex-wrap:wrap;gap:5px}
 .ctx>*{flex:1 1 100%}
@@ -250,6 +252,7 @@ body,button{font-family:"Zen Maru Gothic",system-ui,sans-serif;letter-spacing:.0
 .lbl3{font-size:10px;padding:1px 6px}
 /* 3Dの画面は映像の形に合わせた高さにして、余白（空・床）を出さない。操作ボタンはすぐ下に */
 .view{flex:0 0 auto;height:auto;aspect-ratio:1.42/1;min-height:170px;max-height:46vh;max-height:46dvh}
+@media (max-height:720px){ .view{max-height:34vh;max-height:34dvh} }   /* 背の低いスマホは映像を少し低くして、ボタンが画面に入るように */
 #sGame{justify-content:flex-start}
 .panel{margin-top:0}
 /* Safari：下のツールバーやホームバーに隠れないように、実際に見えている高さを使う */
