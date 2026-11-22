@@ -1,0 +1,2842 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>全てのゲスト全てのキャストにワクワク感と安心感を</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#b3262d;--red-d:#7d1a1f;--cream:#f6ecd6;--cream-d:#e6d6b2;--ink:#2b2320;--gold:#c99a2e;--green:#2f8a4e;--teal:#1f6f78;--bg1:#6b2b22;--bg2:#2e1712}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;font-family:"Zen Maru Gothic",system-ui,sans-serif;color:var(--ink);background:#1b1210;overflow:hidden;user-select:none;-webkit-user-select:none}
+#app{max-width:460px;margin:0 auto;height:100%;position:relative;overflow:hidden;background:linear-gradient(180deg,var(--bg1),var(--bg2))}
+#app.pd{--bg1:#16535c;--bg2:#0b2529}
+#app.night{--bg1:#1c1f3a;--bg2:#07081a}
+#app.pd.night{--bg1:#0f2a3a;--bg2:#040d14}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:10px}
+.screen.on{display:flex}
+button{font-family:inherit;border:none;cursor:pointer;touch-action:manipulation;color:var(--ink)}
+.btn{background:var(--cream);border-radius:11px;padding:9px 8px;font-weight:700;font-size:13px;box-shadow:0 3px 0 var(--cream-d);line-height:1.25}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--cream-d)}
+.btn.red{background:var(--red);color:#fff;box-shadow:0 3px 0 var(--red-d)}
+.btn.green{background:var(--green);color:#fff;box-shadow:0 3px 0 #1d5a32}
+.btn.gold{background:var(--gold);color:#fff;box-shadow:0 3px 0 #8a6a1d}
+.btn.sel{outline:3px solid #f3c64b}
+.btn:disabled{opacity:.35}
+/* title */
+.title-card{margin:auto 0;background:var(--cream);border-radius:18px;padding:18px 14px;text-align:center;border:3px solid var(--gold);box-shadow:0 8px 24px rgba(0,0,0,.4);max-height:100%;overflow:auto}
+.title-card h1{margin:4px 0 2px;font-size:21px;line-height:1.3;color:var(--red)}
+.title-card .sub{font-size:12px;opacity:.75;margin-bottom:10px}
+.seg{display:flex;gap:6px;margin:5px 0 10px}
+.seg button{flex:1;padding:9px 2px;border-radius:10px;background:#fff;border:2px solid var(--cream-d);font-weight:700;font-size:12px}
+.seg button.sel{border-color:var(--red);background:#fde8e6;color:var(--red)}
+.lbl{font-size:12px;text-align:left;font-weight:700;opacity:.7}
+.note{font-size:11px;opacity:.6;margin-top:8px;line-height:1.5}
+.howto{text-align:left;font-size:12.5px;line-height:1.6;max-height:60vh;overflow:auto}
+.howto b{color:var(--red)}
+/* hud */
+.hud{display:flex;gap:5px;align-items:center;color:#fff;font-size:11px;flex-wrap:nowrap}
+.hud .pill{background:rgba(0,0,0,.35);border-radius:999px;padding:3px 8px;white-space:nowrap}
+.hud .score{margin-left:auto;font-weight:900;font-size:15px;color:#ffe6a0}
+.dwell{position:relative;height:16px;background:rgba(0,0,0,.4);border-radius:8px;margin:6px 0 2px;overflow:hidden}
+.dwell i{position:absolute;left:0;top:0;bottom:0;background:#f3c64b;width:0}
+.dwell .m{position:absolute;top:0;bottom:0;width:2px;background:#fff}
+.dwell .m.x{background:#ff5050}
+.dwell span{position:absolute;right:6px;top:0;font-size:10px;color:#fff;font-weight:900;line-height:16px}
+.phase{color:#fff;font-size:11px;display:flex;justify-content:space-between;opacity:.85}
+/* car */
+.carwrap{position:relative;margin-top:6px;transition:transform .9s cubic-bezier(.5,0,.3,1)}
+.carwrap.away{transform:translateX(130%)}
+.carwrap.enter{transform:translateX(-130%);transition:none}
+.car{background:var(--red);border-radius:10px;padding:16px 6px 8px;position:relative;box-shadow:inset 0 -4px 0 var(--red-d)}
+.car::before{content:"";position:absolute;left:10px;right:10px;top:5px;height:5px;border-radius:4px;background:#5c1216}
+.car .lab{position:absolute;top:-1px;font-size:9px;color:#ffd9a0;font-weight:900}
+.car .lab.l{left:8px}.car .lab.r{right:8px}
+.inner{display:flex;gap:4px;align-items:stretch}
+.space{width:40px;background:#f0e3c4;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;border:2px dashed #c9b48a;line-height:1.1;text-align:center}
+.space small{font-size:7.5px;font-weight:900;color:#7a6440}
+.benches{flex:1;display:flex;flex-direction:column;gap:2px}
+.row{position:relative;background:linear-gradient(180deg,#e8d6ae,#d8c194);border-radius:6px;height:26px;margin:0 2px}
+.row .pp{position:absolute;top:50%;transform:translate(-50%,-50%);border-radius:50% 50% 45% 45%;border:2px solid rgba(255,255,255,.85);box-shadow:0 1px 2px rgba(0,0,0,.3)}
+#app.front .row .pp{transform:translate(50%,-50%)}
+.row .pp.ad{width:8.6%;aspect-ratio:1/1;max-height:23px}
+.row .pp.kd{width:4.6%;aspect-ratio:1/1}
+.row .pp.rep{border-color:#f3c64b;border-width:3px}
+.row .pp{border-width:1.5px}
+.rowlab{display:flex;justify-content:space-between;font-size:8.5px;color:#fff;font-weight:900;padding:0 2px}
+.backrest{height:3px;background:#5c1216;border-radius:2px;margin:0 4px}
+.doors{display:flex;justify-content:space-between;margin-top:3px;padding:0 2px}
+.door{font-size:9px;font-weight:900;color:#fff;background:rgba(0,0,0,.35);border-radius:5px;padding:1px 6px}
+.door.ent{background:#2f8a4e}
+.car.unload .row{opacity:.85}
+.platform{display:flex;justify-content:space-around;align-items:center;margin-top:7px;background:rgba(0,0,0,.25);border-radius:8px;padding:4px}
+.gate{background:#d9d2c3;border-radius:7px;padding:4px 6px;font-size:10px;font-weight:900;min-width:70px;text-align:center;border:2px solid transparent}
+.gate.open{background:#ffe6a0;border-color:#c99a2e}
+.gate.ok{background:#9fdcb3;border-color:var(--green)}
+.gate small{display:block;font-size:8px;opacity:.7}
+/* stage */
+.stage{flex:1;position:relative;background:rgba(255,255,255,.07);border-radius:14px;margin:7px 0 6px;overflow:hidden;min-height:118px}
+.stage .floor{position:absolute;left:0;right:0;bottom:0;height:30%;background:rgba(0,0,0,.18)}
+.bubble{position:absolute;left:8px;right:8px;top:6px;background:#fff;border-radius:11px;padding:5px 9px;font-size:13px;font-weight:700;min-height:30px;line-height:1.35}
+.bubble.cast{background:#fff4d6}
+.bubble small{display:block;font-size:9px;opacity:.55;font-weight:500}
+.group{position:absolute;left:0;right:42%;bottom:8px;display:flex;justify-content:center;align-items:flex-end;gap:0 2px;padding:0 10px;transition:transform .45s ease,opacity .45s}
+.group.walkin{transform:translateX(-110%);opacity:0;transition:none}
+.group.walkout{transform:translateY(-40px);opacity:0}
+.group.exitL{transform:translateX(-110%);opacity:0}
+.group.exitR{transform:translateX(110%);opacity:0}
+.tags{position:absolute;left:8px;bottom:4px;display:flex;gap:3px;flex-wrap:wrap;max-width:60%}
+.tag{font-size:9.5px;background:rgba(0,0,0,.5);color:#fff;border-radius:6px;padding:2px 5px}
+.queue{position:absolute;right:4px;bottom:6px;width:42%;color:#fff;font-size:8.5px;opacity:.8;border-left:1px dashed rgba(255,255,255,.3);padding-left:5px}
+.qline{display:flex;gap:7px;align-items:flex-end;overflow:hidden;margin-top:2px}
+.qg{display:flex;align-items:flex-end;gap:1px;flex:none}
+.aside{position:absolute;left:8px;top:48px;font-size:10px;background:rgba(243,198,75,.9);color:#2b2320;border-radius:6px;padding:2px 6px;font-weight:900;display:none}
+.aside.on{display:block}
+/* controls */
+.panel{display:none;flex-direction:column;gap:6px}
+.panel.on{display:flex}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px}
+.g4 .btn{font-size:11.5px;padding:8px 3px}
+.g3.ins .btn{font-size:11.5px;padding:6px 3px}
+.counter{display:flex;align-items:stretch;background:var(--cream);border-radius:11px;overflow:hidden;box-shadow:0 3px 0 var(--cream-d)}
+.counter button{width:38px;background:#e9dcbd;font-size:20px;font-weight:900}
+.counter button.plus{background:var(--gold);color:#fff;flex:1;width:auto;font-size:18px}
+.counter .n{width:52px;text-align:center;font-size:22px;font-weight:900;padding-top:2px}
+.counter .n small{display:block;font-size:8px;font-weight:700;opacity:.6;margin-top:-2px}
+.toast{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.9);background:rgba(20,10,8,.92);color:#fff;padding:10px 14px;border-radius:12px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:.2s;text-align:center;z-index:30;max-width:88%}
+.toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.toast.good{background:rgba(31,111,60,.95)}
+.toast.bad{background:rgba(160,30,30,.95)}
+.pop{position:absolute;font-weight:900;color:#ffe6a0;font-size:15px;pointer-events:none;animation:up 1s forwards;z-index:20;text-shadow:0 2px 3px #000}
+.pop.neg{color:#ff8a8a}
+@keyframes up{to{transform:translateY(-34px);opacity:0}}
+.sheet{position:absolute;left:10px;right:10px;bottom:10px;background:var(--cream);border-radius:14px;padding:10px;display:none;z-index:35;border:3px solid var(--gold)}
+.sheet.on{display:block}
+.sheet h3{margin:0 0 6px;font-size:13px}
+/* overlay */
+.ov{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+.ov.on{display:flex}
+.card{background:var(--cream);border-radius:16px;padding:16px 14px;width:100%;text-align:center;border:3px solid var(--gold);max-height:100%;overflow:auto}
+.card h2{margin:0 0 6px;font-size:17px;color:var(--red)}
+.card .big{font-size:30px;font-weight:900}
+.card table{width:100%;font-size:12.5px;margin:6px 0;border-collapse:collapse}
+.card td{padding:3px 2px;border-bottom:1px dashed var(--cream-d);text-align:left}
+.card td:last-child{text-align:right;font-weight:700}
+.trivia{background:#fff;border-radius:10px;padding:7px 9px;font-size:12px;text-align:left;margin:6px 0;line-height:1.5}
+.trivia b{color:var(--teal)}
+.rank{font-size:52px;font-weight:900;color:var(--red);line-height:1}
+/* フロントローダー：連結部が右 */
+#app.front .inner,#app.front .doors,#app.front .platform{flex-direction:row-reverse}
+#app.front .group.exitR{transform:translateX(-110%)}
+#app.front .group.exitL{transform:translateX(110%)}
+/* ===== 3D view ===== */
+.view{position:relative;flex:1;min-height:250px;border-radius:14px;overflow:hidden;margin:6px 0;background:#000}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#lbls{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl3{position:absolute;left:0;top:0;white-space:nowrap;font-size:10px;font-weight:900;color:#fff;background:rgba(20,14,12,.62);padding:2px 6px;border-radius:7px;line-height:1.25;will-change:transform}
+.lbl3.door{background:rgba(47,138,78,.92)}
+.lbl3.staff{background:rgba(36,48,90,.8)}
+.lbl3.waitz{background:rgba(70,140,200,.85)}
+.lbl3.you{background:rgba(192,57,43,.9)}
+.lbl3.gt{background:rgba(70,70,70,.82)}
+.lbl3.gt.open{background:rgba(201,154,46,.95)}
+.lbl3.gt.ok{background:rgba(47,138,78,.95)}
+.lbl3.gt b{margin-left:4px}
+.view .bubble{position:absolute;left:8px;right:8px;top:6px;z-index:5;font-size:12.5px;padding:5px 9px;min-height:26px;background:rgba(255,255,255,.94)}
+.view .bubble.cast{background:rgba(255,244,214,.95)}
+.view .tags{position:absolute;left:6px;bottom:44px;z-index:5;max-width:62%}
+.view .queue{position:absolute;right:6px;bottom:44px;width:auto;border:none;padding:2px 6px;background:rgba(0,0,0,.45);border-radius:6px;z-index:5;font-size:10px;opacity:1}
+.view .aside{z-index:5;top:auto;bottom:66px}
+.camb{position:absolute;right:6px;top:44px;z-index:6;background:rgba(255,255,255,.88);border-radius:9px;padding:4px 8px;font-size:11px;font-weight:900}
+.view .platform{position:absolute;left:6px;right:6px;bottom:6px;margin:0;z-index:6;background:rgba(0,0,0,.35);padding:3px;gap:4px}
+.view .gate{min-width:0;flex:1;padding:3px 4px;font-size:10px}
+.view .platform>span{display:none}
+.nogl{display:none;position:absolute;inset:0;align-items:center;justify-content:center;color:#fff;font-size:13px}
+/* ===== 統一デザイン（色4つ・文字サイズ3段階） =====
+   ネイビー #1d2433（地・ラベル） / アイボリー #f7f3ea（ボタン・カード） / トロリーの赤 #b0222a（主なボタン） / 金 #c9a24a（選択・強調）
+   文字：Zen Maru Gothic　大 15px / 中 13px / 小 11px */
+:root{--ink:#1d2433;--ivory:#f7f3ea;--line:#e3dccb;--txt:#2b2320;--red:#b0222a;--red-d:#7f1820;--gold:#c9a24a;--ok:#3f8a5a}
+#app,#app.pd,#app.night,#app.pd.night{--bg1:#1d2433;--bg2:#141a26}
+body,button{font-family:"Zen Maru Gothic",system-ui,sans-serif;letter-spacing:.01em}
+.btn{background:var(--ivory);color:var(--txt);border:1px solid var(--line);box-shadow:0 2px 0 var(--line);border-radius:12px;font-size:13px;font-weight:700;padding:9px 6px;line-height:1.3}
+.btn small{font-size:11px;font-weight:500;opacity:.7}
+.btn:active{box-shadow:none;transform:translateY(2px)}
+.btn.red{background:var(--red);color:#fff;border-color:var(--red-d);box-shadow:0 2px 0 var(--red-d);font-size:15px;padding:11px 8px}
+.btn.green,.btn.gold{background:var(--red);color:#fff;border-color:var(--red-d);box-shadow:0 2px 0 var(--red-d)}
+.btn.sel{outline:none;border:2px solid var(--gold);background:#fbf3dc}
+.btn:disabled{opacity:.35}
+.g3.ins .btn,.g4 .btn{font-size:12px;padding:7px 3px}
+.counter{background:var(--ivory);border:1px solid var(--line);box-shadow:0 2px 0 var(--line)}
+.counter button{background:#ece6d6;color:var(--txt)}
+.counter button.plus{background:var(--ink);color:#fff;font-size:15px}
+.counter .n{color:var(--txt);font-size:22px}
+.counter .n small{font-size:10px}
+.hud{font-size:11px}
+.hud .pill{background:rgba(255,255,255,.1);color:#fff;font-weight:700;padding:3px 9px}
+.hud .score{color:var(--gold);font-size:15px}
+.phase{font-size:11px;font-weight:700;color:rgba(255,255,255,.75)}
+.dwell{background:rgba(255,255,255,.12)}
+/* 3Dのラベルはすべて同じ形：ネイビー地に白文字、種類は左の色の線で区別 */
+.lbl3,.lbl3.door,.lbl3.staff,.lbl3.you,.lbl3.gt,.lbl3.gt.open,.lbl3.gt.ok,.lbl3.waitz,.lbl3.bench{background:rgba(29,36,51,.85);color:#fff;font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 7px;border-left:3px solid rgba(255,255,255,.4)}
+.lbl3.you{border-left-color:var(--red)}
+.lbl3.door{border-left-color:var(--gold)}
+.lbl3.gt.open{border-left-color:var(--gold)}
+.lbl3.gt.open b{color:var(--gold)}
+.lbl3.gt.ok{border-left-color:var(--ok)}
+.lbl3.gt.ok b{color:#9fdcb3}
+.lbl3.waitz{border-left-color:#6aa6d6}
+/* 吹き出し・タグ・トースト */
+.view .bubble,.view .bubble.cast{background:var(--ivory);color:var(--txt);font-size:13px;font-weight:700;border-left:4px solid #9aa3b5;border-radius:10px}
+.view .bubble.cast{border-left-color:var(--red)}
+.bubble small{font-size:10px;font-weight:500;opacity:.6}
+.tag,.view .queue{background:rgba(29,36,51,.85);color:#fff;font-size:10.5px;font-weight:700;border-radius:6px}
+.view .aside{background:rgba(29,36,51,.85);color:#fff;font-size:10.5px;border-left:3px solid var(--gold)}
+.camb{background:rgba(29,36,51,.85);color:#fff;font-size:11px;font-weight:700;border-radius:8px}
+.toast,.toast.good,.toast.bad{background:rgba(29,36,51,.95);color:#fff;font-size:13px;border-left:4px solid #9aa3b5}
+.toast.good{border-left-color:var(--ok)}
+.toast.bad{border-left-color:var(--red)}
+/* ゲートのボタン（3Dの上） */
+.view .platform{background:rgba(29,36,51,.55)}
+.view .gate{background:var(--ivory);color:var(--txt);border:1px solid var(--line);font-size:11px;font-weight:700;border-radius:8px}
+.view .gate small{font-size:10px;opacity:.7}
+.view .gate.open{background:#fbf3dc;border:2px solid var(--gold)}
+.view .gate.ok{background:#e4f2e8;border:2px solid var(--ok)}
+/* カード・シート */
+.card,.title-card,.sheet{background:var(--ivory);border:none;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.card h2,.title-card h1{color:var(--red)}
+.card h2{font-size:17px}
+.title-card h1{font-size:21px}
+.sheet h3{font-size:13px}
+.seg button{background:#fff;border:1px solid var(--line);font-size:12px}
+.seg button.sel{border:2px solid var(--gold);background:#fbf3dc;color:var(--txt)}
+.lbl{font-size:11px}
+.trivia{font-size:12px}
+.trivia b{color:var(--red)}
+.howto b{color:var(--red)}
+.rank{color:var(--red)}
+#pLoad .btn{padding:7px 5px;font-size:12.5px}
+#pLoad .btn.red{padding:10px 8px;font-size:15px}
+#pLoad{gap:5px}
+/* ===== 操作しやすさ ===== */
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:1px 0}
+.chips .chipl{display:none}
+.chips::-webkit-scrollbar{display:none}
+.chipl{font-size:10.5px;color:rgba(255,255,255,.6);font-weight:700;flex:none}
+.chip{flex:none;background:var(--ivory);color:var(--txt);border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:12.5px;font-weight:700}
+.chip.sel{background:var(--gold);color:#fff;border-color:var(--gold)}
+.chip:disabled{opacity:.3}
+.ctx{display:flex;flex-wrap:wrap;gap:5px}
+.ctx>*{flex:1 1 100%}
+.ctx>#bAside,.ctx>#bRecall{flex:1 1 40%}
+.ctx>*{display:none}
+.ctx>.show{display:grid}
+.ctx>button.show{display:block}
+.gorow{display:grid;grid-template-columns:52px 1fr;gap:6px}
+#bMore{font-size:20px;padding:0}
+#pLoad .btn{min-height:44px}
+/* 次にやること：やさしく光らせる */
+@keyframes nudge{0%,100%{box-shadow:0 0 0 0 rgba(201,162,74,.0)}50%{box-shadow:0 0 0 4px rgba(201,162,74,.85)}}
+.nudge{animation:nudge 1.3s ease-in-out infinite;position:relative;z-index:1}
+/* 3Dの文字は最小限に */
+.view .platform{padding:2px;gap:3px}
+.view .gate{padding:5px 2px;font-size:11px}
+.view .tags{bottom:46px}
+.lblb{position:absolute;right:6px;top:78px;z-index:6;background:rgba(29,36,51,.85);color:#fff;font-size:11px;font-weight:700;border-radius:8px;padding:4px 8px}
+.lbl3{font-size:10px;padding:1px 6px}
+/* 3Dの画面は映像の形に合わせた高さにして、余白（空・床）を出さない。操作ボタンはすぐ下に */
+.view{flex:0 0 auto;height:auto;aspect-ratio:1.42/1;min-height:170px;max-height:46vh;max-height:46dvh}
+#sGame{justify-content:flex-start}
+.panel{margin-top:0}
+/* Safari：下のツールバーやホームバーに隠れないように、実際に見えている高さを使う */
+html,body,#app{height:100%;height:100dvh}
+.screen{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+#sGame{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.gbar{display:flex;gap:5px;margin:2px 0 6px;background:none;padding:0}
+.gbar .gate{flex:1;background:var(--ivory);color:var(--txt);border:1px solid var(--line);border-radius:10px;font-size:12px;font-weight:700;padding:7px 2px;min-height:42px}
+.gbar .gate small{display:block;font-size:10px;opacity:.7}
+.gbar .gate.open{background:#fbf3dc;border:2px solid var(--gold)}
+.gbar .gate.chk{border:2px dashed var(--gold)}
+.gbar .gate.ok{background:#e4f2e8;border:2px solid var(--ok)}
+.gbar>span{display:none}
+.view .tags{bottom:6px}
+.view .queue{bottom:6px}
+.view .aside{bottom:30px}
+.ico3{position:absolute;left:0;top:0;white-space:nowrap;font-size:13px;line-height:1;padding:3px 5px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);border:2px solid #fff;will-change:transform;pointer-events:none}
+.ico3 b{font-size:10px;margin-left:2px;vertical-align:2px}
+.ico3.wc{border-color:#2f6fd0}.ico3.st{border-color:#e86a9a}
+.ico3.open{background:#fde4e1;border-color:#d0302a;color:#a01d18}
+.ico3.lid{background:#e4f2e8;border-color:#3f8a5a;color:#2a6a40}
+.rk{display:grid;grid-template-columns:30px 1fr auto;gap:1px 8px;align-items:center;padding:7px 4px;border-bottom:1px dashed var(--cream-d);font-size:13px}
+.rk .no{font-weight:900;color:var(--red);text-align:center;font-size:15px}
+.rk .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk .sc{font-weight:900;text-align:right}
+.rk .sub{grid-column:2/4;font-size:10.5px;opacity:.6}
+.rk.me{background:#fbf3dc;border-radius:8px}
+.hud{gap:4px}.hud .pill{padding:3px 7px}
+/* セリフは映像の外（すぐ上）に出して、車内にかぶらないようにする */
+#sGame>.bubble{position:static;flex:0 0 auto;margin:0 0 4px;min-height:40px;box-sizing:border-box;background:var(--ivory);color:var(--txt);font-size:12.5px;font-weight:700;line-height:1.35;border-left:4px solid #9aa3b5;border-radius:10px;padding:4px 9px}
+#sGame>.bubble.cast{border-left-color:var(--red)}
+.camb{top:6px}
+.lblb{top:40px}
+/* ---- 読みやすさ：セリフ ---- */
+#sGame>.bubble{display:flex;align-items:flex-start;gap:7px;min-height:44px;padding:5px 30px 5px 6px;position:relative;left:auto;right:auto;top:auto;z-index:2;cursor:pointer;background:#fffdf7;border:1px solid rgba(0,0,0,.08);border-left-width:5px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+#sGame>.bubble .spk{flex:0 0 auto;font-size:10.5px;font-weight:900;color:#fff;border-radius:7px;padding:3px 6px;margin-top:1px;white-space:nowrap}
+#sGame>.bubble .say{flex:1;font-size:14px;line-height:1.42;font-weight:700;color:#1d2433}
+#sGame>.bubble .logb{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.35;font-weight:900}
+.sp-cast{border-left-color:#c0302a!important}.sp-cast .spk{background:#c0302a}
+.sp-guest{border-left-color:#2a62b8!important}.sp-guest .spk{background:#2a62b8}
+.sp-disp{border-left-color:#2e7d4f!important}.sp-disp .spk{background:#2e7d4f}
+.sp-narr .say{font-weight:500!important;color:#5b6170!important;font-style:italic}
+.say .k-num,.logl .k-num{color:#c0302a;font-size:1.08em}
+.say .k-key,.logl .k-key{background:#ffe9a8;border-radius:4px;padding:0 2px}
+.say .k-dir,.logl .k-dir{color:#2a62b8;text-decoration:underline;text-underline-offset:2px}
+#sGame>.bubble.sayin{animation:sayIn .22s ease-out}
+@keyframes sayIn{from{opacity:.2;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.logl{display:flex;gap:7px;align-items:flex-start;padding:7px 2px;border-bottom:1px dashed #ddd;font-size:13px;line-height:1.4}
+.logl .spk{flex:0 0 auto;font-size:10px;font-weight:900;color:#fff;border-radius:6px;padding:2px 5px}
+/* ---- ゲート前のグループの特徴 ---- */
+.ginfo{flex:0 0 auto;display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;white-space:nowrap;align-items:center;gap:4px;min-height:26px;margin:0 0 4px;font-size:12px;font-weight:800}
+.ginfo .gi-h{display:flex;align-items:center;gap:4px;color:#cfd5e3;font-size:11px}
+.ginfo .gi-h i{display:inline-block;width:10px;height:10px;border-radius:3px;border:1.5px solid #fff}
+.ginfo .gi-n{background:#1d2433;color:#fff;border-radius:7px;padding:3px 8px;font-size:13px;border:1.5px solid #fff}
+.ginfo .gi-n.q{background:#5b6170}
+.ginfo .gi{flex:0 0 auto;border-radius:7px;padding:3px 6px;border:2px solid;line-height:1.2}
+.ginfo .gi.warn{background:#d0302a;color:#fff;border-color:#fff;animation:warnP 1s ease-in-out infinite}
+.ginfo .gi.need{background:#fff4c9;color:#6b4a00;border-color:#e0a400}
+.ginfo .gi.ok{background:#e4f2e8;color:#2a6a40;border-color:#3f8a5a}
+.ginfo .gi.info{background:#eef0f5;color:#3c4354;border-color:#b7bdcc}
+.ginfo .gi-none{color:#8d95a8;font-size:11px}
+@keyframes warnP{0%,100%{box-shadow:0 0 0 0 rgba(208,48,42,.0)}50%{box-shadow:0 0 0 4px rgba(208,48,42,.45)}}
+.view .tags{display:none}
+/* ---- 3Dの頭上アイコン ---- */
+.ico3{font-size:15px;padding:0;border:none;background:none;box-shadow:none}
+.ico3 .in{display:inline-block;padding:3px 6px;border-radius:10px;background:#fff;border:2.5px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.45);position:relative}
+.ico3 .in::after{content:'';position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);border:5px solid transparent;border-top-color:inherit;border-bottom:0}
+.ico3 b{font-size:11px;margin-left:2px;vertical-align:1px;font-weight:900}
+.ico3.wc .in{background:#2f6fd0;border-color:#fff;color:#fff}
+.ico3.st .in{background:#e86a9a;border-color:#fff;color:#fff}
+.ico3.open .in{background:#d0302a;border-color:#fff;color:#fff;animation:icoB .9s ease-in-out infinite}
+.ico3.lid .in{background:#e4f2e8;border-color:#3f8a5a;color:#2a6a40;font-size:12px;padding:2px 4px;opacity:.9}
+@keyframes icoB{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+/* ---- 大きめの文字 ---- */
+.bigtxt #sGame>.bubble .say{font-size:16.5px}
+.bigtxt .ginfo{font-size:13.5px}
+.bigtxt .ico3{font-size:18px}
+.bigtxt .toast{font-size:16px}
+/* セリフ欄は高さを固定して、セリフの長さでボタンの位置がずれないようにする（長いセリフは文字を少し小さく、はみ出す分は履歴で） */
+#sGame>.bubble{height:58px;min-height:58px;overflow:hidden}
+#sGame>.bubble .say{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;line-height:1.36}
+#sGame>.bubble.long .say{font-size:12.2px;line-height:1.3;-webkit-line-clamp:3}
+.bigtxt #sGame>.bubble{height:66px;min-height:66px}
+.bigtxt #sGame>.bubble.long .say{font-size:14px;line-height:1.28;-webkit-line-clamp:3}
+.ginfo{height:26px;min-height:26px}
+/* ゲートの行も高さを固定（ゲートの状態で文字が変わっても、下の「何名様ですか？」やカウンターの位置が動かない） */
+#platform.gbar{height:50px;min-height:50px;flex:0 0 50px;box-sizing:border-box;align-items:stretch}
+#platform.gbar .gate{height:50px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;white-space:nowrap;overflow:hidden;line-height:1.25}
+#platform.gbar .gate small{display:block;white-space:nowrap}
+.phase{height:20px;overflow:hidden;white-space:nowrap}
+/* 状況で出るボタン（ずれ・詰め・ベビーカー・飲み物）は、映像の下のはしに重ねて出す。
+   ロード中の「何名様ですか？」「カウンター」「どうぞ」などの位置は、どの状況でも動かない */
+#pLoad{position:relative}
+#pLoad #ctx{position:absolute;left:0;right:0;bottom:calc(100% + 62px);display:flex;flex-direction:column-reverse;gap:4px;z-index:8;pointer-events:none}
+#pLoad #ctx>*{pointer-events:auto;flex:0 0 auto}
+#pLoad #ctx .btn{min-height:34px;padding:6px 8px;font-size:12.5px;box-shadow:0 2px 8px rgba(0,0,0,.45);border:1.5px solid rgba(0,0,0,.15)}
+#pLoad #ctx .g2{gap:4px}
+/* あそびかた：画面の図＋番号 */
+.hw-tabs{display:flex;gap:4px;margin-bottom:8px;position:sticky;top:0;background:inherit;z-index:2}
+.hw-tabs button{flex:1;font:inherit;font-size:11.5px;font-weight:800;padding:6px 2px;border-radius:8px;border:1.5px solid var(--cream-d);background:#fff;color:var(--ink)}
+.hw-tabs button.sel{background:var(--red);border-color:var(--red);color:#fff}
+.hw-pg{display:none}.hw-pg.on{display:block}
+.mock{background:#1d2433;border-radius:12px;padding:7px;display:flex;flex-direction:column;gap:4px;font-size:10px;font-weight:700;color:#1d2433;margin-bottom:8px}
+.mock>div{position:relative}
+.m-hud{display:flex;gap:3px;color:#fff}.m-hud span{background:rgba(255,255,255,.15);border-radius:6px;padding:1px 5px}.m-hud .m-r{margin-left:auto;color:#ffd77a}
+.m-bar{height:7px;border-radius:4px;background:linear-gradient(90deg,#f0c75e 30%,#3a4256 30%)}
+.m-say{background:#fffdf7;border-left:4px solid #c0302a;border-radius:6px;padding:4px 6px}.m-say b{background:#c0302a;color:#fff;border-radius:4px;padding:0 4px;margin-right:3px}
+.m-info{color:#cfd5e3;display:flex;gap:3px;align-items:center}.m-info b{background:#1d2433;color:#fff;border:1px solid #fff;border-radius:5px;padding:0 4px}
+.m-info .w,.hw-l .w{background:#d0302a;color:#fff;border-radius:5px;padding:0 4px}.m-info .y,.hw-l .y{background:#fff4c9;color:#6b4a00;border:1px solid #e0a400;border-radius:5px;padding:0 4px}
+.m-view{height:92px;border-radius:8px;background:linear-gradient(#c33 0 28%,#f3e7c4 28% 36%,#d8cbb0 36%);display:flex;align-items:center;justify-content:center;color:#5b4a36}
+.m-cam{position:absolute;right:4px;top:4px;background:#1d2433;color:#fff;border-radius:6px;padding:1px 5px}
+.m-lbl{position:absolute;right:4px;top:22px;background:#1d2433;color:#fff;border-radius:6px;padding:1px 5px}
+.m-ctx{position:absolute;left:4px;right:4px;bottom:4px;background:#fffdf7;border-radius:6px;padding:2px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.m-row{display:flex;gap:3px}.m-b{flex:1;position:relative;background:#f3e7c4;border-radius:6px;padding:5px 2px;text-align:center}
+.m-b.dk{background:#2a3142;color:#fff}.m-b.g{background:#c9a24a;color:#fff}.m-b.red{background:#b0222a;color:#fff;flex:4}.m-b.s{flex:.6}
+.m-n{position:absolute;right:-3px;top:-6px;font-style:normal;background:#ffd23f;color:#1d2433;border:1.5px solid #1d2433;border-radius:50%;width:16px;height:16px;line-height:13px;text-align:center;font-size:9.5px;font-weight:900;z-index:3}
+.m-row>.m-n{right:-2px}
+.hw-l{margin:0;padding-left:0;list-style:none;counter-reset:hw}
+.hw-l li{counter-increment:hw;position:relative;padding:4px 0 4px 24px;border-bottom:1px dashed #e4ddcc}
+.hw-l li::before{content:counter(hw);position:absolute;left:0;top:5px;background:#ffd23f;color:#1d2433;border:1.5px solid #1d2433;border-radius:50%;width:17px;height:17px;line-height:14px;text-align:center;font-size:10px;font-weight:900}
+.howto{max-height:70vh}
+.ginfo .gi-ppl{flex:0 0 auto;background:#fff;border-radius:7px;padding:1px 5px;font-size:15px;letter-spacing:-1px;border:2px solid #cfd5e3;display:flex;align-items:center;gap:3px}
+.ginfo .gi-ppl .kd{font-style:normal;font-size:11px}
+.ginfo .gi-ppl small{font-size:10px;letter-spacing:0;color:#5b6170;font-weight:900}
+#iHold{background:#eef0f5;color:#3c4354}   /* 「← 左」のかわりに「次の電車でご案内」 */
+</style>
+</head>
+<body>
+<div id="app">
+
+<section class="screen on" id="sTitle">
+  <div class="title-card">
+    <div style="font-size:28px">🚃</div>
+    <h1>全てのゲスト<br>全てのキャストに<br>ワクワク感と安心感を</h1>
+    <div class="sub">ローダーとして、担当の1両をアンロード＆ロード！</div>
+    <div class="lbl">ステーション</div>
+    <div class="seg" id="segSt">
+      <button data-v="awf" class="sel">アメリカン<br>ウォーターフロント</button>
+      <button data-v="pd">ポート<br>ディスカバリー</button>
+    </div>
+    <div class="lbl">ポジション</div>
+    <div class="seg" id="segPos">
+      <button data-v="front" class="sel">フロント<br>ローダー</button>
+      <button data-v="rear">リア<br>ローダー</button>
+    </div>
+    <div class="lbl">混雑レベル</div>
+    <div class="seg" id="segLv">
+      <button data-v="0" class="sel">平日</button>
+      <button data-v="1">休日</button>
+      <button data-v="2">繁忙期</button>
+      <button data-v="3">超繁忙期</button>
+    </div>
+    <div class="lbl">モード</div>
+    <div class="seg" id="segMode">
+      <button data-v="real" class="sel">本番</button>
+      <button data-v="prac">🔰 練習（時間制限なし）</button>
+    </div>
+    <div class="lbl">時間帯</div>
+    <div class="seg" id="segTod">
+      <button data-v="day" class="sel">☀️ 昼</button>
+      <button data-v="night">🌙 夜</button>
+    </div>
+    <div class="lbl">文字の大きさ</div>
+    <div class="seg" id="segTxt">
+      <button data-v="n" class="sel">標準</button>
+      <button data-v="l">大きめ</button>
+    </div>
+    <button class="btn red" style="width:100%" id="bStart">シフトに入る</button>
+    <button class="btn" style="width:100%;margin-top:8px" id="bVs">🆚 2人で通信対戦</button>
+    <button class="btn" style="width:100%;margin-top:8px" id="bRank">🏆 ランキング・過去のスコア</button>
+    <button class="btn" style="width:100%;margin-top:8px" id="bHow">あそびかた</button>
+    <div class="note" id="best"></div>
+    <div class="note">※ 非公式のファンメイドゲームです。</div>
+  </div>
+</section>
+
+<section class="screen" id="sGame">
+  <div class="hud">
+    <span class="pill" id="hSt">AWF</span>
+    <span class="pill" id="hPos">フロント</span>
+    <span class="pill" id="hTod">☀️</span>
+    <span class="pill" id="hTrip">1/6便</span>
+    <span class="pill" id="hSet">第1編成</span>
+    <span class="score" id="hScore">0</span>
+    <span class="pill" id="hVs" style="display:none"></span>
+    <button class="pill" id="bHome" style="border:none;font:inherit;font-size:11px;font-weight:700">🏠</button>
+  </div>
+  <div class="dwell" id="dwell"><i></i><div class="m" id="mInt"></div><div class="m x" id="mX"></div><span id="dwT">0秒</span></div>
+  <div class="phase"><span id="phase">到着</span><span id="hLoad">車内 0名</span></div>
+  <div class="bubble" id="bubble"></div>
+  <div class="ginfo" id="ginfo"></div>
+  <div class="view" id="view">
+    <canvas id="cv"></canvas>
+    <div id="lbls"></div>
+    <div class="tags" id="tags"></div>
+    <div class="queue" id="queue"></div>
+    <div class="aside" id="aside"></div>
+    <button class="camb" id="bCam">🔍 車内アップ</button>
+    <button class="lblb" id="bLbl">🏷 名前</button>
+    <div class="nogl" id="nogl">この端末では3D表示が使えません</div>
+  </div>
+  <div class="platform gbar" id="platform"></div>
+  <div style="display:none"><div id="carwrap"><div id="car"></div></div><div class="group" id="group"></div><div id="stage"></div></div>
+
+  <!-- アンローディング -->
+  <div class="panel" id="pUnload">
+    <div class="g2">
+      <button class="btn" id="bCallOut">📣 お出口は反対側</button>
+      <button class="btn" id="bExitL">← フロントの出口へ</button>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="panel" id="pLoad">
+    <div class="g2">
+      <button class="btn" id="bAsk">🗣 何名様ですか？</button>
+      <div class="counter">
+        <button id="bMinus">−</button>
+        <div class="n"><span id="cN">0</span><small>カウンター</small></div>
+        <button class="plus" id="bPlus">＋1</button>
+      </div>
+    </div>
+    <div class="chips" id="chips">
+      <span class="chipl">座る位置</span>
+      <button class="chip" data-ins="free" id="iFree">おまかせ</button>
+      <button class="chip" data-ins="R" id="iR">右 →</button>
+      <button class="chip" id="iHold">🚃 次の電車で</button>
+      <button class="chip" data-ins="oku" id="iOku">奥（上）</button>
+      <button class="chip" data-ins="temae" id="iTemae">手前（下）</button>
+      <button class="chip" data-ins="around" id="iAround">↻ 反対側へ</button>
+    </div>
+    <div class="ctx" id="ctx">
+      <button class="btn" id="bOther">↕ 反対側のベンチへ</button>
+      <div class="g2" id="ctxShift"><button class="btn" id="bShiftL">← 左へずれてもらう</button><button class="btn" id="bShiftR">右へずれてもらう →</button></div>
+      <button class="btn" id="bFold">🙏 たたむ？次の電車？</button>
+      <button class="btn" id="bNextWc">♿ 次の電車でご案内</button>
+      <button class="btn" id="bSqueeze">🙏 詰めてもらう</button>
+      <button class="btn" id="bAside">👶 横で待ってもらう</button>
+      <button class="btn" id="bRecall">📣 待機の方を呼ぶ</button>
+      <button class="btn" id="bDrink">🥤 フタのない飲み物のお願い</button>
+    </div>
+    <div class="gorow">
+      <button class="btn" id="bMore">⋯</button>
+      <button class="btn red" id="bGo">どうぞ、ご乗車ください</button>
+    </div>
+  </div>
+  <div class="sheet" id="sheetMore">
+    <h3>そのほかの対応</h3>
+    <div class="g2">
+      <button class="btn" id="bCall">後ろの方に<br>人数を聞く</button>
+      <button class="btn" id="bHold">次の電車でご案内</button>
+    </div>
+    <button class="btn" style="width:100%;margin-top:6px" id="bMoreX">閉じる</button>
+  </div>
+
+  <!-- ゲート -->
+  <div class="panel" id="pGate">
+    <div class="trivia" style="margin:0;font-size:12px"><b>入口 →（サポート）→ 出口</b>の順にタップ</div>
+    <button class="btn red" id="bThumb">👍 サムアップ</button>
+  </div>
+
+  <div class="sheet" id="sheetCall">
+    <h3 id="callH">後ろに並んでいる方に、順番に人数を聞きます</h3>
+    <div class="trivia" id="callInfo" style="text-align:center;font-size:13px"></div>
+    <div class="g2">
+      <button class="btn red" id="bCallGo">この方をご案内</button>
+      <button class="btn" id="bCallNext">さらに後ろの方に聞く</button>
+    </div>
+    <button class="btn" style="width:100%;margin-top:6px" id="bCallX">やめる（今の方のまま）</button>
+  </div>
+  <div class="sheet" id="sheetStuck">
+    <h3>グループで並んで座ろうとしている…どうする？<br><small style="font-weight:500">ずれてもらう方は、車内のゲストをタップして選んでね</small></h3>
+    <div class="g2">
+      <button class="btn" id="sLeft">← 選んだ方に<br>「もう少し左に行けますか？」</button>
+      <button class="btn" id="sRight">選んだ方に →<br>「もう少し右に行けますか？」</button>
+    </div>
+    <button class="btn red" style="width:100%;margin-top:6px" id="sBack">「背中合わせでお願いします」</button>
+    <button class="btn" style="width:100%;margin-top:6px" id="sClose">閉じる</button>
+  </div>
+  <div class="toast" id="toast"></div>
+</section>
+
+<div class="ov" id="ovHow">
+  <div class="card">
+    <h2>あそびかた</h2>
+    <div class="howto">
+      <div class="hw-tabs"><button class="sel" data-hw="load">ロード</button><button data-hw="unload">アンロード</button><button data-hw="gate">ゲートOK</button><button data-hw="other">そのほか</button></div>
+
+      <!-- ロードの画面 -->
+      <div class="hw-pg on" data-hw="load">
+        <div class="mock">
+          <div class="m-hud"><span>AWF</span><span>フロント</span><span>1/6便</span><i class="m-n">1</i><span class="m-r">120 🏠</span></div>
+          <div class="m-bar"><i class="m-n">2</i></div>
+          <div class="m-say"><b>🙋 あなた</b> 何名様ですか？ <i class="m-n">3</i></div>
+          <div class="m-info">ゲート前 <b>4名</b> <span class="w">⚠🥤フタなし</span><span class="y">👶ベビーカー</span><i class="m-n">4</i></div>
+          <div class="m-view">映像（車内・ゲート・列）<i class="m-n">5</i><span class="m-cam">🔍車内アップ <i class="m-n">6</i></span><span class="m-lbl">🏷名前 <i class="m-n">7</i></span>
+            <div class="m-ctx">状況で出るボタン（重なって出る）<i class="m-n">8</i></div></div>
+          <div class="m-row"><span class="m-b">出口ゲート</span><span class="m-b">入口ゲート</span><i class="m-n">9</i></div>
+          <div class="m-row"><span class="m-b">🗣 何名様ですか？<i class="m-n">10</i></span><span class="m-b dk">− 4 ＋1<i class="m-n">11</i></span></div>
+          <div class="m-row"><span class="m-b g">おまかせ</span><span class="m-b">右 →</span><span class="m-b">🚃 次の電車で</span><i class="m-n">12</i></div>
+          <div class="m-row"><span class="m-b">奥（上）</span><span class="m-b">手前（下）</span><span class="m-b">↻ 反対側へ</span><i class="m-n">13</i></div>
+          <div class="m-row"><span class="m-b s">⋯<i class="m-n">14</i></span><span class="m-b red">どうぞ、ご乗車ください<i class="m-n">15</i></span></div>
+        </div>
+        <ol class="hw-l">
+          <li><b>上のバー</b>：ステーション・担当・便・スコア。🏠で最初の画面へ</li>
+          <li><b>時間のバー</b>：到着からの時間。白い線＝インターバル、赤い線＝踏切で止まる</li>
+          <li><b>セリフ</b>：🙋あなた／🧑‍🤝‍🧑ゲスト／📣ディスパッチャー。<b>タップで履歴</b></li>
+          <li><b>ゲート前のグループ</b>：人数と特徴。<span class="w">赤</span>＝対応しないとオペミス、<span class="y">黄</span>＝注意、緑＝OK</li>
+          <li><b>映像</b>：車内のグループをタップで選ぶ（ずれてもらう相手）</li>
+          <li><b>車内アップ／全体</b>：カメラの切りかえ</li>
+          <li><b>名前</b>：場所や人の名前を表示</li>
+          <li><b>状況で出るボタン</b>：<br>「左（右）にずれますか？」…選んだグループにずれてもらう<br>「反対側のベンチへお移りいただけますか？」…選んだグループに反対側のベンチへ移ってもらう（ベビーカー・車いすのグループは連結部スペースの反対側へ）<br>「皆さま少しずつお詰めいただけますか？」…座りきれないとき<br>「たためば乗れますが…」…ベビーカーが台数制限をこえたとき<br>「あとで（横で待機）」／「お待たせした方を呼ぶ」…ベビーカー・車いす（呼ぶと1回で乗車）<br>「フタのない飲み物のお願い」</li>
+          <li><b>ゲート</b>：タップで開け閉め。ロードの最後にもう一度押すとゲート確認へ</li>
+          <li><b>何名様ですか？</b>：ゲート前のグループに人数を聞く</li>
+          <li><b>カウンター</b>：＋1／−で数える</li>
+          <li><b>席の指示（左右）・次の電車で</b>：おまかせ（基本は左詰め）／右に寄せて座ってもらう／🚃次の電車でご案内</li>
+          <li><b>席の指示（奥・手前）</b>：奥＝上のベンチ、手前＝下のベンチ。↻反対側へ＝ベビーカーグループの横へ</li>
+          <li><b>⋯</b>：後ろの方に人数を聞く（乗れそうなら先にご案内）／次の電車でご案内</li>
+          <li><b>どうぞ、ご乗車ください</b>：選んだ席の指示で乗ってもらう</li>
+        </ol>
+      </div>
+
+      <!-- アンロードの画面 -->
+      <div class="hw-pg" data-hw="unload">
+        <div class="mock">
+          <div class="m-say"><b>🙋 あなた</b> お出口は反対側にございます</div>
+          <div class="m-view">映像（降りるゲスト）</div>
+          <div class="m-row"><span class="m-b">出口ゲート<i class="m-n">1</i></span><span class="m-b">サポート（PD）<i class="m-n">2</i></span><span class="m-b">入口ゲート<i class="m-n">3</i></span></div>
+          <div class="m-row"><span class="m-b">📣 お出口は反対側に<i class="m-n">4</i></span><span class="m-b">← フロントの出口へ<i class="m-n">5</i></span></div>
+        </div>
+        <ol class="hw-l">
+          <li><b>出口ゲート</b>：電車が止まったら最初に開ける</li>
+          <li><b>サポートゲート</b>（PDのみ）：開けると降りるのが早くなる</li>
+          <li><b>入口ゲート</b>：連結部があいたら開けてOK（全員降りてからご乗車）</li>
+          <li><b>お出口は反対側に</b>：降りるゲストへの声かけ</li>
+          <li><b>フロントの出口へ</b>（AWFリアのみ）：ベビーカー・車いすの方をディスパッチャーの前を通してフロントの出口へ</li>
+        </ol>
+      </div>
+
+      <!-- ゲートOKの画面 -->
+      <div class="hw-pg" data-hw="gate">
+        <div class="mock">
+          <div class="m-view">映像（ゲートを指差し確認）</div>
+          <div class="m-row"><span class="m-b">出口ゲート</span><span class="m-b">入口ゲート</span><i class="m-n">1</i></div>
+          <div class="m-row"><span class="m-b red">👍 サムアップ<i class="m-n">2</i></span></div>
+        </div>
+        <ol class="hw-l">
+          <li><b>ゲート</b>：<b>入口 →（サポート）→ 出口</b>の順にタップ。1つ1〜2秒かかる。順番ちがいはオペミス。まちがえて閉めたゲートは、サムアップ前ならもう一度タップで開けられる（入口を開けるとローディングに戻る）</li>
+          <li><b>サムアップ</b>：全部ゲートOKのあとに。3秒後に出発（対戦中は相手のサムアップもそろってから）。人数しだいで出発タイミングボーナス（21名なら早いほど、16〜20名はインターバル50秒ぴったりが高い）</li>
+        </ol>
+      </div>
+
+      <!-- そのほか -->
+      <div class="hw-pg" data-hw="other">
+        <b>スコア</b><br>
+        ・減点：オペミス（入口ゲートの早開け、21名超え、台数制限、ゲート確認の順番、フタなし飲み物）、出発の遅れ（踏切停止）、横で待たせた方の乗せ忘れ<br>
+        ・加点：乗車人数、21人に近いほど満員ボーナス（15人から。21人で+120）、出発タイミングボーナス（21名ぴったりなら早いほど高い／16〜20名はインターバル50秒ぴったりがいちばん高い／15名以下はなし）、ベビーカー2組／2台持ち／車いすの便（混雑レベルで倍率）<br>
+        ・超繁忙期は8便、ヒント（光るボタン）なし<br><br>
+        <b>🔰 練習モード</b>：最初の画面で選ぶ。時間制限なし（次の電車が踏切で止まらない）。スコアはランキングに残らない<br><br>
+        <b>🆚 通信対戦</b>：部屋をつくった人がフロント、4けたの番号で入った人がリア<br>
+        <b>🏆 ランキング</b>：シフト終了後に名前を入れて登録<br>
+        <b>文字の大きさ</b>：最初の画面で「大きめ」を選べる
+      </div>
+    </div>
+    <button class="btn red" style="width:100%;margin-top:10px" data-close="ovHow">OK</button>
+  </div>
+</div>
+
+<div class="ov" id="ovTrip">
+  <div class="card">
+    <h2 id="tTitle">いってらっしゃい！</h2>
+    <table id="tTable"></table>
+    <div class="trivia" id="tTrivia"></div>
+    <button class="btn red" style="width:100%" id="bNext">次の電車を迎える</button>
+  </div>
+</div>
+
+<div class="ov" id="ovVs">
+  <div class="card">
+    <h2>🆚 2人で通信対戦</h2>
+    <div class="trivia" id="vsInfo">フロントとリアに分かれてスコアを競います。<br>つくった人＝<b>フロント</b>、入った人＝<b>リア</b>（設定はつくった人のもの）</div>
+    <div id="vsMenu">
+      <div class="lbl">相手に表示する名前</div>
+      <input id="vsName" maxlength="12" placeholder="例：しょうま" autocomplete="off" style="width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:2px solid var(--cream-d);margin:5px 0 8px;background:#fff;color:var(--ink)">
+      <button class="btn red" style="width:100%" id="bVsMake">部屋をつくる</button>
+      <div class="lbl" style="margin-top:10px">部屋番号で入る</div>
+      <div class="g2"><input id="vsCode" inputmode="numeric" maxlength="4" placeholder="4けたの番号" style="font:inherit;font-size:16px;padding:9px;border-radius:10px;border:2px solid var(--line);min-width:0"><button class="btn" id="bVsJoin">部屋に入る</button></div>
+    </div>
+    <div id="vsWait" style="display:none">
+      <div style="font-size:12px">部屋番号</div>
+      <div id="vsNo" style="font-size:40px;font-weight:900;letter-spacing:.15em;color:var(--red)"></div>
+      <div class="trivia" id="vsStat" style="text-align:center">相手を待っています…</div>
+    </div>
+    <button class="btn" style="width:100%;margin-top:8px" id="bVsX">やめる</button>
+  </div>
+</div>
+<div class="ov" id="ovLog">
+  <div class="card" style="max-height:80vh;display:flex;flex-direction:column">
+    <h2>セリフの履歴</h2>
+    <div id="logList" style="overflow:auto;flex:1;text-align:left"></div>
+    <button class="btn" style="width:100%;margin-top:8px" data-close="ovLog">閉じる</button>
+  </div>
+</div>
+<div class="ov" id="ovQuit">
+  <div class="card">
+    <h2>最初の画面に戻りますか？</h2>
+    <div class="trivia" style="text-align:center">このシフトの記録は保存されません</div>
+    <div class="g2"><button class="btn" data-close="ovQuit">つづける</button><button class="btn red" id="bQuitYes">戻る</button></div>
+  </div>
+</div>
+<div class="ov" id="ovRank">
+  <div class="card" style="max-height:88vh;display:flex;flex-direction:column">
+    <h2>🏆 ランキング</h2>
+    <div class="seg" id="rkTab"><button data-v="all" class="sel">みんな</button><button data-v="me">自分の記録</button></div>
+    <div class="seg" id="rkLv"><button data-v="0" class="sel">平日</button><button data-v="1">休日</button><button data-v="2">繁忙期</button><button data-v="3">超繁忙期</button></div>
+    <div id="rkNote" style="font-size:11px;opacity:.65;margin:0 0 4px"></div>
+    <div id="rkList" style="overflow:auto;flex:1;min-height:120px;text-align:left"></div>
+    <button class="btn" style="width:100%;margin-top:8px" data-close="ovRank">閉じる</button>
+  </div>
+</div>
+<div class="ov" id="ovEnd">
+  <div class="card">
+    <h2>シフト終了！おつかれさまでした</h2>
+    <div class="rank" id="eRank">A</div>
+    <div class="big" id="eScore">0</div>
+    <table id="eTable"></table>
+    <div class="trivia" id="eComment"></div>
+    <div class="trivia" id="eVs" style="display:none;text-align:center;font-size:14px"></div>
+    <div id="eReg" style="display:none">
+      <div class="lbl">ランキングに表示する名前</div>
+      <input id="eName" maxlength="12" placeholder="例：しょうま" autocomplete="off" style="width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:2px solid var(--cream-d);margin:5px 0 8px;background:#fff;color:var(--ink)">
+      <button class="btn red" style="width:100%;margin-bottom:8px" id="bReg">🏆 この名前でランキングに登録</button>
+    </div>
+    <div class="trivia" id="eSave" style="text-align:center">記録を保存中…</div>
+    <button class="btn red" style="width:100%" id="bAgain">もう一度シフトに入る</button>
+    <button class="btn" style="width:100%;margin-top:8px" id="bRank2">🏆 ランキングを見る</button>
+    <button class="btn" style="width:100%;margin-top:8px" id="bTop">タイトルへ</button>
+  </div>
+</div>
+</div>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const app=$('app');
+const CELLS=40, CARCAP=21, MAX_ST=2, MAX_WC=1;
+function stN(g){ return g&&g.stroller&&!g.folded ? Math.max(0,(g.nSt||1)-(g.foldOne?1:0)) : 0; }   // 2台持ちで1台だけたたんだら1台   // 広げたベビーカーの台数（2台持ちは2台）
+let TRIPS=6;
+let PRAC=false;   // 練習モード：次の電車が踏切で止まらない（時間をかけてOK）。スコアはランキングに載せない
+const T_INT=50, T_X=60;           // ディスパッチ可能 / 踏切停止ライン（到着からの秒）
+const SETS=['第1編成','第2編成','第3編成'];
+const LV=[
+  // size: 1〜8名グループの出やすさ / far: 海外ゲスト
+  {name:'平日', speed:0.6, mis:0.10, wc:0.03, st:0.08, far:0.06, size:[14,44,18,16,6,2,0,0], unload:[16,20], walk:600},
+  {name:'休日', speed:0.8, mis:0.18, wc:0.05, st:0.16, far:0.10, size:[8,34,20,22,9,5,2,0], unload:[16,20], walk:500},
+  {name:'繁忙期', speed:1.0, mis:0.25, wc:0.08, st:0.26, far:0.14, size:[5,24,18,24,13,9,5,2], unload:[16,20], walk:420},
+  // 超繁忙期：時間が速い・大人数とベビーカーがさらに多い・ヒントなし・8便
+  {name:'超繁忙期', speed:1.18, mis:0.35, wc:0.07, st:0.27, far:0.20, size:[4,24,18,26,14,8,4,2], unload:[18,21], walk:380, drink:0.03, noSplit:0.4, loose:0.2, hints:false, trips:8},
+];
+const STN={awf:{short:'AWF', gates:2, to:'ポートディスカバリー'}, pd:{short:'PD', gates:3, to:'アメリカンウォーターフロント'}};
+const TRIVIA=[
+  '各ステーションには<b>ローダーが2人</b>。それぞれ2両編成の片方1両を担当します。',
+  'ディスパッチインターバルは3台運行で<b>135秒</b>。前の電車の出発から135秒は次を出発させられません。',
+  '駅の手前は<b>単線</b>。出発が遅れると、次の電車は<b>踏切で一時停止</b>することに。',
+  '片道は<b>約2分30秒</b>。1両の定員は<b>21名</b>ですが、実際は18名ほどでパンパンです。',
+  'ゲートOKは<b>1つずつ指差し確認</b>してから、真ん中のディスパッチャーへ<b>サムアップ</b>。',
+  '「お詰めください」は強い言い方。<b>「左にずれますか？」</b>のように、方向を伝えてやわらかくお願いします。',
+  '車両は<b>背中合わせのベンチ1つ</b>。区切りはなく、詰めれば片側に大人10人。',
+  'アメリカンウォーターフロントは<b>エレベーターがフロント側</b>。リアのベビーカー・車いすのゲストはフロント側へ。',
+];
+const COLORS=['#e8743b','#3b82c4','#7a5bc7','#2f9e6e','#d24d78','#c9a13a','#4aa3a8','#8d6e63','#5c6bc0','#ef8f5a'];
+const GCOL=['#1f6f78','#b5532a','#3f7f5e','#4b6aa8','#7a5b9c','#9c6b3f','#2a8f9c','#a8437a','#5e7d2a','#6b5bd1','#c07a2a','#2f5f8f'];
+
+let st='awf', pos='front', lv=0, tod='day', G=null, tick=null, audio=null, gid=0;
+
+// ---------- title ----------
+function seg(id,cb){$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  $(id).querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');cb(b.dataset.v);});}
+seg('segSt',v=>{st=v;app.classList.toggle('pd',v==='pd')});
+seg('segPos',v=>pos=v);
+seg('segLv',v=>lv=+v);
+seg('segTod',v=>{tod=v;app.classList.toggle('night',v==='night')});
+seg('segMode',v=>{PRAC=v==='prac';});
+seg('segTxt',v=>{app.classList.toggle('bigtxt',v==='l'); try{localStorage.setItem('erw_txt',v);}catch(e){}});
+try{ if(localStorage.getItem('erw_txt')==='l'){ app.classList.add('bigtxt'); $('segTxt').querySelectorAll('button').forEach(b=>b.classList.toggle('sel',b.dataset.v==='l')); } }catch(e){}
+$('bHow').onclick=()=>$('ovHow').classList.add('on');
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).classList.remove('on'));
+function loadBest(){try{const b=JSON.parse(localStorage.getItem('erw_best3')||'{}');
+  const s=Object.entries(b).map(([k,v])=>`${LV[k].name} ${v}`).join('　');
+  $('best').textContent=s?('ハイスコア：'+s):'';}catch(e){}}
+loadBest();
+// ===== ランキング =====
+let RDB=null, RUID=null;
+(async()=>{ try{ if(!window.claude||!window.claude.use) return; RDB=await window.claude.use('db'); const u=await window.claude.use('user'); RUID=u? await u.id():null; }catch(e){ RDB=null; } })();
+function savedName(){ try{ return (localStorage.getItem('erw_name')||'').slice(0,12); }catch(e){ return ''; } }
+function keepName(n){ try{ localStorage.setItem('erw_name',n); }catch(e){} }
+function getName(){ const el=$('vsName'); return ((el&&el.value)||savedName()||'').trim().slice(0,12); }
+function needName(el){ el.focus(); el.style.borderColor='var(--red)'; el.placeholder='名前を入れてください'; }
+function localHist(){ try{ return JSON.parse(localStorage.getItem('erw_hist')||'[]'); }catch(e){ return []; } }
+function withTimeout(p,ms){ return Promise.race([p,new Promise((_,rj)=>setTimeout(()=>rj({code:'timeout'}),ms))]); }
+function saveLocal(rec){ try{ const h=localHist(); h.push(rec); localStorage.setItem('erw_hist',JSON.stringify(h.slice(-100))); }catch(e){} }
+async function saveShared(rec){
+  if(!RDB||!RUID) return 'local';
+  try{
+    const ref=RDB.doc('scores/'+RUID); const snap=await withTimeout(ref.get(),10000);
+    const d=snap&&snap.exists?snap.data():null;
+    const list=(d&&Array.isArray(d.entries))?d.entries.slice():[];
+    list.push(rec);
+    await withTimeout(ref.set({entries:list.slice(-60), updated:Date.now()}),10000);
+    return 'shared';
+  }catch(e){ return 'local'; }
+}
+let rkTab='all', rkLv=0, LASTREC=null;
+function openRank(){
+  $('ovRank').classList.add('on'); rkLv=lv;
+  document.querySelectorAll('#rkLv button').forEach(b=>b.classList.toggle('sel',+b.dataset.v===rkLv));
+  renderRank();
+}
+async function renderRank(){
+  const box=$('rkList'); box.textContent='読み込み中…'; let rows=[], note='';
+  if(rkTab==='me'){ rows=localHist().slice(); note='この端末で遊んだ記録（新しい順）'; }
+  else if(RDB){
+    try{ const q=await withTimeout(RDB.collection('scores').get(),10000);
+      for(const d of q.docs){ const e=(d.data()||{}).entries; if(Array.isArray(e)) for(const r of e){ if(r&&typeof r.score==='number') rows.push(Object.assign({},r,{_me:d.id===RUID})); } }
+      note='みんなの記録（上位30件）';
+    }catch(e){ rows=localHist(); note='みんなのランキングに接続できないため、この端末の記録を表示中'; }
+  } else { rows=localHist(); note='みんなのランキングが使えない開き方のため、この端末の記録を表示中'; }
+  rows=rows.filter(r=>r.lv===rkLv);
+  if(rkTab==='me') rows.sort((a,b)=>(b.at||0)-(a.at||0)); else rows.sort((a,b)=>b.score-a.score);
+  rows=rows.slice(0,30);
+  $('rkNote').textContent=note; box.textContent='';
+  if(!rows.length){ box.textContent='まだ記録がありません'; return; }
+  rows.forEach((r,i)=>{
+    const d=document.createElement('div'); d.className='rk'+(r._me?' me':'');
+    const no=document.createElement('div'); no.className='no'; no.textContent=rkTab==='me'?'・':(i+1);
+    const nm=document.createElement('div'); nm.className='nm'; nm.textContent=String(r.name||'（名前なし）').slice(0,12)+(r.rank?'　'+String(r.rank).slice(0,2):'');
+    const sc=document.createElement('div'); sc.className='sc'; sc.textContent=(+r.score)+' pt';
+    const sub=document.createElement('div'); sub.className='sub';
+    const dt=r.at?new Date(r.at):null;
+    sub.textContent=(r.st==='pd'?'PD':'AWF')+'・'+(r.pos==='front'?'フロント':'リア')+'・'+(r.tod==='night'?'夜':'昼')+(dt?'・'+(dt.getMonth()+1)+'/'+dt.getDate()+' '+dt.getHours()+':'+String(dt.getMinutes()).padStart(2,'0'):'');
+    d.append(no,nm,sc,sub); box.appendChild(d);
+  });
+}
+document.querySelectorAll('#rkTab button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#rkTab button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');rkTab=b.dataset.v;renderRank();});
+document.querySelectorAll('#rkLv button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#rkLv button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');rkLv=+b.dataset.v;renderRank();});
+// ===== 通信対戦 =====
+// 部屋：vs/<番号>_h（フロント・部屋をつくった人）と vs/<番号>_g（リア・入った人）。おたがいの文書を見て、出発のタイミングとスコアをそろえる
+let VS=null, vsUnsub=null, vsBusy=false, vsPend=null;
+function vsMsg(t){ $('vsStat').textContent=t; }
+function vsClose(){ try{vsUnsub&&vsUnsub();}catch(e){} vsUnsub=null; }
+function vsDoc(role){ return RDB.doc('vs/'+VS.code+'_'+role); }
+function vsPush(patch){ // 1つの文書には1回ずつ書く（書いている間の変更はまとめて次に）
+  if(!VS||!RDB) return; VS.me=Object.assign(VS.me||{},patch,{at:Date.now()});
+  if(vsBusy){ vsPend=true; return; }
+  vsBusy=true; withTimeout(vsDoc(VS.role).set(VS.me),10000).catch(()=>{}).then(()=>{ vsBusy=false; if(vsPend){ vsPend=false; vsPush({}); } });
+}
+function vsOppReady(){
+  if(!VS||!VS.opp) return true;
+  if(VS.opp.left||Date.now()-(VS.opp.at||0)>60000){ if(!VS.lostMsg){VS.lostMsg=true; toast('対戦相手との通信が切れました。ひとりで続けます','bad');} return true; }
+  return (VS.opp.thumbTrip||0)>=G.trip;
+}
+function vsHud(){
+  $('hSet').style.display=$('hTod').style.display=VS?'none':'';
+  if(!VS){ $('hVs').style.display='none'; return; }
+  const o=VS.opp||{}; $('hVs').style.display=''; $('hVs').textContent='🆚 '+String(o.name||'相手').slice(0,6)+' '+(o.score||0);
+}
+function vsEndView(){
+  if(!VS) { $('eVs').style.display='none'; return; }
+  const o=VS.opp||{}, me=G.score; $('eVs').style.display='';
+  if(!o.final){ $('eVs').textContent=`🆚 ${o.name||'相手'}：${o.score||0} pt（シフト中…）`; return; }
+  const res= me>o.score?'🎉 あなたの勝ち！': me<o.score?'😢 あなたの負け…':'🤝 引き分け';
+  $('eVs').textContent=`${res}　あなた ${me} pt ／ ${o.name||'相手'} ${o.score} pt`;
+}
+function vsListen(onOpp){
+  vsClose();
+  vsUnsub=RDB.collection('vs').where('room','==',VS.code).onSnapshot(q=>{
+    for(const d of q.docs){ const v=d.data()||{}; if(v.role&&v.role!==VS.role){ VS.opp=v; } }
+    onOpp&&onOpp(VS.opp); if(G&&$('sGame').classList.contains('on')) vsHud(); if($('ovEnd').classList.contains('on')) vsEndView();
+  },()=>vsMsg('通信でエラーが起きました'));
+}
+function vsBegin(conf){ // 2人そろったら同じ設定で始める
+  st=conf.st; lv=conf.lv; tod=conf.tod; pos=VS.role==='h'?'front':'rear';
+  app.classList.toggle('pd',st==='pd'); app.classList.toggle('night',tod==='night');
+  PRAC=false; $('ovVs').classList.remove('on'); start(); vsPush({trip:0,thumbTrip:0,score:0,heads:0,final:false}); vsHud();
+}
+$('bVs').onclick=()=>{
+  $('vsName').value=savedName(); $('vsName').style.borderColor='';
+  $('vsMenu').style.display=''; $('vsWait').style.display='none'; $('ovVs').classList.add('on');
+  if(!RDB||!RUID){ $('vsInfo').innerHTML='この開き方では通信対戦が使えません。<br>claude.aiにログインして、このゲームのページを開いてください（共有で招待された人どうしで遊べます）。'; $('bVsMake').disabled=$('bVsJoin').disabled=true; }
+};
+$('bVsX').onclick=()=>{ if(VS){ vsPush({left:true}); } vsClose(); VS=null; $('ovVs').classList.remove('on'); };
+$('bVsMake').onclick=async()=>{
+  if(!getName()){ needName($('vsName')); return; } keepName(getName());
+  VS={code:String(Math.floor(1000+Math.random()*9000)), role:'h', opp:null};
+  $('vsMenu').style.display='none'; $('vsWait').style.display=''; $('vsNo').textContent=VS.code; vsMsg('部屋をつくっています…');
+  try{
+    await withTimeout(vsDoc('h').set(VS.me={room:VS.code,role:'h',uid:RUID,name:getName(),st,lv,tod,at:Date.now()}),10000);
+    vsMsg(`この番号を相手に伝えてね。相手を待っています…（${STN[st].short}・${LV[lv].name}・${tod==='night'?'夜':'昼'}）`);
+    vsListen(o=>{ if(o&&!o.left&&!VS.started&&Date.now()-(o.at||0)<120000){ VS.started=true; vsMsg(`${o.name}さんが入りました！まもなくスタート`); const conf={st,lv,tod}; vsPush({go:Date.now()+3000}); setTimeout(()=>vsBegin(conf),3000); } });
+  }catch(e){ vsMsg('部屋をつくれませんでした（通信エラー）'); }
+};
+$('bVsJoin').onclick=async()=>{
+  const code=($('vsCode').value||'').replace(/\D/g,''); if(code.length!==4){ $('vsCode').focus(); return; }
+  if(!getName()){ needName($('vsName')); return; } keepName(getName());
+  VS={code, role:'g', opp:null};
+  $('vsMenu').style.display='none'; $('vsWait').style.display=''; $('vsNo').textContent=code; vsMsg('部屋をさがしています…');
+  try{
+    const h=await withTimeout(vsDoc('h').get(),10000), hv=h&&h.exists?h.data():null;
+    if(!hv||hv.left||Date.now()-(hv.at||0)>30*60000){ vsMsg('その番号の部屋が見つかりません'); VS=null; return; }
+    VS.opp=hv;
+    await withTimeout(vsDoc('g').set(VS.me={room:code,role:'g',uid:RUID,name:getName(),at:Date.now()}),10000);
+    vsMsg(`${hv.name}さんの部屋に入りました。スタートを待っています…`);
+    vsListen(o=>{ if(o&&o.go&&!VS.started){ VS.started=true; setTimeout(()=>vsBegin({st:o.st,lv:o.lv,tod:o.tod}),Math.max(0,Math.min(3000,o.go-Date.now()))); } });
+  }catch(e){ vsMsg('部屋に入れませんでした（通信エラー）'); VS=null; }
+};
+$('bubble').onclick=()=>{
+  const box=$('logList'); box.textContent='';
+  SAYLOG.slice().reverse().forEach(l=>{ const s=SPK[l.k], d=document.createElement('div'); d.className='logl '+s[2];
+    d.innerHTML=(s[1]?`<span class="spk">${s[0]} ${s[1]}</span>`:'')+`<span>${l.k==='narr'?l.t:emph(l.t)}</span>`; box.appendChild(d); });
+  if(!SAYLOG.length) box.textContent='まだありません';
+  $('ovLog').classList.add('on');
+};
+document.querySelectorAll('[data-close="ovLog"]').forEach(b=>b.onclick=()=>$('ovLog').classList.remove('on'));
+document.querySelectorAll('.hw-tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.hw-tabs button').forEach(x=>x.classList.toggle('sel',x===b));
+  document.querySelectorAll('.hw-pg').forEach(p=>p.classList.toggle('on',p.dataset.hw===b.dataset.hw));
+});
+$('bHome').onclick=()=>$('ovQuit').classList.add('on');
+document.querySelectorAll('[data-close="ovQuit"]').forEach(b=>b.onclick=()=>$('ovQuit').classList.remove('on'));
+$('bQuitYes').onclick=()=>{
+  clearInterval(tick); if(G) G.phase='quit'; setPanel(null);
+  if(VS){ vsPush({left:true}); setTimeout(()=>{vsClose();VS=null;},1500); }
+  document.querySelectorAll('.ov.on,.sheet.on').forEach(e=>e.classList.remove('on'));
+  show('sTitle'); loadBest();
+};
+$('bRank').onclick=openRank; $('bRank2').onclick=openRank;
+$('bStart').onclick=start;
+$('bReg').onclick=()=>{
+  const n=($('eName').value||'').trim().slice(0,12); if(!n){ needName($('eName')); return; }
+  keepName(n); const rec=Object.assign({},LASTREC,{name:n});
+  $('bReg').disabled=true; $('eSave').textContent='ランキングに登録中…';
+  saveShared(rec).then(w=>{ if(w==='shared'){ $('eReg').style.display='none'; $('eSave').textContent='🏆 みんなのランキングに登録しました'; } else { $('bReg').disabled=false; $('eSave').textContent='登録できませんでした。通信を確認してもう一度押してください'; } });
+}; $('bAgain').onclick=()=>{ if(VS){vsClose();VS=null;}$('ovEnd').classList.remove('on');start();};
+$('bTop').onclick=()=>{$('ovEnd').classList.remove('on'); if(VS){vsClose();VS=null;}show('sTitle');loadBest();};
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));}
+
+// ---------- sound ----------
+function ac(){audio=audio||new (window.AudioContext||window.webkitAudioContext)();return audio;}
+function bell(n=2){try{const a=ac();for(let i=0;i<n;i++){const o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=1320;o.connect(g);g.connect(a.destination);const t=a.currentTime+i*0.28;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.35,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+0.25);o.start(t);o.stop(t+0.3);}}catch(e){}}
+function blip(f=660){try{const a=ac();const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.connect(g);g.connect(a.destination);const t=a.currentTime;g.gain.setValueAtTime(0.12,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.08);o.start(t);o.stop(t+0.1);}catch(e){}}
+function clank(){try{const a=ac();const o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.value=140;o.connect(g);g.connect(a.destination);const t=a.currentTime;g.gain.setValueAtTime(0.08,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.12);o.start(t);o.stop(t+0.13);}catch(e){}}
+
+// ---------- utils ----------
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function pickW(ws){let s=ws.reduce((a,b)=>a+b),r=Math.random()*s;for(let i=0;i<ws.length;i++){if((r-=ws[i])<0)return i;}return ws.length-1}
+// セリフ：話す人ごとに色とアイコンのラベル。人数・ベビーカー・フタなどの大事な言葉は太字＋色で目立たせる
+const SPK={cast:['🙋','あなた','sp-cast'],guest:['🧑‍🤝‍🧑','ゲスト','sp-guest'],disp:['📣','ディスパッチャー','sp-disp'],narr:['','','sp-narr']};
+const SAYLOG=[];
+function emph(t){
+  return String(t).split(/(<[^>]+>)/).map(x=>x.startsWith('<')?x:x
+    .replace(/([0-9０-９]+\s*(?:名様?|人|台|秒|便))/g,'<b class="k-num">$1</b>')
+    .replace(/(フタのない飲み物|フタなし|ベビーカー|車いす|お飲み物)/g,'<b class="k-key">$1</b>')
+    .replace(/(奥側|手前側|奥|手前|左|右|反対側|次の電車)/g,'<b class="k-dir">$1</b>')).join('');
+}
+function say(kind,t){
+  const b=$('bubble'), s=SPK[kind];
+  const plain=String(t).replace(/<[^>]+>/g,''); b.className='bubble '+s[2]+(plain.length>34?' long':'');
+  b.innerHTML=(s[1]?`<span class="spk">${s[0]} ${s[1]}</span>`:'')+`<span class="say">${kind==='narr'?t:emph(t)}</span><span class="logb" title="履歴">≡</span>`;
+  void b.offsetWidth; b.classList.add('sayin');
+  const last=SAYLOG[SAYLOG.length-1]; if(!(last&&last.k===kind&&last.t===String(t))){ SAYLOG.push({k:kind,t:String(t)}); if(SAYLOG.length>30) SAYLOG.shift(); }
+}
+function sayGuest(t,narr){ say(narr?'narr':'guest',t); }
+function sayDisp(t){ say('disp',t); }
+function sayCast(t){ say('cast',t); }
+function toast(t,cls=''){const e=$('toast');e.className='toast on '+cls;e.innerHTML=t;clearTimeout(e._t);e._t=setTimeout(()=>e.className='toast',2200);}
+function pop(v,el){const r=(el||$('hScore')).getBoundingClientRect(),a=app.getBoundingClientRect();const e=document.createElement('div');e.className='pop'+(v<0?' neg':'');e.textContent=(v>0?'+':'')+v;e.style.left=(r.left-a.left+r.width/2-12)+'px';e.style.top=(r.top-a.top)+'px';$('sGame').appendChild(e);setTimeout(()=>e.remove(),1000);}
+function add(v,el){G.score+=v;$('hScore').textContent=G.score;pop(v,el);}
+function opeMiss(msg,el){ // オペミス（運営上の重大なミス）
+  G.stats.ope=(G.stats.ope||0)+1; G.trainOpe.push(msg.replace(/<br>/g,''));
+  add(-100,el); buzz([80,60,160]); toast('⚠ オペミス<br>'+msg,'bad'); blip(140); setTimeout(()=>blip(140),160);
+}
+function miss(msg,v,el,key){buzz(120);G.trainMiss.push(msg.replace(/<br>/g,''));G.stats.miss++;add(-v,el);toast(msg,'bad');blip(180);}
+
+// ---------- groups ----------
+function makeGroup(forUnload){
+  const L=LV[lv];
+  const base=[1,2,3,4,5,6,7,8][pickW(L.size)];
+  const g={id:gid++, kids:0, baby:false, wc:false, stroller:false, asked:false, col:GCOL[gid%GCOL.length]};
+  if(base>=3) g.kids=Math.min(base-1,rnd(0,2)); else if(base===2&&Math.random()<.2) g.kids=1;
+  const adults=base-g.kids;
+  const r=Math.random();
+  if(r<L.wc) g.wc=true; else if(r<L.wc+L.st){g.baby=true;g.stroller=true;}
+  if(g.wc && Math.random()<0.15){g.baby=true;g.stroller=true;}   // 同じグループに車いす＋ベビーカー
+  if(g.stroller && !g.wc && Math.random()<[0.12,0.18,0.24,0.24][lv]) g.nSt=2;   // ベビーカー2台持ち（双子・兄弟）
+  // フタのない飲み物を持っているゲスト（持ち込みはオペミス）
+  g.far = !forUnload && Math.random()<L.far;   // 海外ゲスト（英語で人数を答える）
+  g.loose = Math.random()<(L.loose||0.12) ? 1 : 0;   // たまに詰めずに座るゲスト（海外ゲストなど）
+  if(g.loose) g.intl = Math.random()<0.6;
+  if(g.far) g.intl = true;
+  g.noSplit = false;   // 案内にはみなさん従う（背中合わせもOK）
+  g.want=null;   // 座る側の希望を言うゲストはいない
+
+  g.people=[];
+  for(let i=0;i<adults;i++) g.people.push({t:(g.wc&&i===0)?'wc':'adult', c:COLORS[rnd(0,9)], h:rnd(0,2)});
+  for(let i=0;i<g.kids;i++) g.people.push({t:'kid', c:COLORS[rnd(0,9)], h:rnd(0,1)});
+  if(lv>=2) g.people.sort(()=>Math.random()-.5);
+  g.size=base+(g.baby?(g.nSt||1):0);
+  if(!forUnload && Math.random()<(L.drink||[0.01,0.015,0.02][lv])){ const cand=g.people.map((p,i)=>i).filter(i=>g.people[i].t!=='wc'); if(cand.length) g.people[cand[rnd(0,cand.length-1)]].drink=true; }
+  else if(!forUnload && Math.random()<(L.drink||[0.06,0.09,0.13][lv])*1.3){ const cand=g.people.map((p,i)=>i).filter(i=>g.people[i].t!=='wc'); if(cand.length) g.people[cand[rnd(0,cand.length-1)]].lid=true; }   // フタ付きの飲み物（そのまま乗れる）
+
+  g.anch=g.wc||g.stroller;
+  // 体格：大人は細身・ふつう・大きめ（中学生くらいも）、子どもは年齢で座る幅が変わる（1マス＝16cm）
+  for(const p of g.people){
+    if(p.t==='wc'){p.w=0;continue;}
+    if(p.t==='kid'){ p.age=rnd(3,12); p.w=p.age<=6?2:3; continue; }
+    const r=Math.random(); p.b = r<.22?'slim':r<.78?'normal':'large'; if(Math.random()<.08){p.teen=true;}
+    // 座る幅（1マス＝約11cm）：大人はどんなに詰めても4マス以上 → 片側に大人は10人が限界。体格でばらつく
+    p.w = p.b==='slim'?4 : p.b==='normal'?(Math.random()<.3?4:5) : (Math.random()<.5?5:6);
+  }
+  g.units=g.people.reduce((a,p)=>a+(p.w||0),0);
+  g.answer=g.size;
+  if(Math.random()<L.mis){
+    if(g.baby&&Math.random()<.6) g.answer=g.size-1;
+    else if(g.kids>0&&Math.random()<.6) g.answer=g.size-1;
+    else if(Math.random()<0.12){g.answer=g.size+1; g.away=true; g.awayBack=performance.now()+rnd(20,45)*1000;}   // トイレに行っている人を数えてしまう（まれ）。しばらくすると戻ってくる
+  }
+  return g;
+}
+
+// ---------- car model ----------
+// rows[0]=A側, rows[1]=B側。index 0 = 連結部側, 19 = 車両の端側
+function newCar(){return {rows:[Array(CELLS).fill(null),Array(CELLS).fill(null)], groups:{}, st:0, wc:0};}
+// ベビーカー・車いすを置いた側（0＝奥/上、1＝手前/下）
+function spaceRows(car){const out=new Set();for(const x of Object.values(car.groups)) if(x.g.anch&&!x.g.folded) out.add(x.g.spaceRow??1);return out;}
+// 連結部の入口：手前側にベビーカー等を置くとふさがる。奥側に置いたときは入口はそのまま使える
+function entrance(car){return spaceRows(car).has(1)?'end':'coup';}
+// そのベンチへ入る入口：奥側にベビーカー等があると、その前は通れないので奥のベンチへは車両の端の入口から
+function rowDoor(car,r){ if(entrance(car)==='end') return 'end'; if(r===0&&spaceRows(car).has(0)) return 'end'; return 'coup'; }
+function runs(row){const out=[];let s=-1;for(let i=0;i<=CELLS;i++){if(i<CELLS&&row[i]===null){if(s<0)s=i;}else if(s>=0){out.push([s,i-1]);s=-1;}}return out;}
+function fitsAt(row,s,len){if(s<0||s+len>CELLS)return false;for(let i=s;i<s+len;i++)if(row[i]!==null)return false;return true;}
+function put(car,g,segs){ if(g.anch){ const s0=segs.find(x=>x.s===0)||segs[0]; g.spaceRow = s0? s0.r : (g.spaceRow??1); }for(const sg of segs)for(let i=sg.s;i<sg.s+sg.len;i++)car.rows[sg.r][i]=g.id;
+  car.groups[g.id]={g,segs,pos:segs.length?Math.min(...segs.map(x=>x.s)):-1};}
+function remove(car,id){for(const row of car.rows)for(let i=0;i<CELLS;i++)if(row[i]===id)row[i]=null;delete car.groups[id];}
+function heads(car){return Object.values(car.groups).reduce((a,x)=>a+x.g.size,0);}
+// 着席位置を決める。mode: free / L / R（画面の左右）。戻り値 [{r,s,len}...]（片側 or 背中合わせで両側に分かれる） / null
+// 入口から届く範囲（座っているゲストの前に通路はないので、入口側から空いている所まで）
+function reach(row,door){ // {a,b} の区間 or null
+  if(door==='coup'){let k=0;while(k<CELLS&&row[k]===null)k++;return k?{a:0,b:k-1,L:k}:null;}
+  let k=CELLS-1;while(k>=0&&row[k]===null)k--;return k<CELLS-1?{a:k+1,b:CELLS-1,L:CELLS-1-k}:null;
+}
+// 区間の中で len マス分の位置。side: 'hi'=車両の端側に詰める / 'lo'=連結部側に詰める。gap: 詰めないゲストのすき間
+function placeIn(R,len,side,gap){
+  if(!R||R.L<len) return null;
+  // ベンチの端から座ってもらうので、ベンチの端（車両の端・連結部の端）とのあいだにはすき間を作らない
+  if((side==='hi'&&R.b===CELLS-1)||(side!=='hi'&&R.a===0)) gap=0;
+  const g=Math.min(gap||0,R.L-len);
+  return side==='hi'? R.b-len+1-g : R.a+g;
+}
+// 着席位置を決める。mode: free / L / R（画面の左右）。戻り値 [{r,s,len}...] / null
+// キューラインから見た奥側・手前側のベンチ（アメリカ：奥＝上、ポート：奥＝下）
+function rowOf(mode){ return mode==='oku' ? 0 : 1; }   // キューラインから見て奥＝上のベンチ、手前＝下のベンチ（両ステーション共通）
+const benchName=r=> r===0?'上のベンチ':'下のベンチ';
+function updOkuLabels(){ $('iOku').textContent='奥（上）'; $('iTemae').textContent='手前（下）'; }
+// 座れる人数は決めていない。体格（座る幅）しだいで、詰めても大人だけで21人は座れない／子どもが多ければ21人座れる
+function findSeat(car,g,mode,onlyRow){ return findSeat0(car,g,mode,onlyRow); }
+function findSeat0(car,g,mode,onlyRow){
+  if(mode==='oku'||mode==='temae'){ onlyRow = rowOf(mode); mode='row'; }   // キューラインから見た奥・手前（アメリカとポートで逆）
+  const len=g.units;
+  if(len===0){ if(g.anch) g.spaceRow = onlyRow!=null?onlyRow:1; return []; }
+  const rows=car.rows;
+  if(g.anch){ // 連結部の入口から。連結部の真横（index0）に代表者。残りは同じ側の続き or 背中合わせの側
+    const c=[], rowsOK=r=> onlyRow==null || r===onlyRow;
+    for(let r=0;r<2;r++){ if(!rowsOK(r)) continue; const R=reach(rows[r],'coup'); if(R&&R.L>=len) c.push([{r,s:0,len}]);}
+    // 同じグループは同じベンチ。どうしても1つのベンチに入らない大人数のときだけ、背中合わせに分かれる
+    if(!c.length&&onlyRow==null) for(let r=0;r<2;r++){
+      const R=reach(rows[r],'coup'), R2=reach(rows[1-r],'coup'); if(!R||!R2) continue;
+      const l1=Math.min(R.L,len-1), l2=len-l1; if(l1>=1&&R2.L>=l2) c.push([{r,s:0,len:l1},{r:1-r,s:0,len:l2}]);
+    }
+    return c.length?c[rnd(0,c.length-1)]:null;
+  }
+  const door=entrance(car);                 // coup / end（ベンチごとの入口は rowDoor）
+  // 位置の決め方：おまかせ＝連結部から見て奥（車両の端側）から順に / 奥側＝入口から遠い / 手前側＝入口に近い
+  let side;
+  // 画面の左右 → ベンチの向き（リアは連結部が左、フロントは連結部が右）
+  const lowIsLeft = pos!=='front';
+  if(mode==='L') side= lowIsLeft?'lo':'hi';
+  else if(mode==='R') side= lowIsLeft?'hi':'lo';
+  else if(mode==='fill') side= door==='coup'?'hi':'lo';
+  else if(mode==='around') side='lo';   // 中に入ってぐるっと回って反対側＝ベビーカーグループの横へ   // 上手に案内された状態（アンロード用）
+  else side='hi';
+  const loose = (mode==='free'||mode==='fill') && Math.random()<g.loose*(mode==='fill'?0.5:1);   // 詰めないゲスト
+  // ふつうのゲストは前のグループにぴったり続けて座る（すき間を作るのは、詰めない海外ゲストだけ）
+  const gap = loose? rnd(2,6) : 0;
+  const R=[reach(rows[0],rowDoor(car,0)),reach(rows[1],rowDoor(car,1))];
+  const single=[];
+  for(let r=0;r<2;r++){ if(onlyRow!=null&&r!==onlyRow) continue; const s0=placeIn(R[r],len,side,gap); if(s0!==null) single.push({r,s:s0});}
+  // 同じグループの人は同じベンチに座る。どちらのベンチにも入りきらない大人数のときだけ、2つのベンチに分かれる
+  const wantSplit = !single.length && onlyRow==null && R[0]&&R[1]&&R[0].L+R[1].L>=len;
+  if(wantSplit){
+    let l1=Math.min(R[0].L,Math.ceil(len/2)); if(len-l1>R[1].L) l1=len-R[1].L; if(l1>R[0].L) return null;
+    const l2=len-l1; if(l1<1||l2<1){ if(single.length) return [{r:single[0].r,s:single[0].s,len}]; return null; }
+    return [{r:0,s:placeIn(R[0],l1,side,0),len:l1},{r:1,s:placeIn(R[1],l2,side,0),len:l2}];
+  }
+  if(!single.length) return null;
+  // 奥側/手前側の指示なら、より奥（手前）になる側を選ぶ。おまかせは空いている方を選びがち
+  let pick;
+  if(mode==='free') pick= single.length===2&&R[0].L!==R[1].L&&Math.random()<0.7 ? (R[0].L>R[1].L?single[0]:single[1]) : single[rnd(0,single.length-1)];
+  else if(mode==='around'){ // ベビーカー（車いす）グループのすぐ横に来られる側を優先
+    const adj=x=>{const c=x.s-1; if(c<0) return 0; const id=rows[x.r][c]; return id!==null&&car.groups[id]&&car.groups[id].g.anch?1:0;};
+    pick=single.slice().sort((x,y)=> adj(y)-adj(x) || x.s-y.s)[0];
+  }
+  else { pick=single.slice().sort((x,y)=> side==='hi'? y.s-x.s : x.s-y.s)[0]; }
+  return [{r:pick.r,s:pick.s,len}];
+}
+function seatFill(car,targetHeads){ // アンロード用に乗客を配置（18名前後）
+  let tries=0;
+  const freeCells=()=>car.rows.reduce((a,r)=>a+r.filter(v=>v===null).length,0);
+  // 目標人数まで → そのあとも、ベンチにすき間が目立つうちは乗せる（到着する電車はいつも満員に見える）
+  while((heads(car)<targetHeads || (freeCells()>6&&heads(car)<CARCAP)) && tries<400){
+    tries++;
+    const g=makeGroup(true);
+    const room=Math.max(targetHeads,CARCAP)-heads(car);
+    if(g.size>room) continue;                       // 残りに合う人数のグループだけ
+    if(g.anch && heads(car)>4) continue;            // ベビーカー・車いすは先に乗った想定
+    if(g.wc&&car.wc>=MAX_WC) continue;
+    if(g.stroller&&(car.st+stN(g)>MAX_ST||car.wc>0)) continue;
+    if(g.wc&&car.st>0) continue;
+    const p=findSeat(car,g,'fill'); if(!p) continue;
+    put(car,g,p);
+    if(g.wc) car.wc++; car.st+=stN(g);
+  }
+  settleRows(car);
+}
+// 到着した電車：ベンチの端から座っているので、両端に空席は作らない。グループのあいだに少しずつすき間を分ける
+function settleRows(car){
+  for(let r=0;r<2;r++){
+    const list=[]; for(const id in car.groups) for(const sg of car.groups[id].segs) if(sg.r===r) list.push({sg,id:+id,anch:car.groups[id].g.anch});
+    let lo=0; list.filter(x=>x.anch).sort((a,b)=>a.sg.s-b.sg.s).forEach(x=>{ x.sg.s=lo; lo+=x.sg.len; });
+    const rest=list.filter(x=>!x.anch).sort((a,b)=>a.sg.s-b.sg.s); if(!rest.length) continue;
+    const W=rest.reduce((a,x)=>a+x.sg.len,0), slack=CELLS-lo-W; if(slack<0) continue;
+    const n=rest.length, gaps=[]; for(let i=0;i<n-1;i++) gaps.push(Math.floor(slack/(n-1||1))+(i<slack%(n-1||1)?1:0));
+    if(n===1){ rest[0].sg.s=CELLS-rest[0].sg.len; } else { let c=lo; rest.forEach((x,i)=>{ x.sg.s=c; c+=x.sg.len+(gaps[i]||0); }); }
+    const row=car.rows[r]; row.fill(null);
+    for(const x of list) for(let i=x.sg.s;i<x.sg.s+x.sg.len&&i<CELLS;i++) row[i]=x.id;
+  }
+  for(const id in car.groups){ const x=car.groups[id]; x.pos=Math.min(...x.segs.map(q=>q.s)); }
+}
+
+// ---------- game flow ----------
+function start(){
+  TRIPS = LV[lv].trips || 6;
+  gid=0;
+  G={trip:0, score:0, set:rnd(0,2), queue:[], carry:[], cur:null,
+     stats:{boarded:0,correct:0,counted:0,miss:0,stops:0,stopSec:0,full:0,over:0,bonus:0}, log:[]};
+  $('hSt').textContent=STN[st].short;
+  $('hPos').textContent=pos==='front'?'フロント':'リア';
+  updOkuLabels();
+  $('hTod').textContent=tod==='night'?'🌙':'☀️';
+  app.classList.toggle('front',pos==='front');
+  $('mInt').style.left=(T_INT/(T_X+15)*100)+'%';
+  $('mX').style.left=(T_X/(T_X+15)*100)+'%';
+  show('sGame');
+  setTimeout(()=>{ if(!E3.ready){ E3.init($('cv')) || ($('nogl').style.display='flex'); } E3.setup(); newTrain(); },30);
+}
+function newTrain(){
+  G.trip++; G.set=(G.set+1)%3;
+  G.car=newCar(); G.t=0; G.phase='arrive'; G.count=0; G.trainMiss=[]; G.trainOpe=[]; G.order=[]; G.gateOrder=0; G.ins='free';
+  G.gates=Array.from({length:STN[st].gates},(_,i)=>i===0?'closed':'closed');
+  G.depart=false; G.thumbed=false; G.go3=false; G.waitMsg=false; G.waitInt=false; G.checkQ=[]; G.checking=null; G.unloadOk=0; G.unloadN=0; G.called=false; G.fw=[]; G.aside=[]; G.warnedAnch=false; clearTimeout(G.uT); $('bCallOut').classList.remove('sel'); $('bExitL').style.display=(st==='awf'&&pos==='rear')?'':'none';
+  { const tgt=rnd(...LV[lv].unload);
+    for(let k=0;k<8;k++){ G.car=newCar(); seatFill(G.car,tgt); if(heads(G.car)>=tgt-2) break; } }
+  G.unloadList=Object.values(G.car.groups).map(x=>x.g).sort((a,b)=>doorDist(a)-doorDist(b));
+  G.unloadN=G.unloadList.length;
+  $('hTrip').textContent=`${G.trip}/${TRIPS}便`;
+  $('hSet').textContent=SETS[G.set];
+  render(); setPanel(null); updCount();
+  E3.newTrain();
+  const w=$('carwrap'); w.classList.remove('away'); w.classList.add('enter'); void w.offsetWidth; w.classList.remove('enter');
+  $('group').innerHTML=''; $('tags').innerHTML=''; renderInfo(null);
+  sayCast('電車が近づいています…');
+  { const due=G.carry.filter(g=>!g.forTrip||g.forTrip<=G.trip); G.carry=G.carry.filter(g=>!due.includes(g)); G.queue=due.concat(G.queue); } G.sel=null;   // この電車の番になった方だけ先頭へ（あとの電車の方は待機場で待つ）
+  while(G.queue.length<10) G.queue.push(makeGroup());
+  drawQueue();
+  setTimeout(()=>{
+    G.phase='unload'; bell(1);
+    sayCast('おかえりなさい！お忘れ物のないよう、お降りください');
+    clearInterval(tick); tick=setInterval(loop,250);
+    G.cur=null; nextUnload();
+  },3400);
+}
+function doorDist(g){const x=G.car.groups[g.id];if(!x||x.pos<0)return 0;const mid=x.pos+g.units/2;return Math.min(mid,CELLS-mid)+Math.random()*2;}
+// トイレに行っていた人が戻ってくる：まだ並んでいればグループに合流。もう乗った（出た）あとなら、ひとりで列の先頭に
+function checkAwayBack(){
+  if(!G||!G.queue) return;
+  const now=performance.now();
+  const all=[G.cur].concat(G.queue,G.aside||[],G.carry||[]).filter(Boolean);
+  const boarded=G.car?Object.values(G.car.groups).map(x=>x.g):[];
+  for(const g of all.concat(boarded)){
+    if(!g.away||!g.awayBack||now<g.awayBack) continue;
+    g.away=false; g.awayBack=null;
+    let np; for(let k=0;k<50&&!np;k++){ const t=makeGroup(); np=t.people.find(p=>p.t==='adult'); }
+    if(!np) continue;
+    if(all.includes(g)){ // まだ列や待機中 → 合流。人数は本当に言ったとおりになる
+      g.people.push(np); g.size++; g.units+=np.w||0;
+      if(g===G.cur){ sayGuest('（トイレに行っていた人が戻ってきて、グループに合流した）',true); renderInfo(g); drawGroup(g,''); }
+      drawQueue();
+    } else { // もう乗った・降りたあと → ひとりで戻ってきて、次に案内
+      const ng=makeGroup(); ng.people=[np]; ng.size=1; ng.kids=0; ng.baby=false; ng.wc=false; ng.stroller=false; ng.nSt=0; ng.anch=false; ng.units=np.w||4; ng.answer=1; ng.intl=g.intl; ng.col=g.col; ng.returned=true;
+      G.queue.unshift(ng); drawQueue(); toast('トイレの人が戻りました（列の先頭）');
+    }
+  }
+}
+function loop(){
+  checkFrontWatch(); checkAwayBack();
+  if(G.depart) return;
+  G.t+=0.25*LV[lv].speed;
+  const p=Math.min(1,G.t/(T_X+15));
+  $('dwell').querySelector('i').style.width=(p*100)+'%';
+  if(PRAC){ $('dwell').querySelector('i').style.background='#9fdcb3'; $('dwT').textContent=`🔰 練習 ${Math.floor(G.t)}秒`; return; }
+  $('dwell').querySelector('i').style.background=G.t>T_X?'#ff5050':G.t>T_INT?'#9fdcb3':'#f3c64b';
+  $('dwT').textContent=G.t>T_X?`⚠ 踏切で一時停止中 +${Math.ceil(G.t-T_X)}秒`:`${Math.floor(G.t)}秒`;
+  if(G.t>T_X && !G.stopWarned){G.stopWarned=true;toast('次の電車が踏切で一時停止しています！','bad');}
+}
+function setPanel(id){['pUnload','pLoad','pGate'].forEach(p=>$(p).classList.toggle('on',p===id));
+  $('phase').textContent={arrive:'到着',unload:'アンローディング',load:'ローディング',gate:'ゲートOK',go:'出発'}[G.phase]||'';}
+
+// ---------- unload ----------
+function coupClear(){ // 連結部付近（スペース＋index0〜5）にゲストがいない
+  if(G.car.st>0||G.car.wc>0) return false;
+  for(const row of G.car.rows) for(let i=0;i<6;i++) if(row[i]!==null) return false;
+  return true;
+}
+const EXIT=()=>G.gates.length-1;
+const supportOpen=()=>G.gates.length===3&&G.gates[1]==='open';
+function needFront(g){return st==='awf'&&pos==='rear'&&(g.stroller||g.wc);}
+function unloadFactor(){return (supportOpen()?0.5:1)*(G.called?1:1.8);}
+function nextUnload(){ // ゲストは基本的に自分で降りる。ローダーは声かけ
+  if(G.phase!=='unload'||G.cur) return;
+  setPanel('pUnload');
+  if(G.gates[EXIT()]!=='open'){
+    setTimeout(()=>{ if(G.phase==='unload'&&G.gates[EXIT()]!=='open') { if(LV[lv].hints!==false) toast('出口ゲートを開けよう'); } },300);
+    return;
+  }
+  if(!G.unloadList.length){
+    $('group').innerHTML=''; $('tags').innerHTML=''; renderInfo(null);
+    sayCast('全員降りました！');
+    setPanel(null);
+    if(G.gates[0]==='open') startLoad(); else if(LV[lv].hints!==false) toast('入口ゲートをタップして開けよう');
+    return;
+  }
+  const g=G.unloadList[0];
+  G.cur=g; drawGroup(g,'walkin','car');
+  if(!G.called && Math.random()<0.6) sayGuest('（連結部側の出口から出ようとしている…）',true);
+  const f=unloadFactor();
+  const wait=Math.round(LV[lv].walk*(needFront(g)?2.4:1.2)*f);
+  clearTimeout(G.uT); G.uT=setTimeout(()=>doExit('R',false),wait);
+}
+function doExit(d,byCast){
+  if(G.phase!=='unload'||!G.cur) return;
+  clearTimeout(G.uT);
+  const g=G.cur, el=$('bExitL');
+  g.exitDir=d;
+  if(d==='L'){
+    if(needFront(g)){add(5,el);blip(990);sayCast('エレベーターをご利用の方は、ディスパッチャーの前を通ってフロントの出口へどうぞ');}
+    else {miss('このゲストは通常の出口ゲートへ',20,el);d='R';}
+  } else if(needFront(g)){
+    (G.fw=G.fw||[]).push(g);   // 出口ゲートをこえるまではまだ間に合う（そのあいだにボタンを押せばフロントの出口へ）
+  }
+  remove(G.car,g.id); if(g.wc)G.car.wc--; G.car.st-=stN(g);
+  G.unloadList.shift(); G.cur=null; render();
+  $('group').className='group '+(d==='L'?'exitL':'exitR');
+  setTimeout(nextUnload,Math.round(LV[lv].walk*0.5*unloadFactor()));
+}
+$('bExitL').onclick=()=>{
+  // 出口ゲートへ向かっている途中のベビーカー・車いすのグループがいれば、そのグループをフロントの出口へ
+  if(G.fw&&G.fw.length){ const g=G.fw.shift(); g.exitDir='L'; E3.reroute(g.id); add(5,$('bExitL')); blip(990);
+    sayCast('エレベーターをご利用の方は、ディスパッチャーの前を通ってフロントの出口へどうぞ'); return; }
+  doExit('L',true);
+};
+// 出口ゲートをこえたら、声かけ忘れのミス
+function checkFrontWatch(){
+  if(!G||!G.fw||!G.fw.length) return;
+  for(const g of G.fw.slice()){
+    if(E3.passedExit(g.id)){ G.fw=G.fw.filter(x=>x!==g); miss(`${g.wc?'車いす':'ベビーカー'}のゲストが出口から出てしまった`,20,$('bExitL')); }
+  }
+}
+$('bCam').onclick=()=>{const m=E3.toggleCam();$('bCam').textContent=m==='over'?'🔍 車内アップ':'🗺 全体';};
+$('bCallOut').onclick=()=>{
+  if(G.phase!=='unload') return;
+  if(G.called){sayCast('お出口は反対側にございます〜！');return;}
+  G.called=true; add(5,$('bCallOut')); blip(990);
+  sayCast('（連結部付近に立って）お出口は反対側にございます！');
+  $('bCallOut').classList.add('sel');
+};
+
+// ---------- gates ----------
+function gateTap(i,el){
+  if(G.depart) return;
+  if(G.phase==='arrive'){
+    if(G.gates[i]==='open') return;
+    if(i===0){ G.gates[0]='open'; clank(); render(); opeMiss('電車の到着前に入口ゲートを開けた',el); }
+    else toast('まだ電車が到着していません');
+    return;
+  }
+  if(G.phase==='unload'){
+    if(i===EXIT()){
+      if(G.gates[i]==='open') return;
+      G.gates[i]='open'; clank(); render(); sayCast('（出口ゲートを開けます）お忘れ物のないよう、お降りください');
+      setTimeout(nextUnload,400);
+      return;
+    }
+    if(i!==0){ // ポートのサポートゲート
+      if(G.gates[i]==='open') return;
+      if(G.gates[EXIT()]!=='open'){toast('先に出口ゲートを開けよう');return;}
+      G.gates[i]='open'; clank(); render(); sayCast('（サポートゲートも開けます）こちらからもお降りいただけます');
+      return;
+    }
+    if(G.gates[0]==='open') return;
+    if(!coupClear()){miss('連結部にまだゲストがいます',30,el);return;}
+    G.gates[0]='open'; clank(); render(); sayCast('（入口ゲートを開けます）');
+    if(!G.unloadList.length) startLoad();
+    return;
+  }
+  if(G.phase==='load'||G.phase==='gate'){
+    // まちがえて閉めた（ゲートOKした）ゲートは、サムアップする前ならもう一度開けられる。入口ゲートを開けたらローディングに戻る
+    if(G.phase==='gate'&&G.gates[i]==='ok'){
+      if(G.thumbed){ toast('サムアップ後は開けられません'); return; }
+      if(G.checking!=null){ toast('ゲートOKの確認中です'); return; }
+      G.gates[i]=G.gatesAtLoad?G.gatesAtLoad[i]:'open'; clank(); render();
+      if(i===0){ // 入口ゲートを開けた → ローディングにもどる
+        G.gates=G.gates.map((x,k)=>x==='ok'||x==='chk'?(G.gatesAtLoad?G.gatesAtLoad[k]:'open'):x); G.checkQ=[];
+        G.phase='load'; setPanel('pLoad'); sayCast('（入口ゲートをもう一度開けます）'); render(); nextLoad();
+      } else sayCast(`（${i===G.gates.length-1?'出口':'サポート'}ゲートをもう一度開けます）`);
+      return;
+    }
+    if(G.gates[i]==='ok') return;
+    if(G.phase==='load'){
+      // ローディング終了 → ゲート確認へ
+      G.gatesAtLoad=G.gates.slice(); G.phase='gate'; if(G.cur){G.queue.unshift(G.cur);G.cur=null;$('group').innerHTML='';$('tags').innerHTML='';renderInfo(null);}
+      if(G.aside.length){ // 横で待っていたゲストを乗せられなかった＝大きなミス
+        const n=G.aside.length;
+        G.aside.forEach(x=>carryPush(x));G.aside=[];drawQueue();
+        G.stats.asideMiss=(G.stats.asideMiss||0)+n;
+        miss(`横で待っていた${n>1?n+'組の':''}ベビーカー・車いすを乗せ忘れ（大きなミス）`,100*n,el);
+        setTimeout(()=>sayCast('大変申し訳ございません、次の電車で最初にご案内いたします'),1200);
+      }
+      setPanel('pGate');
+    }
+    if(G.thumbed||G.gates[i]==='chk'||(G.checkQ||[]).includes(i)) return;
+    { const want=G.gates.findIndex((x,k)=>x!=='ok'&&x!=='chk'&&!(G.checkQ||[]).includes(k));   // 入口→（サポート）→出口の順
+      if(i!==want) opeMiss('ゲートの安全確認の順番違い<br>（入口→'+(G.gates.length===3?'サポート→':'')+'出口）',el); }
+    (G.checkQ=G.checkQ||[]).push(i); G.gates[i]='chk'; render();
+    runCheck();
+  }
+}
+// ゲートOKは1〜2秒：あなたがゲートまで歩き、ガチャガチャと閉まりを確かめて指差し → OK
+function runCheck(){
+  if(G.checking!=null||!G.checkQ||!G.checkQ.length) return;
+  const i=G.checkQ.shift(); G.checking=i;
+  const nm=i===0?'入口ゲート':i===G.gates.length-1?'出口ゲート':'サポートゲート';
+  E3.checkGate(i, ()=>{ clank(); setTimeout(()=>clank(),180); },
+    ()=>{ G.gates[i]='ok'; G.checking=null; blip(1200); sayCast(`（ガチャガチャ）${nm}、ゲートOK！☝`); render(); runCheck(); });
+}
+$('bThumb').onclick=()=>{
+  if(G.phase!=='gate'||G.depart) return;
+  if(G.thumbed) return;
+  if(G.gates.some(x=>x!=='ok')){toast(G.checking!=null?'ゲートOKの確認中です':'まだ確認していないゲートがあります','bad');return;}
+  G.thumbed=true; if(VS) vsPush({thumbTrip:G.trip,score:G.score,heads:heads(G.car)}); sayCast('（出口ゲート付近へ）👍 ゲートOK！（ディスパッチャーへサムアップ）'); E3.thumb(true);
+  // 相方のローダーもゲートOK（サムアップ）してから、3秒後に出発
+  const wait=()=>{
+    if(G.phase!=='gate') return;
+    if(!E3.myThumbUp()){ setTimeout(wait,200); return; }   // 出口ゲート付近に着いてサムアップしてから
+    if(VS && !vsOppReady()){ if(!G.waitMsg){G.waitMsg=true; toast('相手のサムアップ待ち…');} setTimeout(wait,250); return; }
+    // ディスパッチインターバルより早くても、ゲートOK・サムアップがそろえばすぐ出発
+    if(G.go3) return; G.go3=true;
+    sayDisp(VS?'（2人のサムアップを確認…）':'（サムアップを確認…）');
+    setTimeout(()=>{ G.depart=true; dispatch(); },3000/LV[lv].speed);
+  };
+  wait();
+};
+
+// ---------- load ----------
+function startLoad(){
+  G.phase='load'; G.loadStarted=true; G.ins='free'; selIns();
+  sayCast('お待たせいたしました！ご乗車のご案内です');
+  setPanel('pLoad'); nextLoad();
+}
+function nextLoad(){
+  if(G.phase!=='load') return;
+  G.cur=G.queue.shift(); while(G.queue.length<8) G.queue.push(makeGroup());
+  G.cur.asked=!!(G.cur.anch&&G.cur.askedOnce); G.countAtAsk=G.count; G.ins='free'; selIns(); updHold(); G.stuck=false; $('sheetStuck').classList.remove('on');
+  drawGroup(G.cur,'walkin','queue'); drawQueue();
+  if(LV[lv].hints!==false&&G.cur.anch&&!G.warnedAnch&&G.queue.some(q=>!q.anch)){G.warnedAnch=true;setTimeout(()=>toast('横で待ってもらえます'),300);}
+  sayGuest(G.cur.held?'お待たせしました〜！':'（ゲートの前のグループ）', !G.cur.held);
+}
+function selIns(){['iFree','iR','iOku','iTemae','iAround'].forEach(id=>$(id).classList.toggle('sel',$(id).dataset.ins===G.ins));
+  if(G.car) $('iAround').disabled=spaceRows(G.car).size===0;}
+document.querySelectorAll('[data-ins]').forEach(b=>b.onclick=()=>{
+  if(G.phase!=='load')return; G.ins=b.dataset.ins; selIns(); blip(700);
+  const e=entrance(G.car)==='coup'?'連結部側':'車両の端';
+  if(G.ins==='L') sayCast('左側のお席へどうぞ');
+  if(G.ins==='R') sayCast('右側のお席へどうぞ');
+  if(G.ins==='oku') sayCast(`奥側のお席へどうぞ（キューラインから見て奥＝${benchName(rowOf('oku'))}）`);
+  if(G.ins==='temae') sayCast(`手前側のお席へどうぞ（キューラインから見て手前＝${benchName(rowOf('temae'))}）`);
+  if(G.ins==='around') sayCast('中に入って、ぐるっと回って反対側にお進みください（ベビーカーのお客様の横へ）');
+});
+$('bAsk').onclick=()=>{
+  if(G.phase!=='load'||!G.cur) return;
+  if(G.cur.asked){sayGuest(`${G.cur.answer}人です`);return;}
+  sayCast('こんにちは！何名様ですか？');
+  setTimeout(()=>{ if(!G.cur)return; G.cur.asked=true; G.cur.askedOnce=true; G.countAtAsk=G.count;
+    let t=`${G.cur.answer}人です！`;
+    if(G.cur.away) t=`${G.cur.answer}人です！（あれ、1人トイレに行ったような…）`;
+    if(G.cur.far){ const w=['One','Two','Three','Four','Five','Six','Seven','Eight','Nine'][G.cur.answer-1]||String(G.cur.answer); t=`${w}${G.cur.answer>1?' people':''}!（${G.cur.answer}人）`; }
+    if(G.cur.want!=null) t+= G.cur.wantWhy==='believe' ? ' ビリーブが見たいので、見える側のベンチに座りたいです！' : ` ${G.cur.want===0?'上':'下'}側のベンチに座りたいです！`;
+    if(G.cur.wc&&G.cur.stroller) t+=' 車いすとベビーカー、このままで大丈夫ですか？';
+    else if(G.cur.stroller&&G.cur.nSt===2) t+=' ベビーカー2台、このままで大丈夫ですか？';
+    else if(G.cur.wc) t+=' 車いすのままで乗れますか？';
+    else if(G.cur.stroller) t+=' ベビーカーはこのままで大丈夫ですか？';
+    sayGuest(t); updHold();
+    renderInfo(G.cur);
+    if(G.cur.want!=null) $('tags').insertAdjacentHTML('beforeend',`<span class="tag">${G.cur.wantWhy==='believe'?'🎆 ビリーブが見たい':'🪟 '+(G.cur.want===0?'上':'下')+'側を希望'}</span>`);
+  },400);
+};
+function updCount(){$('cN').textContent=G.count;}
+$('bPlus').onclick=()=>{if(G.phase!=='load')return;buzz(15);G.count=Math.min(30,G.count+1);updCount();blip(880);};
+$('bMinus').onclick=()=>{if(G.phase!=='load')return;G.count=Math.max(0,G.count-1);updCount();blip(500);};
+// ---- ベビーカー・車いすが台数制限より多く来たとき ----
+// この電車に乗る予定の台数（車内＋横で待ってもらっている方）
+function planned(){ const a=G.aside||[]; return { st:G.car.st+a.reduce((n,x)=>n+stN(x),0), wc:G.car.wc+a.filter(x=>x.wc).length, stG:Object.values(G.car.groups).filter(x=>stN(x.g)>0).map(x=>x.g).concat(a.filter(x=>stN(x)>0)), wcG:Object.values(G.car.groups).filter(x=>x.g.wc).map(x=>x.g).concat(a.filter(x=>x.wc)) }; }
+function overLimit(g){
+  if(!g||!g.anch||g.waited) return false;
+  const P=planned();
+  if(g.wc && P.wc>=MAX_WC) return 'wc';
+  if(g.wc && P.st>0 && !g.stroller) return 'wc';
+  if(stN(g)>0 && (P.st+stN(g)>MAX_ST || P.wc>0)) return 'st';
+  return false;
+}
+// 「たためば乗れますが、次の電車かたたむか、どうしますか？」→ ゲストが決める
+function askFold(g){
+  if(!g||g.foldAsked) return;
+  g.foldAsked=true;
+  const P=planned(), wcBlock=P.wc>0&&!g.wc;
+  const why=wcBlock?'車いすのお客様がご乗車になるため':'ベビーカーがいっぱいのため';
+  // 2台持ちで、あと1台なら置ける → 1台だけたためば乗れる
+  const one = !wcBlock && g.nSt===2 && P.st+1<=MAX_ST;
+  g.foldPlan = one?'one':'all';
+  sayCast(one ? `申し訳ございません、こちらの電車はベビーカーがあと1台分しか置けないため、ベビーカーを1台たためば乗れますが、次の電車にするか、1台たたむか、どうしますか？`
+              : `申し訳ございません、こちらの電車は${why}、ベビーカーはたためば乗れますが、次の電車にするか、たたむか、どうしますか？`);
+  setTimeout(()=>{
+    if(G.cur!==g||G.phase!=='load') return;
+    if(Math.random()<0.6){
+      if(g.foldPlan==='one'){ g.foldOne=true; sayGuest('じゃあ、1台たたんで乗ります！（1人はだっこで）'); }
+      else { g.folded=true; g.anch=g.wc; g.units=g.people.reduce((a,p)=>a+(p.w||0),0); sayGuest('じゃあ、たたんで乗ります！（赤ちゃんはだっこで）'); }
+      renderInfo(g); drawQueue();
+    } else nextTrainFor(g,'たたむのは大変なので、待ちます');
+  },1100);
+}
+// ---- 次の電車以降でご案内するとき：その電車に乗る予定のベビーカー・車いすの台数を数えて、乗れる電車を決める ----
+function fitsTrip(list,g){
+  const st=list.reduce((n,x)=>n+stN(x),0), wc=list.filter(x=>x.wc).length;
+  if(g.wc && (wc>=MAX_WC || list.some(x=>stN(x)>0))) return false;
+  if(stN(g)>0 && (st+stN(g)>MAX_ST || wc>0)) return false;
+  return true;
+}
+function laterTrip(g){ for(let t=G.trip+1;t<G.trip+8;t++){ if(fitsTrip(G.carry.filter(x=>x.forTrip===t&&x!==g),g)) return t; } return G.trip+8; }
+function tripName(t){ const d=t-G.trip; return d<=1?'次の電車':d===2?'次の次の電車':`${d}本あとの電車`; }
+function carryPush(g,t){ g.held=true; g.forTrip=t||(g.anch&&!g.folded?laterTrip(g):G.trip+1); G.carry.push(g); return g.forTrip; }
+function nextTrainFor(g,line){ // 次の電車以降でご案内（横の待機スペースで待って、その電車の最初に）
+  sayGuest(line);
+  setTimeout(()=>{ if(G.cur!==g||G.phase!=='load') return; g.foldAsked=false; const t=carryPush(g); sayCast(`かしこまりました。${tripName(t)}でのご案内になります。こちらで少々お待ちください`); G.cur=null; $('group').className='group walkout'; renderInfo(null); setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk); },900);
+}
+$('bGo').onclick=()=>{
+  if(G.phase!=='load'||!G.cur) return;
+  const g=G.cur, car=G.car, el=$('bGo');
+  if(!g.asked){toast('まずは「何名様ですか？」');return;}
+  // 車いす・ベビーカーの台数ルール
+  if(g.wc&&car.wc>=MAX_WC){opeMiss('車いすの台数オーバー',el);return;}
+  if(g.stroller&&!g.folded&&(car.st+stN(g)>MAX_ST||(car.wc>0&&!g.wc))){ // 3台目／車いすが乗っているとき：ゲストに判断してもらう
+    if(!g.foldAsked) askFold(g);
+    return;
+  }
+  if((g.wc&&car.st>0)||(g.stroller&&!g.folded&&car.wc>0)){opeMiss('ベビーカーと車いす（別グループ）',el);return;}
+  let mode=g.anch?((G.ins==='oku'||G.ins==='temae')?G.ins:'free'):G.ins;   // ベビーカー・車いすのグループも奥／手前の指示に従う
+  let p=null, wantOk=null;
+  if(g.want!=null){ p=findSeat(car,g,mode,g.want); wantOk=!!p; }
+  if(!p && (mode==='oku'||mode==='temae')){
+    p=findSeat(car,g,mode);
+    if(!p){toast(`${mode==='oku'?'奥側':'手前側'}（${benchName(rowOf(mode))}）に空きがありません`);return;}
+  }
+  if(!p) p=findSeat(car,g,mode);
+  if(!p && g.noSplit && !g.anch){
+    // 背中合わせなら座れるのに、グループで並んで座ろうとしている
+    const ok2=findSeat(car,Object.assign({},g,{noSplit:false}),'free');
+    if(ok2){
+      G.stuck=true;
+      sayGuest('みんなで並んで座りたいんですけど…（明らかに入らない）');
+      $('sheetStuck').classList.add('on');
+      return;
+    }
+  }
+  if(!p){
+    if(g.anch){miss('連結部の横の席が空いていません',30,el);}
+    else if(heads(car)+g.size>CARCAP){toast('定員オーバーになります');}
+    else {G.noRoom=true; sayGuest(`（${g.size}名分の場所が少し足りない）`,true); toast('あと少し入りません → 🙏詰めてもらう／後ろの方に聞く');}
+    return;
+  }
+  if(wantOk===true){ add(5,el); setTimeout(()=>sayGuest('やった、こっち側に座れた！'),700); }
+  else if(wantOk===false) setTimeout(()=>sayGuest('（希望の側には座れなかった…）',true),700);
+  if(hasDrink(g)) opeMiss('フタなし飲み物を持ち込ませた',el);
+  const entBefore=entrance(car), topBefore=rowDoor(car,0);
+  g.boardDoor = p.length ? rowDoor(car,p[0].r) : 'coup';
+  put(car,g,p);
+  if(g.wc) car.wc++; car.st+=stN(g);
+  G.stats.counted++;
+  if(VS) vsPush({heads:heads(car)});
+  (G.order=G.order||[]).push({n:g.size, st:stN(g), wc:!!g.wc, fold:!!(g.stroller&&g.folded), called:!!g.called, late:!!g.waited});
+  let line='どうぞ、ご乗車ください！';
+  if(g.anch) line=`${entBefore==='end'?'（2台目なので連結部の入口から）':''}${g.wc&&g.stroller?'車いすとベビーカー':g.wc?'車いす':g.nSt===2?'ベビーカー2台':'ベビーカー'}は連結部のスペースに止めて、真横のお席へどうぞ`;
+  else if(entBefore==='end') line='車両の端の入口からどうぞ！';
+  sayCast(line);
+  if(entBefore==='coup'&&entrance(car)==='coup'&&topBefore==='coup'&&rowDoor(car,0)==='end') setTimeout(()=>toast('奥（上）へは車両の端の入口から'),600);
+  if(entBefore==='coup'&&entrance(car)==='end') setTimeout(()=>toast('ここからは車両の端の入口から'),600);
+  render(); G.noRoom=false;
+  $('group').className='group walkout'; G.cur=null; G.stuck=false; $('sheetStuck').classList.remove('on');
+  setTimeout(nextLoad,LV[lv].walk);
+};
+// 車内の皆さまに詰めていただく：すき間をなくし、少しずつ肩を寄せてもらって（1回だけ幅が約1割せまくなる）、入口から遠い側へ寄せる
+const SQ=0.94;   // 詰めてもらうと、すき間がなくなり、少しずつ肩を寄せてくれる（大人だけで21人はそれでも無理）
+function squeeze(){
+  if(G.phase!=='load'||!G.car) return;
+  const car=G.car, before=freeReach(car);
+  for(const id in car.groups){ const g=car.groups[id].g; if(g.anch||g.squeezed) continue; g.squeezed=true;
+    for(const sg of car.groups[id].segs) sg.len=Math.max(1,Math.ceil(sg.len*SQ)); }
+  for(let r=0;r<2;r++){
+    const list=[]; for(const id in car.groups) for(const sg of car.groups[id].segs) if(sg.r===r) list.push({sg,id:+id,anch:car.groups[id].g.anch});
+    const row=car.rows[r]; row.fill(null);
+    // ベビーカー・車いすのグループは連結部の横のまま
+    let lo=0; list.filter(x=>x.anch).sort((a,b)=>a.sg.s-b.sg.s).forEach(x=>{ x.sg.s=lo; lo+=x.sg.len; });
+    const rest=list.filter(x=>!x.anch);
+    if(rowDoor(car,r)==='coup'){ let hi=CELLS; rest.sort((a,b)=>b.sg.s-a.sg.s).forEach(x=>{ hi-=x.sg.len; x.sg.s=hi; }); }   // 連結部から入る → 車両の端の方へ寄せる
+    else { rest.sort((a,b)=>a.sg.s-b.sg.s).forEach(x=>{ x.sg.s=lo; lo+=x.sg.len; }); }                                        // 車両の端から入る → 連結部の方へ寄せる
+    for(const x of list) for(let i=x.sg.s;i<x.sg.s+x.sg.len&&i<CELLS;i++) row[i]=x.id;
+  }
+  for(const id in car.groups){ const x=car.groups[id]; x.pos=Math.min(...x.segs.map(q=>q.s)); }
+  const gained=freeReach(car)-before;
+  sayCast('お手数ですが、皆さま少しずつお詰めいただけますでしょうか？');
+  G.t+=4; G.noRoom=false; render();
+  setTimeout(()=>sayGuest(gained>0?'（車内のゲストが少しずつ詰めてくれた）':'（これ以上は詰められない…）',true),700);
+}
+function freeReach(car){ let n=0; for(let r=0;r<2;r++){ const R=reach(car.rows[r],rowDoor(car,r)); if(R) n+=R.L; } return n; }
+function shift(dir){ // 選んだグループに、左右にずれてもらう
+  if(G.phase!=='load') return false;
+  const x=G.car.groups[G.sel];
+  if(G.sel==null||!x){toast('車内のグループをタップして選ぼう');return false;}
+  if(x.g.anch){toast('ベビーカー・車いすはそのままでOK');return false;}
+  const toHi = (dir==='R') === (pos!=='front');   // 画面の左右 → ベンチの向き
+  let moved=false;
+  const segs=x.segs.slice().sort((a,b)=>toHi?b.s-a.s:a.s-b.s);
+  for(const sg of segs){
+    const row=G.car.rows[sg.r];
+    for(let i=sg.s;i<sg.s+sg.len;i++) row[i]=null;
+    let ns=sg.s;
+    if(toHi){ while(ns+sg.len<CELLS && row[ns+sg.len]===null) ns++; }
+    else { while(ns>0 && row[ns-1]===null) ns--; }
+    if(ns!==sg.s) moved=true;
+    sg.s=ns; for(let i=ns;i<ns+sg.len;i++) row[i]=x.g.id;
+  }
+  x.pos=Math.min(...x.segs.map(q=>q.s));
+  sayCast(`すみません、もう少し${dir==='L'?'左':'右'}に行けますか？`);
+  G.t+=2; render();
+  setTimeout(()=>sayGuest(moved?'あ、はーい！':'（もうずれられない）',!moved),500);
+  return moved;
+}
+$('bSqueeze').onclick=squeeze;
+$('bFold').onclick=()=>{ if(G.phase==='load'&&G.cur) askFold(G.cur); };
+$('bNextWc').onclick=()=>{ const g=G.cur; if(G.phase!=='load'||!g||g.foldAsked) return; g.foldAsked=true;
+  sayCast(`申し訳ございません、こちらの電車は車いす（ベビーカー）がいっぱいのため、${tripName(laterTrip(g))}でご案内いたします。`);
+  setTimeout(()=>nextTrainFor(g,'わかりました、待ちます'),1000); };
+// 選んだグループに、反対側のベンチへ移ってもらう（反対側の入口から届く空きに座る）
+function moveOther(){
+  if(G.phase!=='load') return;
+  const x=G.car.groups[G.sel];
+  if(G.sel==null||!x){toast('車内のグループをタップして選ぼう');return;}
+  const g=x.g, from=x.segs.length?x.segs.map(q=>q.r):[g.spaceRow??1], to=from.includes(0)&&from.includes(1)?null:1-from[0];
+  sayCast('恐れ入ります、反対側のベンチへお移りいただけますか？'); G.t+=3;
+  if(to==null){ setTimeout(()=>sayGuest('（もう両方のベンチに分かれて座っている）',true),500); return; }
+  const old=x.segs.map(q=>Object.assign({},q)), oldPos=x.pos;
+  remove(G.car,g.id);
+  const p=findSeat0(G.car,g,'row',to);
+  if(p&&(p.length||g.anch)){ put(G.car,g,p); render(); setTimeout(()=>sayGuest(g.anch?`はーい、${g.wc?'車いす':'ベビーカー'}ごと反対側に移りますね！`:'はーい、移りますね！'),500); }   // ベビーカー・車いすのグループは、連結部スペースの反対側へ
+  else { put(G.car,g,old); G.car.groups[g.id].pos=oldPos; render(); setTimeout(()=>sayGuest('（反対側には座れる場所がない…）',true),500); }
+}
+$('bOther').onclick=moveOther;
+$('bShiftL').onclick=()=>shift('L'); $('bShiftR').onclick=()=>shift('R');
+function stuckShift(dir){
+  if(!G.stuck||!G.cur) return;
+  if(G.sel==null||!G.car.groups[G.sel]){toast('車内のグループをタップして選ぼう');return;}
+  shift(dir);
+  setTimeout(()=>{ if(G.stuck&&G.cur){ const p=findSeat(G.car,G.cur,'free'); if(p){ $('bGo').onclick(); } else sayGuest('（まだ並んでは座れない…）',true); } },900);
+}
+$('sLeft').onclick=()=>stuckShift('L'); $('sRight').onclick=()=>stuckShift('R');
+$('sBack').onclick=()=>{
+  if(!G.stuck||!G.cur) return;
+  sayCast('恐れ入りますが、背中合わせでお願いします');
+  G.cur.noSplit=false; G.t+=2;
+  setTimeout(()=>{ sayGuest('あ、わかりました〜'); setTimeout(()=>$('bGo').onclick(),500); },500);
+};
+$('sClose').onclick=()=>$('sheetStuck').classList.remove('on');
+const hasDrink=g=>!!(g&&g.people.some(p=>p.drink));
+$('bDrink').onclick=()=>{
+  if(G.phase!=='load'||!G.cur) return;
+  const g=G.cur;
+  if(!hasDrink(g)){ if(g.people.some(p=>p.lid)){ sayCast('お飲み物は…'); setTimeout(()=>sayGuest('フタ付きです！'),500); G.t+=1; } else toast('フタなし飲み物の人はいません'); return;}
+  if(g.drinkAsked) return; g.drinkAsked=true;
+  sayCast('恐れ入ります、フタのないお飲み物はお持ち込みいただけません。お飲みいただくか、捨てていただくことはできますか？');
+  setTimeout(()=>{
+    if(G.cur!==g||G.phase!=='load') return;
+    const r=Math.random();
+    if(r<.5){ sayGuest('あ、すみません！飲み切ります…（ごくごく）'); G.t+=3; setTimeout(()=>{ g.people.forEach(p=>p.drink=false); if(G.cur===g){sayGuest('飲み終わりました！'); renderInfo(g);} },1800); }
+    else if(r<.9){ sayGuest('じゃあ、捨ててきます！'); G.t+=4; setTimeout(()=>{ g.people.forEach(p=>p.drink=false); if(G.cur===g){sayGuest('捨ててきました！'); renderInfo(g);} },2200); }
+    else { sayGuest('まだ飲みたいので、飲み切ってから次の電車にします'); setTimeout(()=>{ if(G.cur!==g||G.phase!=='load')return; g.people.forEach(p=>p.drink=false); carryPush(g); G.cur=null; setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk); },1000); }
+  },900);
+};
+$('bAside').onclick=()=>{
+  if(G.phase!=='load') return;
+  if(G.cur&&G.cur.anch){
+    sayCast('ベビーカーを置く位置が入口入ってすぐになるので、先に後ろの方をご案内させてください');
+    G.cur.waited=true; G.aside.push(G.cur); G.cur=null;
+    $('group').className='group walkout'; drawQueue();
+    setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk);
+    return;
+  }
+  toast('ゲート前にベビーカー・車いすはいません');
+};
+// 横で待ってもらった方を、好きなタイミングで呼ぶ（ふつうのゲスト → ベビーカー → ふつうのゲスト、もOK）
+$('bRecall').onclick=()=>{
+  if(G.phase!=='load') return;
+  if(G.aside.length){
+    if(G.cur) G.queue.unshift(G.cur);   // ゲート前の方は入れ替えず、そのまま列の先頭で待ってもらう
+    // ボタン1回でご乗車：人数はもう伺っているのでカウンターに足して、そのまま「どうぞ」（席の指示は今選んでいるもの）
+    const g=G.cur=G.aside.shift(); g.asked=true; g.askedOnce=true;
+    G.countAtAsk=G.count; G.count=Math.min(30,G.count+g.size); updCount();
+    drawGroup(g,'walkin','queue'); drawQueue();
+    sayCast(`お待たせいたしました！${g.wc?'車いす':'ベビーカー'}のお客様、どうぞ`);
+    if(hasDrink(g)&&!g.drinkAsked){ toast('🥤 フタなし飲み物があります'); return; }   // 飲み物のお願いが先
+    setTimeout(()=>{ if(G.cur===g&&G.phase==='load') $('bGo').onclick(); },350);
+    return;
+  }
+  toast('待機中の方はいません');
+};
+$('bHold').onclick=()=>{
+  if(G.phase!=='load'||!G.cur) return;
+  if(G.cur.want!=null && !G.cur.offered){
+    G.cur.offered=true;
+    sayCast('申し訳ございません、今の電車ではご希望の側が難しく…次の電車であればご希望通りにご案内できますが、いかがなさいますか？');
+    const g=G.cur;
+    setTimeout(()=>{
+      if(G.cur!==g) return;
+      if(Math.random()<0.55){
+        sayGuest('じゃあ、次の電車で待ちます！');
+        setTimeout(()=>{ if(G.cur!==g||G.phase!=='load') return; carryPush(g); G.cur=null; $('group').className='group walkout'; setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk); },700);
+      } else { g.want=null; sayGuest('どこでも大丈夫です、今ので乗ります！'); updHold(); }
+    },700);
+    return;
+  }
+  { const t=carryPush(G.cur); sayCast(`申し訳ございません、${tripName(t)}でご案内いたします。こちらで少々お待ちください`); }
+  G.cur=null;
+  $('group').className='group walkout';
+  setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk);
+};
+// ---- 状況に合わせてボタンを出し入れ／次にやることを光らせる ----
+function uiTick(){
+  if(!G||!$('sGame').classList.contains('on')) return;
+  const ph=G.phase, cur=G.cur, sel=G.sel!=null&&G.car&&G.car.groups[G.sel];
+  const show=(id,on)=>$(id).classList.toggle('show',!!on);
+  show('ctxShift', ph==='load'&&sel);
+  show('bOther', ph==='load'&&sel&&!!G.car.groups[G.sel]);
+  show('bSqueeze', ph==='load'&&G.car&&!!G.noRoom);
+  const ol=ph==='load'&&cur&&!cur.foldAsked&&overLimit(cur);
+  show('bFold', ol==='st'); show('bNextWc', ol==='wc');
+  show('bAside', ph==='load'&&cur&&cur.anch&&!cur.waited&&!ol);
+  show('bRecall', ph==='load'&&G.aside&&G.aside.length);
+  show('bDrink', ph==='load'&&cur&&cur.asked&&hasDrink(cur)&&!cur.drinkAsked);
+  $('iAround').disabled=!(G.car&&spaceRows(G.car).size>0);
+  // 次にやること
+  document.querySelectorAll('.nudge').forEach(e=>e.classList.remove('nudge'));
+  if(LV[lv].hints===false) return;
+  let t=null;
+  const gb=i=>document.querySelector(`#platform .gate[data-g="${i}"]`);
+  if(ph==='unload'){ const ex=G.gates.length-1;
+    if(G.gates[ex]!=='open') t=gb(ex);
+    else if(!G.called) t=$('bCallOut');
+    else if($('bExitL').style.display!=='none'&&((G.fw&&G.fw.length)||(G.cur&&(G.cur.stroller||G.cur.wc)))) t=$('bExitL');
+    else if(!G.unloadList.length&&G.gates[0]!=='open') t=gb(0); }
+  else if(ph==='load'&&cur){
+    if(!cur.asked) t=$('bAsk');
+    else if(hasDrink(cur)&&!cur.drinkAsked) t=$('bDrink');
+    else if(G.noRoom) t=$('bSqueeze');
+    else if(!cur.foldAsked&&overLimit(cur)) t=overLimit(cur)==='st'?$('bFold'):$('bNextWc');
+    else if(cur.anch&&G.queue.some(q=>!q.anch)&&!cur.waited) t=$('bAside');
+    else if(G.count===G.countAtAsk) t=$('bPlus');
+    else t=$('bGo'); }
+  else if(ph==='gate'){ const nx=G.gates.findIndex(x=>x!=='ok'); t = nx<0 ? $('bThumb') : (lv===0?gb(nx):null); }
+  if(t) t.classList.add('nudge');
+}
+setInterval(uiTick,250);
+$('bMore').onclick=()=>$('sheetMore').classList.add('on');
+$('bMoreX').onclick=()=>$('sheetMore').classList.remove('on');
+$('iHold').onclick=()=>$('bHold').onclick();   // ⋯を開かなくても押せる
+['bCall','bHold'].forEach(id=>$(id).addEventListener('click',()=>$('sheetMore').classList.remove('on')));
+let showLbl=false;
+$('bLbl').onclick=()=>{showLbl=!showLbl;$('bLbl').textContent=showLbl?'🏷 名前を隠す':'🏷 名前';};
+window.__showLbl=()=>showLbl;
+function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
+function updHold(){ const b=$('bHold'); if(!b) return; b.innerHTML = (G&&G.cur&&G.cur.want!=null&&!G.cur.offered&&G.cur.asked) ? '次の電車なら<br>ご希望通りに' : '次の電車で<br>ご案内'; }
+// 少人数のご案内：人数を指定して呼ぶのではなく、並んでいる方に前から順番に「何名様ですか？」と聞き、乗れそうな人数なら案内する
+let callI=-1;
+function callAsk(){
+  if(G.phase!=='load'||!G.cur){$('sheetCall').classList.remove('on');return;}
+  callI++;
+  const lim=Math.min(6,G.queue.length);
+  while(callI<lim && G.queue[callI].anch) callI++;   // ベビーカー・車いすの方は最後にご案内するので飛ばす
+  if(callI>=lim){ $('callInfo').textContent='これ以上後ろの方には聞けません'; $('bCallGo').disabled=true; $('bCallNext').disabled=true; return; }
+  const g=G.queue[callI]; G.t+=2;
+  const pos=['すぐ後ろ','2組うしろ','3組うしろ','4組うしろ','5組うしろ','6組うしろ'][callI]||'うしろ';
+  sayCast(callI===0?'後ろの方、何名様ですか？':'さらに後ろの方、何名様ですか？');
+  $('callInfo').textContent='…'; $('bCallGo').disabled=true; $('bCallNext').disabled=true;
+  setTimeout(()=>{
+    if(G.phase!=='load') return;
+    const ans=g.far?`${g.answer}! (${g.answer}名)`:`${g.answer}人です！`;
+    sayGuest(ans); $('callInfo').innerHTML=`${pos}のグループ：<b>${g.answer}名</b>（車内 ${heads(G.car)}名／定員${CARCAP}名）`;
+    $('bCallGo').disabled=false; $('bCallNext').disabled=false;
+  },600);
+}
+$('bCall').onclick=()=>{if(G.phase!=='load'||!G.cur)return; callI=-1; $('sheetCall').classList.add('on'); callAsk();};
+$('bCallNext').onclick=callAsk;
+$('bCallGo').onclick=()=>{
+  if(G.phase!=='load'||callI<0||callI>=G.queue.length) return;
+  $('sheetCall').classList.remove('on');
+  const g=G.queue.splice(callI,1)[0];
+  G.queue.unshift(G.cur); G.cur=g; g.asked=true; g.called=true; G.countAtAsk=G.count;
+  sayCast('では先にどうぞ、こちらへお進みください');
+  drawGroup(g,'walkin','queue'); drawQueue();
+};
+$('bCallX').onclick=()=>$('sheetCall').classList.remove('on');
+
+
+// ---------- dispatch ----------
+function dispatch(){
+  clearInterval(tick); setPanel(null); G.phase='go'; render();
+  const car=G.car, h=heads(car);
+  const stop=PRAC?0:Math.max(0,G.t-T_X);
+  bell(2); sayDisp('おーらぼー！');
+  $('carwrap').classList.add('away'); E3.depart();
+  let pts=h*10, notes=[];
+  if(h>CARCAP){pts-=200;G.stats.over++;G.stats.ope=(G.stats.ope||0)+1;G.trainOpe.push('オーバーグルーピング（21名超え）');notes.push(['⚠ オペミス：オーバーグルーピング（21名超え）',-200]);}
+  if(G.count!==h){pts-=25;notes.push([`カウンターずれ（${G.count}→${h}名）`,-25]);}
+  else {G.stats.correct++;}
+  if(h>=18&&h<=CARCAP){pts+=50;G.stats.full++;notes.push(['18名以上',50]);}
+  // 満員ボーナス：21人に近いほど大きく加点（定員超過・オペミスの便はなし）
+  { const FB={15:5,16:10,17:20,18:35,19:55,20:80,21:120}; const fb=(h<=CARCAP&&!G.trainOpe.length)?(FB[h]||0):0;
+    if(fb){ pts+=fb; G.stats.fill=(G.stats.fill||0)+fb; notes.push([`満員ボーナス`,fb]); } }
+  // 出発タイミングのボーナス：人数で決まる
+  //  21名ぴったり → 早いほど高い（インターバルより早くてもOK）
+  //  16〜20名     → インターバル（50秒）ぴったりがいちばん高く、前後10秒で0に。人数が多いほど高い
+  //  15名以下     → なし
+  if(!PRAC&&stop===0&&!G.trainOpe.length&&h>=16&&h<=CARCAP){
+    let fb=0, why='';
+    if(h===CARCAP){ fb = G.t<=T_INT ? 60+Math.round((T_INT-G.t)*3) : Math.max(0,Math.round(60-(G.t-T_INT)*6)); why=`21名ぴったり・到着から${Math.round(G.t)}秒で出発`; }
+    else { const M={16:15,17:25,18:35,19:45,20:55}[h]; fb=Math.max(0,Math.round(M-Math.abs(G.t-T_INT)*M/10)); why=`${h}名・到着から${Math.round(G.t)}秒で出発／インターバル${T_INT}秒`; }
+    if(fb>0){ pts+=fb; G.stats.fast=(G.stats.fast||0)+fb; notes.push([`出発タイミング（${Math.round(G.t)}秒）`,fb]); }
+  }
+  if(stop>0){const s=Math.ceil(stop), sp=Math.min(150,s*5);pts-=sp;G.stats.stops++;G.stats.stopSec+=s;notes.push([`踏切停止（${s}秒）`,-sp]);}   // 1秒あたり−5（最大−150）
+  // ベビーカー・車いすの組数と混雑レベルに合わせた加点（ベビーカー2組がいちばん難しい）。オペミスがあった便は加点なし
+  { const o=G.order||[], stG=o.filter(x=>x.st>0).length, tw=o.filter(x=>x.st===2).length, wc=o.filter(x=>x.wc).length;
+    let b=0, why=[];
+    if(stG>=2){b+=60;why.push('ベビーカー2組');} else if(stG===1){b+=20;why.push('ベビーカー1組');}
+    if(tw){b+=30*tw;why.push('2台持ち');}
+    if(wc){b+=25*wc;why.push('車いす');}
+    const mul=[1,1.2,1.5,2][lv]||1;
+    if(b&&!G.trainOpe.length&&h<=CARCAP){ b=Math.round(b*mul); pts+=b; G.stats.bonus+=b; notes.push([`${why.join('・')}（×${mul}）`,b]); }
+    G.log.push({trip:G.trip, order:o.slice(), h, ope:G.trainOpe.length}); }
+  G.score+=pts; G.stats.boarded+=h;
+  $('hScore').textContent=G.score; if(VS) vsPush({trip:G.trip,score:G.score,heads:0});
+  const gNow=G;
+  setTimeout(()=>{
+    if(G!==gNow||G.phase==='quit') return;
+    $('tTitle').textContent=`${G.trip}便目 いってらっしゃい！`;
+    $('tTable').innerHTML=
+      `<tr><td>ご乗車</td><td>${h}/${CARCAP}名</td></tr>`+
+      `<tr><td>カウンター</td><td>${G.count}</td></tr>`+
+      `<tr><td>乗車ポイント</td><td>+${h*10}</td></tr>`+
+      `<tr><td colspan="2" style="text-align:left;font-size:11px">案内した順番：${orderStr((G.log[G.log.length-1]||{}).order||[])}</td></tr>`+
+      notes.map(n=>`<tr><td>${n[0]}</td><td>${n[1]>0?'+':''}${n[1]}</td></tr>`).join('')+
+      G.trainOpe.filter(m=>!m.startsWith('オーバー')).map(m=>`<tr><td style="color:var(--red)">⚠ オペミス：${m}</td><td>−100</td></tr>`).join('')+
+      (G.trainMiss.length?`<tr><td>ミス</td><td>${G.trainMiss.length}回</td></tr>`:'')+
+      `<tr><td>出発</td><td>到着から${Math.round(G.t)}秒</td></tr>`+
+      `<tr><td>スコア</td><td>${G.score}</td></tr>`;
+    $('tTrivia').style.display='none';   // 便の結果はシンプルに（豆知識は出さない）
+    $('bNext').textContent=G.trip>=TRIPS?'シフトの結果を見る':'次の電車を迎える';
+    $('ovTrip').classList.add('on');
+  },2300);
+}
+$('bNext').onclick=()=>{$('ovTrip').classList.remove('on'); if(G.trip>=TRIPS) return end(); G.stopWarned=false; G.loadStarted=false; newTrain();};
+function orderStr(o){ if(!o.length) return '—'; return o.map(x=>(x.wc?'♿':'')+(x.st===2?'👶👶':x.st?'👶':'')+(x.fold?'（たたみ）':'')+x.n+'名').join(' → '); }
+function end(){
+  const s=G.stats;
+  let pts=100 - s.miss*4 - (s.ope||0)*12 - (s.asideMiss||0)*15 - s.over*13 - s.stopSec*0.8 + s.full*3 - (TRIPS-s.correct)*6;
+  const r=pts>=105?'S':pts>=90?'A':pts>=70?'B':'C';
+  $('eRank').textContent=r; $('eScore').textContent=G.score+' pt';
+  $('eTable').innerHTML=
+    `<tr><td>ステーション / ポジション</td><td>${STN[st].short} / ${pos==='front'?'フロント':'リア'}</td></tr>`+
+    `<tr><td>混雑レベル</td><td>${LV[lv].name}</td></tr>`+
+    `<tr><td>ご案内したゲスト</td><td>${s.boarded}名</td></tr>`+
+    `<tr><td>18名以上ご案内できた便</td><td>${s.full}/${TRIPS}</td></tr>`+
+    `<tr><td>カウンターが合っていた便</td><td>${s.correct}/${TRIPS}</td></tr>`+
+    `<tr><td>定員超過</td><td>${s.over}回</td></tr>`+
+    `<tr><td>踏切停止</td><td>${s.stops}回（${s.stopSec}秒）</td></tr>`+
+    `<tr><td>待たせたベビーカー等を次の電車に</td><td>${s.asideMiss||0}組</td></tr>`+
+    `<tr><td style="color:var(--red)">⚠ オペミス</td><td>${s.ope||0}回</td></tr>`+
+    `<tr><td>その他のミス</td><td>${s.miss}回</td></tr>`+
+    `<tr><td>ベビーカー・車いすボーナス</td><td>+${s.bonus||0}</td></tr>`+
+    `<tr><td>満員ボーナス</td><td>+${s.fill||0}</td></tr>`+
+    `<tr><td>出発タイミングボーナス</td><td>+${s.fast||0}</td></tr>`+
+    `<tr><td colspan="2" style="text-align:left;font-weight:700;padding-top:8px">案内した順番</td></tr>`+
+    (G.log||[]).map(l=>`<tr><td colspan="2" style="text-align:left;font-size:11px;line-height:1.5">${l.trip}便目（${l.h}名${l.ope?'・⚠オペミス':''}）：${orderStr(l.order)}</td></tr>`).join('');
+  const cm={S:'完璧！安全で速いローディング。トレーナーも任せられます。',
+            A:'安定したローダー！ベビーカーの席の空け方を工夫すればSも。',
+            B:'いい調子。カウンターは車内の合計、ゲストの申告より自分の目を信じて。',
+            C:'まずはアンロード→入口ゲート→ローディング→ゲートOKの流れを確認しよう。'}[r];
+  $('eComment').innerHTML='🎩 '+cm;
+  if(!PRAC) try{const b=JSON.parse(localStorage.getItem('erw_best3')||'{}');if(!b[lv]||G.score>b[lv]){b[lv]=G.score;localStorage.setItem('erw_best3',JSON.stringify(b));}}catch(e){}
+  $('ovEnd').classList.add('on');
+  $('eSave').textContent='記録を保存中…';
+  if(VS){ vsPush({final:true,score:G.score,rank:r}); vsEndView(); }
+  if(PRAC){ $('eReg').style.display='none'; $('eSave').textContent='🔰 練習モードの記録はランキングに残りません'; }
+  else { LASTREC={name:savedName()||'',score:G.score,rank:r,lv,st,pos,tod,at:Date.now()}; saveLocal(LASTREC);
+  $('bReg').disabled=false; $('eName').value=savedName(); $('eName').style.borderColor='';
+  if(RDB&&RUID){ $('eReg').style.display=''; $('eSave').textContent='📱 この端末に記録しました。名前を入れると、みんなのランキングにも載ります'; }
+  else { $('eReg').style.display='none'; $('eSave').textContent='📱 この端末に記録しました（みんなのランキングには登録できない開き方です）'; } }
+}
+
+// ---------- render ----------
+function render(){
+  const car=G.car, ent=entrance(car);
+  // 座っているゲストを1人ずつ表示（大人＝2マス分、子ども＝1マス分）
+  const dots=[[],[]];
+  for(const x of Object.values(car.groups)){
+    const ppl=x.g.people.filter(p=>p.t!=='wc'); let k=0;
+    for(const sg of x.segs){
+      let c=sg.s;
+      while(k<ppl.length){
+        const u=ppl[k].w||(ppl[k].t==='kid'?2:4);
+        if(c+u>sg.s+sg.len) break;
+        dots[sg.r].push({c:c+u/2, kid:u===1, col:x.g.col, rep:x.g.anch&&c===0});
+        c+=u; k++;
+      }
+    }
+  }
+  const side=pos==='front'?'right':'left';
+  const cells=r=>dots[r].map(d=>`<span class="pp ${d.kid?'kd':'ad'}${d.rep?' rep':''}" style="${side}:${(d.c/CELLS*100).toFixed(2)}%;background:${d.col}"></span>`).join('');
+  let icons=''; for(let k=0;k<car.st;k++) icons+='👶'; for(let k=0;k<car.wc;k++) icons+='♿';
+  const pName=pos==='front'?'フロント車両':'リア車両';
+  $('car').innerHTML=
+    (pos==='front'
+      ? `<span class="lab l">← 車両の端 ${pName}・${SETS[G.set]}</span><span class="lab r">連結部（相方の車両）→</span>`
+      : `<span class="lab l">← 連結部（相方の車両）</span><span class="lab r">${pName}・${SETS[G.set]} 車両の端 →</span>`)+
+    `<div class="inner"><div class="space">${icons||'<span style="opacity:.3">□</span>'}<small>連結部<br>スペース</small></div>`+
+    `<div class="benches"><div class="rowlab"><span>上のベンチ</span></div><div class="row">${cells(0)}</div><div class="backrest"></div><div class="row">${cells(1)}</div><div class="rowlab"><span>下のベンチ（ホーム側）</span></div></div></div>`+
+    `<div class="doors"><span class="door ${ent==='coup'&&G.phase==='load'?'ent':''}">🚪 連結部側の入口</span><span class="door ${ent==='end'&&G.phase==='load'?'ent':''}">車両の端の入口 🚪</span></div>`;
+  $('car').className='car'+(G.phase==='unload'?' unload':'');
+  $('platform').innerHTML=G.gates.map((s,i)=>`<button class="gate ${s==='open'?'open':s==='ok'?'ok':s==='chk'?'chk':''}" data-g="${i}">${i===0?'入口ゲート':i===G.gates.length-1?'出口ゲート':'サポートゲート'}<small>${s==='open'?'開':s==='ok'?'ゲートOK ☝':s==='chk'?'確認中…':'閉'}</small></button>`).join('');
+  $('platform').insertAdjacentHTML('afterbegin','<span style="color:#fff;font-size:9px;font-weight:900;text-align:center;line-height:1.2">🧍<br>ディス<br>パッチャー</span>');
+  $('platform').querySelectorAll('.gate').forEach(b=>b.onclick=()=>gateTap(+b.dataset.g,b));
+  $('hLoad').textContent=`車内 ${heads(car)}名`;
+}
+function mini(html,k){return html.replace(/width="([\d.]+)" height="([\d.]+)"/g,(m,w,h)=>`width="${(w*k).toFixed(1)}" height="${(h*k).toFixed(1)}"`);}
+function drawQueue(){ // うしろに並んでいるゲストを小さく表示
+  const gs=G.queue.slice(0,6).map(g=>`<div class="qg">${mini(g.people.map(personSVG).join('')+(g.stroller?strollerSVG()+(g.nSt===2?strollerSVG():''):''),0.42)}</div>`).join('');
+  const nSt=G.queue.slice(0,10).reduce((a,g)=>a+(g.stroller?(g.nSt||1):0),0), nWc=G.queue.slice(0,10).filter(g=>g.wc).length;
+  $('queue').innerHTML= LV[lv].hints===false ? 'うしろのゲスト：自分の目で確認' : `うしろ ${nSt?'👶'+nSt:''} ${nWc?'♿'+nWc:''}${!nSt&&!nWc?'—':''}`;
+  const a=G.aside||[];
+  $('aside').className='aside'+(a.length?' on':'');
+  $('aside').textContent='横でお待ち：'+a.map(g=>g.wc&&g.stroller?'♿👶':g.wc?'♿':g.nSt===2?'👶👶':'👶').join(' ');
+  updAside();
+}
+function updAside(){
+  const b=$('bAside'); if(!b||!G) return;
+  const a=G.aside||[];
+  b.innerHTML='👶 横で待ってもらう';
+  const r=$('bRecall'); if(r) r.innerHTML=`📣 待機の方を呼ぶ（${a.map(g=>g.wc&&g.stroller?'♿👶':g.wc?'♿':g.nSt===2?'👶👶':'👶').join('')}）`;
+}
+function personSVG(p){
+  if(p.t==='wc') return `<svg width="48" height="64" viewBox="0 0 52 70"><circle cx="20" cy="18" r="8" fill="#f2c9a0"/><path d="M12 16 Q20 6 28 16" fill="#3a2a22"/><rect x="12" y="27" width="16" height="20" rx="6" fill="${p.c}"/><rect x="18" y="42" width="20" height="7" rx="3" fill="${p.c}"/><circle cx="20" cy="56" r="12" fill="none" stroke="#333" stroke-width="3"/><circle cx="42" cy="64" r="4" fill="#333"/></svg>`;
+  const kid=p.t==='kid', s=kid?(0.6+p.h*0.06):(0.86+p.h*0.06);
+  const w=Math.round(34*s), h=Math.round(70*s);
+  const cane='';
+  const hair=kid?'#5a3a2a':'#3a2a22';
+  return `<svg width="${w+(cane?6:0)}" height="${h}" viewBox="0 0 ${34+(cane?6:0)} 70"><circle cx="17" cy="12" r="9" fill="#f2c9a0"/><path d="M8 10 Q17 0 26 10" fill="${hair}"/><rect x="6" y="22" width="22" height="28" rx="9" fill="${p.c}"/><rect x="9" y="47" width="6" height="21" rx="3" fill="#3b3b4a"/><rect x="19" y="47" width="6" height="21" rx="3" fill="#3b3b4a"/>${cane}</svg>`;
+}
+function strollerSVG(){return `<svg width="48" height="46" viewBox="0 0 50 48"><path d="M6 12 Q6 30 22 30 L38 30 L38 18 Q32 8 18 8 Z" fill="#8bb8d8"/><circle cx="30" cy="22" r="6" fill="#f6d2b0"/><path d="M25 21 Q30 14 35 21" fill="#f3e3a0"/><path d="M6 12 Q10 2 22 4" stroke="#6a98bb" stroke-width="5" fill="none"/><path d="M38 18 L46 6" stroke="#555" stroke-width="3"/><rect x="6" y="30" width="32" height="4" fill="#555"/><circle cx="12" cy="41" r="5" fill="#333"/><circle cx="34" cy="41" r="5" fill="#333"/></svg>`;}
+function renderInfo(g){
+  const el=$('ginfo'); if(!el) return;
+  if(!g){ el.innerHTML='<span class="gi-h">ゲート前</span><span class="gi-none">—</span>'; return; }
+  const c=[];   // [種類, アイコン, 文字]
+  if(G.phase!=='unload'&&g.asked&&hasDrink(g)&&!g.drinkFixed) c.push(['warn','🥤','フタなし']);
+  if(g.wc) c.push(['need','♿','車いす']);
+  if(g.stroller) c.push(['need',g.nSt===2?'👶👶':'👶',g.folded?'ベビーカー（たたむ）':g.nSt===2?(g.foldOne?'ベビーカー2台（1台たたむ）':'ベビーカー2台'):'ベビーカー']);
+  if(G.phase!=='unload'&&g.asked&&!hasDrink(g)&&g.people.some(p=>p.lid)) c.push(['ok','🥤','フタ付き']);
+  if(g.intl&&G.phase!=='unload') c.push(['info','🌏','海外']);
+  if(g.held) c.push(['info','⏳','お待たせ中']); else if(g.waited) c.push(['info','⏳','横で待機した方']);
+  const n = G.phase==='unload' ? '' : (g.asked?`<span class="gi-n">${g.answer}名</span>`:'<span class="gi-n q">？名</span>');
+  // 実際にいる人を1人ずつアイコンで（数え直しやすいように）：大人🧑・子ども🧒・赤ちゃん👶・車いすの方♿
+  const ppl=g.people.map(p=>p.t==='wc'?'♿':p.t==='kid'?'<i class="kd">🧒</i>':'🧑').join('')+(g.baby?'<i class="kd">👶</i>'.repeat(g.nSt||1):'');
+  el.innerHTML=`<span class="gi-h"><i style="background:${g.col}"></i>ゲート前</span><span class="gi-ppl" title="実際にいる人">${ppl}</span>${n}`+(c.length?c.map(x=>`<span class="gi ${x[0]}">${x[0]==='warn'?'⚠':x[0]==='ok'?'✓':''}${x[1]} ${x[2]}</span>`).join(''):'<span class="gi-none">特になし</span>');
+}
+function drawGroup(g,anim){
+  const el=$('group');
+  el.className='group '+(anim||'');
+  const n=g.people.length+(g.stroller?(g.nSt||1):0), k=n>=7?0.62:n>=5?0.78:1;
+  el.innerHTML=mini(g.people.map(personSVG).join('')+(g.stroller?strollerSVG()+(g.nSt===2?strollerSVG():''):''),k);
+  void el.offsetWidth; el.className='group';
+  $('tags').innerHTML=''; renderInfo(g);
+  if(G.phase==='unload') sayGuest('（降りるゲスト）',true);
+}
+// ===================================================================
+//  3D表示（外部ライブラリなしの小さなWebGLエンジン）
+// ===================================================================
+const E3=(()=>{
+  let gl=null, cv=null, prog=null, U={}, A={}, GEO={}, W=1, H=1, DPR=1;
+  const ROOT={ch:[],p:[0,0,0],r:[0,0,0],s:[1,1,1],lm:new Float32Array(16),wm:new Float32Array(16),nm:new Float32Array(9),vis:true};
+  let train=null, carObj=null, partner=null, env=null, gatesN=[];
+  const ents=new Map();
+  let sx=1, VP=new Float32Array(16), camMode='over';
+  const cam={eye:[0,8,13],tgt:[0,0.3,1.8],fov:40};
+  let mateGN=[], mate=null, tPrev=0, lastSync=0, trainAnim=null, avatar=null, staff=[], lbls=[], lamps=[];
+  let lighting=null, ready=false, thumbT=0;
+
+  // ---------- 行列 ----------
+  const I16=()=>{const m=new Float32Array(16);m[0]=m[5]=m[10]=m[15]=1;return m;};
+  function mulTo(o,a,b){
+    for(let i=0;i<4;i++){const b0=b[i*4],b1=b[i*4+1],b2=b[i*4+2],b3=b[i*4+3];
+      o[i*4]=a[0]*b0+a[4]*b1+a[8]*b2+a[12]*b3; o[i*4+1]=a[1]*b0+a[5]*b1+a[9]*b2+a[13]*b3;
+      o[i*4+2]=a[2]*b0+a[6]*b1+a[10]*b2+a[14]*b3; o[i*4+3]=a[3]*b0+a[7]*b1+a[11]*b2+a[15]*b3;}
+    return o;}
+  function trsTo(o,p,r,s){ // R = Ry*Rx*Rz
+    const cy=Math.cos(r[1]),sy=Math.sin(r[1]),cx=Math.cos(r[0]),sxx=Math.sin(r[0]),cz=Math.cos(r[2]),sz=Math.sin(r[2]);
+    const m00=cy*cz+sy*sxx*sz, m01=-cy*sz+sy*sxx*cz, m02=sy*cx;
+    const m10=cx*sz,           m11=cx*cz,            m12=-sxx;
+    const m20=-sy*cz+cy*sxx*sz, m21=sy*sz+cy*sxx*cz,  m22=cy*cx;
+    o[0]=m00*s[0];o[1]=m10*s[0];o[2]=m20*s[0];o[3]=0;
+    o[4]=m01*s[1];o[5]=m11*s[1];o[6]=m21*s[1];o[7]=0;
+    o[8]=m02*s[2];o[9]=m12*s[2];o[10]=m22*s[2];o[11]=0;
+    o[12]=p[0];o[13]=p[1];o[14]=p[2];o[15]=1;return o;}
+  function persp(f,asp,n,fa){const t=1/Math.tan(f/2),m=new Float32Array(16);m[0]=t/asp;m[5]=t;m[10]=(fa+n)/(n-fa);m[11]=-1;m[14]=2*fa*n/(n-fa);return m;}
+  function lookAt(e,c,u){
+    let z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]];let l=Math.hypot(...z);z=z.map(v=>v/l);
+    let x=[u[1]*z[2]-u[2]*z[1],u[2]*z[0]-u[0]*z[2],u[0]*z[1]-u[1]*z[0]];l=Math.hypot(...x);x=x.map(v=>v/l);
+    const y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+    const m=new Float32Array(16);
+    m[0]=x[0];m[4]=x[1];m[8]=x[2];m[12]=-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]);
+    m[1]=y[0];m[5]=y[1];m[9]=y[2];m[13]=-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]);
+    m[2]=z[0];m[6]=z[1];m[10]=z[2];m[14]=-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]);m[15]=1;return m;}
+
+  // ---------- 形 ----------
+  function mk(pos,nrm,idx){const g={n:idx.length};
+    g.vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,g.vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);
+    g.nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,g.nb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(nrm),gl.STATIC_DRAW);
+    g.ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,g.ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx),gl.STATIC_DRAW);return g;}
+  function gBox(){const P=[],N=[],I=[];
+    const F=[[[1,0,0],[0,1,0],[0,0,1]],[[-1,0,0],[0,1,0],[0,0,-1]],[[0,1,0],[0,0,1],[1,0,0]],[[0,-1,0],[0,0,-1],[1,0,0]],[[0,0,1],[1,0,0],[0,1,0]],[[0,0,-1],[-1,0,0],[0,1,0]]];
+    for(const [n,u,v] of F){const b=P.length/3;
+      for(const [a,c] of [[-1,-1],[1,-1],[1,1],[-1,1]]){P.push((n[0]+u[0]*a+v[0]*c)*.5,(n[1]+u[1]*a+v[1]*c)*.5,(n[2]+u[2]*a+v[2]*c)*.5);N.push(...n);}
+      // 向きをそろえる
+      const ux=u,vx=v,cr=[ux[1]*vx[2]-ux[2]*vx[1],ux[2]*vx[0]-ux[0]*vx[2],ux[0]*vx[1]-ux[1]*vx[0]];
+      if(cr[0]*n[0]+cr[1]*n[1]+cr[2]*n[2]>0) I.push(b,b+1,b+2,b,b+2,b+3); else I.push(b,b+2,b+1,b,b+3,b+2);}
+    return mk(P,N,I);}
+  function gCyl(seg=14){const P=[],N=[],I=[];
+    for(let i=0;i<=seg;i++){const a=i/seg*Math.PI*2,c=Math.cos(a),s=Math.sin(a);P.push(c,-.5,s,c,.5,s);N.push(c,0,s,c,0,s);}
+    for(let i=0;i<seg;i++){const k=i*2;I.push(k,k+1,k+3,k,k+3,k+2);}
+    for(const y of [-.5,.5]){const b=P.length/3;P.push(0,y,0);N.push(0,Math.sign(y),0);
+      for(let i=0;i<=seg;i++){const a=i/seg*Math.PI*2;P.push(Math.cos(a),y,Math.sin(a));N.push(0,Math.sign(y),0);}
+      for(let i=0;i<seg;i++) y>0? I.push(b,b+i+2,b+i+1):I.push(b,b+i+1,b+i+2);}
+    return mk(P,N,I);}
+  function gSph(seg=16,rg=10){const P=[],N=[],I=[];
+    for(let j=0;j<=rg;j++){const t=j/rg*Math.PI,st=Math.sin(t),ct=Math.cos(t);
+      for(let i=0;i<=seg;i++){const a=i/seg*Math.PI*2;const x=st*Math.cos(a),z=st*Math.sin(a);P.push(x,ct,z);N.push(x,ct,z);}}
+    for(let j=0;j<rg;j++)for(let i=0;i<seg;i++){const a=j*(seg+1)+i,b=a+seg+1;I.push(a,a+1,b,b,a+1,b+1);}
+    return mk(P,N,I);}
+  function gDisc(seg=20){const P=[0,0,0],N=[0,1,0],I=[];
+    for(let i=0;i<=seg;i++){const a=i/seg*Math.PI*2;P.push(Math.cos(a),0,Math.sin(a));N.push(0,1,0);}
+    for(let i=0;i<seg;i++) I.push(0,i+2,i+1);return mk(P,N,I);}
+
+  // ---------- シェーダー ----------
+  const VS=`attribute vec3 aP;attribute vec3 aN;uniform mat4 uVP,uM;uniform mat3 uNM;varying vec3 vN;varying vec3 vW;
+  void main(){vec4 w=uM*vec4(aP,1.);vW=w.xyz;vN=uNM*aN;gl_Position=uVP*w;}`;
+  const FS=`precision mediump float;varying vec3 vN;varying vec3 vW;
+  uniform vec3 uC,uE,uSun,uSunC,uSky,uGnd,uFog,uEye;uniform float uA,uFn,uFf,uSpec;uniform vec3 uLP[4];uniform vec3 uLC[4];
+  void main(){vec3 n=normalize(vN);if(!gl_FrontFacing)n=-n;
+    vec3 amb=mix(uGnd,uSky,n.y*.5+.5);float d=max(dot(n,-uSun),0.);vec3 c=uC*(amb+uSunC*d);
+    for(int i=0;i<4;i++){vec3 L=uLP[i]-vW;float r=length(L);c+=uC*uLC[i]*max(dot(n,L/r),0.)/(1.+r*r*.12);}
+    vec3 V=normalize(uEye-vW);vec3 Hh=normalize(V-uSun);c+=uSunC*pow(max(dot(n,Hh),0.),24.)*uSpec;
+    float rim=pow(1.-max(dot(n,V),0.),3.);c+=amb*rim*.18;
+    c+=uE;float f=clamp((length(uEye-vW)-uFn)/(uFf-uFn),0.,1.);c=mix(c,uFog,f);
+    gl_FragColor=vec4(c,uA);}`;
+  function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o;}
+
+  // ---------- ノード ----------
+  const hex=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255];};
+  function N(g,col,p,s,r,o){const n={g:g?GEO[g]:null,c:col?hex(col):[1,1,1],e:[0,0,0],a:1,spec:.12,p:p||[0,0,0],s:s||[1,1,1],r:r||[0,0,0],ch:[],vis:true,lm:new Float32Array(16),wm:new Float32Array(16),nm:new Float32Array(9)};
+    if(o) Object.assign(n,o); return n;}
+  const G0=()=>N(null);
+  const add=(par,...cs)=>{for(const c of cs){par.ch.push(c);c.par=par;}return par;};
+  const detach=n=>{if(n.par){const i=n.par.ch.indexOf(n);if(i>=0)n.par.ch.splice(i,1);n.par=null;}};
+
+  // ---------- 初期化 ----------
+  function init(canvas){
+    cv=canvas;
+    gl=cv.getContext('webgl',{antialias:true,alpha:true,premultipliedAlpha:false});
+    if(!gl) return false;
+    prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);gl.useProgram(prog);
+    A.P=gl.getAttribLocation(prog,'aP');A.N=gl.getAttribLocation(prog,'aN');
+    for(const u of ['uVP','uM','uNM','uC','uE','uA','uSun','uSunC','uSky','uGnd','uFog','uEye','uFn','uFf','uSpec','uLP','uLC']) U[u]=gl.getUniformLocation(prog,u);
+    gl.enableVertexAttribArray(A.P);gl.enableVertexAttribArray(A.N);
+    GEO.box=gBox();GEO.cyl=gCyl();GEO.cyl8=gCyl(8);GEO.sph=gSph();GEO.sphl=gSph(10,6);GEO.disc=gDisc();
+    gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.frontFace(gl.CCW);
+    gl.disable(gl.CULL_FACE); // 形の向きを気にしない（安全側）
+    let pd=null;
+    cv.addEventListener('pointerdown',ev=>{pd={x:ev.clientX,y:ev.clientY,moved:0};});
+    cv.addEventListener('pointermove',ev=>{ if(!pd) return; const dx=ev.clientX-pd.x; pd.moved+=Math.abs(dx); pd.x=ev.clientX;
+      if(camMode==='fp'){ fpYaw+=dx*.006; } });
+    cv.addEventListener('pointerup',ev=>{ if(pd&&pd.moved<8) onTap(ev); pd=null; });
+    cv.addEventListener('pointercancel',()=>{pd=null;});
+    window.addEventListener('resize',resize);resize();
+    if(window.ResizeObserver){ new ResizeObserver(resize).observe(cv); }
+    ready=true; requestAnimationFrame(frame);
+    return true;
+  }
+  function resize(){if(!cv)return;DPR=Math.min(window.devicePixelRatio||1,2);const r=cv.getBoundingClientRect();W=Math.max(1,r.width);H=Math.max(1,r.height);cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);}
+
+  // ---------- 座標（リア：連結部が左＝-x ／ フロント：連結部が右） ----------
+  const X=xl=>sx*xl;
+  // 車両の長さ：KC倍に縮めている（18人で見た目も満員に）。車両まわりの位置もすべてKC倍
+  const KC=0.68;
+  const CELLW=0.16*KC, BENCH0=-3.2*KC;
+  const seatX=c=>X(BENCH0+c*CELLW);
+  const DOOR={coup:-3.8*KC,end:3.8*KC}, BEND={coup:-3.42*KC,end:3.42*KC};
+  const CARP=-(9.2*KC+0.9), MG=CARP+3.7*KC;   // 相方の車両の中心（連結部に約0.9mの隙間）／相方の入口ゲート
+  const mateXL=()=>gateXL().map(x=>CARP-x);   // 相方の車両のゲート（入口・(サポート)・出口）
+  function gateXL(){return (st==='pd'?[-3.7,0.2,3.7]:[-3.7,3.7]).map(v=>v*KC);}
+  const GATEZ=3.2;
+  // キューライン：入口ゲートから電車と並行にのびる1列のレーン（腰の高さの柵で作る）
+  // ---- キューライン：入口ゲート ← 担当車両の列 ← プレグルーパー（分岐点） ← 1列の本線
+  //      ゲートとキューラインの間はキャストが動ける通路（1列）
+  const PX=CARP/2, CZ=3.6, EXZ=3.52;   // EXZ：出口通路の中心   // PX：連結部（ディスパッチャー）の位置、CZ：キャスト通路の中心
+  const TOPZ=4.3, BOTZ=5.6, JZ=4.95;   // 上の列＝前方（フロント）車両用、下の列＝後方（リア）車両用、分岐点
+  let JX=-8, PZ=JZ;
+  const PLS={};
+  function buildPL(){
+    const mk=pts=>{const cum=[0];for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));return {pts,cum,L:cum[cum.length-1]};};
+    const L=w=>sx*w;   // 画面（world）のx → local
+    // 分岐点は画面の左端。前方車両は常に画面の左側の車両
+    const camX = X(-1.7*KC), jw = camX-5.6;
+    JX=L(jw);
+    const myG=-3.7*KC, mateG=MG;            // local
+    const iAmFront = pos==='front';
+    const laneTo=(gLocal,z)=>[[gLocal,3.95],[gLocal,z],[L(jw+.6),z],[L(jw+.6),JZ],[JX,JZ]];
+    const our = laneTo(myG, iAmFront?TOPZ:BOTZ);
+    const par = laneTo(mateG, iAmFront?BOTZ:TOPZ);
+    const wl=d=>L(jw-d);
+    const main = st==='pd'
+      ? [[JX,JZ],[wl(1.6),JZ],[wl(1.6),7.0],[wl(-9),7.0],[wl(-9),8.2],[wl(30),8.2]]   // ポート：折り返し
+      : [[JX,JZ],[wl(30),JZ]];                                                         // アメリカ：まっすぐ1列
+    PLS.O=mk(our.concat(main.slice(1))); PLS.Olane=mk(our).L; PLS.P=mk(par); PLS.main=main; PLS.our=our; PLS.par=par;
+    PLS.jw=jw;
+  }
+  function plAt(pl,s){const {pts,cum}=pl;s=Math.max(0,Math.min(pl.L,s));for(let i=1;i<pts.length;i++){if(s<=cum[i]+1e-6||i===pts.length-1){const L=(cum[i]-cum[i-1])||1,t=(s-cum[i-1])/L,a=pts[i-1],b=pts[i];return {x:a[0]+(b[0]-a[0])*t,z:a[1]+(b[1]-a[1])*t,fx:a[0]-b[0],fz:a[1]-b[1]};}}}
+  function plVerts(pl,s1,s2){const out=[],{pts,cum}=pl;
+    if(s2<s1){for(let i=pts.length-1;i>=0;i--) if(cum[i]<s1-.01&&cum[i]>s2+.01) out.push(pts[i]);}
+    else{for(let i=0;i<pts.length;i++) if(cum[i]>s1+.01&&cum[i]<s2-.01) out.push(pts[i]);}
+    return out;}
+  function plPath(p1,s1,p2,s2){ // 列にそって歩く道（world座標）
+    let out;
+    if(p1===p2){ out=plVerts(PLS[p1],s1,s2); }
+    else { const j1=p1==='O'?PLS.Olane:PLS.P.L, j2=p2==='O'?PLS.Olane:PLS.P.L; out=plVerts(PLS[p1],s1,j1); out.push([JX,JZ]); out=out.concat(plVerts(PLS[p2],j2,s2)); }
+    const q=plAt(PLS[p2],s2); out.push([q.x,q.z]);
+    return out.map(([x,z])=>[X(x),z]);
+  }
+  // ベビーカー待機スペース：フロントはディスパッチャーの後ろ（2つの入口ゲートの間）、リアは自分の列の横
+  const waitArea=()=> pos==='front' ? {x:(-4.15*KC+MG+.45)/2,z:4.35,w:(-4.15*KC)-(MG+.45),d:.8} : {x:-2.6*KC,z:4.4,w:1.3,d:.9};   // ベビーカー待機スペース（列とつながった待機場）
+
+  // ---------- 環境 ----------
+  function buildEnv(){
+    env=G0();
+    const awf=st==='awf';
+    const rnd=(a,b)=>a+Math.random()*(b-a);
+    // ---- ホームの床：アメリカ＝古い木の板張り／ポート＝グレーのタイル
+    if(awf){
+      add(env,N('box','#938879',[0,-.25,9.6],[40,.5,17]));
+      for(let z=1.45,k=0;z<16;z+=.6,k++) add(env,N('box',k%2?'#968b7e':'#8f8477',[0,.003,z],[40,.006,.57]));
+    } else {
+      add(env,N('box','#a7afb2',[0,-.25,9.6],[40,.5,17]));
+      for(let z=1.8;z<16;z+=1) add(env,N('box','#9da6a9',[0,.004,z],[40,.006,.02]));
+      for(let x=-18;x<=18;x+=1) add(env,N('box','#9da6a9',[x,.004,9.6],[.02,.006,17]));
+    }
+    add(env,N('box','#e9c43a',[0,.006,1.72],[34,.012,.3]));
+    add(env,N('box','#e9c43a',[0,.008,1.25],[34,.016,.1]));
+    for(let i=-17;i<17;i+=.5) add(env,N('box','#1e1e1e',[i,.012,1.25],[.18,.016,.1]));
+    // ---- 線路（高架）
+    // 線路は駅で行き止まり（折り返し運転）。終端に車止め
+    const stopX = sx>0 ? 6.0 : 15.4, tl=stopX+.6+32, tc=(stopX+.6-32)/2;
+    add(env,N('box','#4a4643',[0,-1.05,-.1],[60,.3,2.7]));
+    add(env,N('box','#6b5a4a',[tc,-.92,-.1],[tl,.05,2.0]));
+    for(const z of [-.48,.28]) add(env,N('box','#9a9a9a',[tc,-.84,z],[tl,.06,.06],null,{spec:.6}));
+    for(let i=-30;i<=stopX+.3;i+=1.2) add(env,N('box','#5a4232',[i,-.88,-.1],[.18,.04,1.1]));
+    add(env,N('box','#7a2a22',[stopX+.35,-.55,-.1],[.25,.55,1.6],null,{spec:.3}));
+    for(const z of [-.55,.35]) add(env,N('box','#e8e2d0',[stopX+.2,-.5,z],[.12,.3,.3]),N('box','#c0392b',[stopX+.2,-.5,z],[.13,.1,.31]));
+    const rc=awf?'#2c4236':'#e8eef0';
+    add(env,N('box',rc,[0,.9,-1.75],[60,.06,.06]),N('box',rc,[0,.45,-1.75],[60,.04,.04]));
+    for(let i=-28;i<=28;i+=2) add(env,N('box',rc,[i,.2,-1.75],[.06,1.4,.06]));
+    add(env,N('box',awf?'#6d5a4c':'#8aa3a8',[0,-1.6,-1.75],[60,1.6,.3]));
+    // ---- ゲートの柵：アメリカ＝深緑のフレーム＋金網／ポート＝クリーム色のフレーム＋網目
+    const gx=gateXL().concat(mateXL()).map(X).sort((a,b)=>a-b);
+    const fc=awf?'#2c4236':'#e6e1d3', mc=awf?'#3a3a3a':'#8d8a80';
+    let segs=[], prev=-17;
+    for(const x of gx){segs.push([prev,x-.55]);prev=x+.55;} segs.push([prev,17]);
+    for(const [a,b] of segs){const L=b-a,c=(a+b)/2;
+      add(env,N('box',fc,[c,1.12,GATEZ],[L,.06,.06]),N('box',fc,[c,.15,GATEZ],[L,.05,.05]),N('box',mc,[c,.63,GATEZ],[L,.9,.01],null,{a:awf?.3:.35}));
+      for(let x=a;x<=b+.01;x+=Math.max(.6,L/Math.max(1,Math.round(L/1.2)))) add(env,N('box',fc,[x,.58,GATEZ],[.07,1.18,.07]));}
+    // ---- キューライン（腰の高さの柵）：本線 → プレグルーパー → 2つの列 → 各車両の入口ゲート
+    buildPL();
+    { let rail;
+      if(awf){ // 深緑のパイプ柵（玉付きの支柱）
+        const sc='#2c4236';
+        rail=(x1,z1,x2,z2)=>{const lx=Math.abs(x2-x1),lz=Math.abs(z2-z1),cx=X((x1+x2)/2),cz=(z1+z2)/2,len=Math.max(lx,lz),rz=lz>lx?[Math.PI/2,0,0]:[0,0,Math.PI/2];
+          for(const y of [.9,.48]) add(env,N('cyl8',sc,[cx,y,cz],[.035,len,.035],rz,{spec:.5}));
+          const n=Math.max(1,Math.round(len/1.4));for(let k=0;k<=n;k++){const px=X(x1+(x2-x1)*k/n),pz=z1+(z2-z1)*k/n;
+            add(env,N('cyl8',sc,[px,.46,pz],[.04,.92,.04],null,{spec:.5}),N('sph',sc,[px,.93,pz],[.06,.06,.06],null,{spec:.6}));}};
+      } else { // シルバーの縦格子の柵
+        const sc='#c9ced1';
+        rail=(x1,z1,x2,z2)=>{const lx=Math.abs(x2-x1),lz=Math.abs(z2-z1),cx=X((x1+x2)/2),cz=(z1+z2)/2,len=Math.max(lx,lz);
+          add(env,N('box',sc,[cx,.98,cz],[lx||.06,.06,lz||.06],null,{spec:.7}),N('box','#dfe3e5',[cx,.55,cz],[lx||.01,.82,lz||.01],null,{a:.28}));
+          const n=Math.max(1,Math.round(len/1.2));for(let k=0;k<=n;k++){const px=X(x1+(x2-x1)*k/n),pz=z1+(z2-z1)*k/n;
+            add(env,N('box',sc,[px,.5,pz],[.06,1.0,.06],null,{spec:.6}));}};
+      }
+      const lane=(pts0,clip,skip)=>{ // 列の両側に柵（曲がり角は内側・外側でつなぎ、通り道をふさがない）
+        const pts=pts0.map(p=>p.slice()); const e=.45;
+        if(clip){const n=pts.length,[x1,z1]=pts[n-2],[x2,z2]=pts[n-1];const dx=Math.sign(x2-x1),dz=Math.sign(z2-z1);pts[n-1]=[x1+dx*Math.min(Math.abs(x2-x1),clip),z1+dz*Math.min(Math.abs(z2-z1),clip)];}
+        const nrm=i=>{const [x1,z1]=pts[i],[x2,z2]=pts[i+1],L=Math.hypot(x2-x1,z2-z1)||1;return [-(z2-z1)/L*e,(x2-x1)/L*e];};
+        for(const sg of [1,-1]){
+          const off=[];
+          for(let i=0;i<pts.length;i++){
+            const np=i>0?nrm(i-1):null, nn=i<pts.length-1?nrm(i):null;
+            let ox,oz;
+            if(!np){ox=nn[0];oz=nn[1];} else if(!nn){ox=np[0];oz=np[1];}
+            else if(Math.abs(np[0]-nn[0])<1e-6&&Math.abs(np[1]-nn[1])<1e-6){ox=np[0];oz=np[1];}
+            else {ox=np[0]+nn[0];oz=np[1]+nn[1];}   // 90°の角：内側も外側も角でぴったりつなぐ
+            off.push([pts[i][0]+sg*ox,pts[i][1]+sg*oz]);
+          }
+          for(let i=1;i<off.length;i++){ if(skip&&skip(off[i-1],off[i])) continue; rail(off[i-1][0],off[i-1][1],off[i][0],off[i][1]); }
+        }
+        for(let i=1;i<pts.length;i++){const [x1,z1]=pts[i-1],[x2,z2]=pts[i];   // 床の色
+          if(Math.abs(z2-z1)<.01){const a=Math.min(x1,x2),b=Math.max(x1,x2);add(env,N('box',awf?'#a59a8a':'#b9c2c5',[X((a+b)/2),.004,z1],[b-a+.9,.006,.9]));}
+          else{const a=Math.min(z1,z2),b=Math.max(z1,z2);add(env,N('box',awf?'#a59a8a':'#b9c2c5',[X(x1),.004,(a+b)/2],[.9,.006,b-a]));}}
+      };
+      // フロント：ベビーカー待機場は、自分の列の曲がり角のとなり（ディスパッチャーの後ろ）。列とのあいだの柵はなくしてつなげる
+      const wa=waitArea(), pocket = pos==='front';
+      const wx1=wa.x-wa.w/2, wx2=wa.x+wa.w/2;
+      const edge = pocket ? wx2 : wx1;   // 列のどちら側に待機場がつながるか
+      lane(PLS.our.slice(0,3), 0, (a,b)=>Math.abs(a[0]-b[0])<.01 && Math.abs(a[0]-edge)<.06 && Math.min(a[1],b[1])<wa.z+wa.d/2-.05);
+      if(!pocket){ const zc=Math.max(...PLS.our.slice(0,2).map(p=>p[1]))+.45;
+        rail(wx1,wa.z-wa.d/2,wx2,wa.z-wa.d/2); rail(wx1,wa.z+wa.d/2,wx2,wa.z+wa.d/2); rail(wx2,wa.z-wa.d/2,wx2,wa.z+wa.d/2);
+        rail(wx1,wa.z+wa.d/2,wx1,zc); }
+      if(pocket){
+        rail(wx1,wa.z-wa.d/2,wx2,wa.z-wa.d/2);   // ディスパッチャーとのあいだの柵
+        rail(wx1,wa.z+wa.d/2,wx2,wa.z+wa.d/2);   // うしろ（列のあいだ）を閉じる柵
+      }
+      // 出口通路：ゲートの柵と、この柵のあいだを通って出ていく
+      { const x0 = (pos==='front' ? 4.15 : (st==='pd' ? -0.6 : 2.9))*KC; rail(x0,3.82,30,3.82); }
+      lane(PLS.main,14);
+    }
+    // ---- ベビーカー待機スペース
+    { const w=waitArea();
+      add(env,N('box','#6aa6d6',[X(w.x),.008,w.z],[w.w,.008,w.d],null,{a:.4}));
+      for(const [xx,zz,ww,dd] of [[w.x,w.z-w.d/2,w.w,.05],[w.x,w.z+w.d/2,w.w,.05],[w.x-w.w/2,w.z,.05,w.d],[w.x+w.w/2,w.z,.05,w.d]]) add(env,N('box','#ffffff',[X(xx),.012,zz],[ww,.01,dd])); }
+    // ---- ディスパッチャーの操作盤（キャスト通路の、連結部の前）
+    { const px=X(PX), pz=3.5;
+      add(env,N('box','#3b2a20',[px,.5,pz],[.95,1.0,.42],null,{spec:.3}),N('box','#c9a24a',[px,1.0,pz],[1.0,.04,.46],null,{spec:.7}));
+      add(env,N('box','#2a2f36',[px,1.08,pz+.04],[.88,.1,.36],[-.35,0,0],{spec:.5}));
+      const bc=['#e74c3c','#2ecc71','#f1c40f','#3498db','#ecf0f1'];
+      for(let i=0;i<5;i++){const b=N('cyl8',bc[i],[px+(i-2)*.15,1.15,pz+.06],[.035,.03,.035],[-.35,0,0],{spec:.6});b.isLamp=true;add(env,b);}
+      const scr=N('box','#3d8bd6',[px,1.28,pz-.1],[.4,.24,.03],[-.2,0,0]);scr.isLamp=true;add(env,scr);
+    }
+    // ---- 照明（夜の明かりの位置だけ。柱や屋根は見やすさのため置かない）
+    lamps=[];
+    for(const xl of [-5.5,-.5,4.5]) lamps.push({n:null,p:[X(xl),3.4,4.6]});
+    lamps=lamps.slice(0,3);
+    add(ROOT,env);
+  }
+
+  // ---------- 車両 ----------
+  function buildCar(sg){ // sg: 連結部が -x 側なら 1、+x 側なら -1（写真を参考にした外装・内装）
+    const c=G0(), x=v=>sg*v;
+    const red='#b0222a', dred='#8a1a20', navy='#1f3a7a', gold='#d4ad4f', brass='#c9a24a', wood='#c67a34', dwood='#8a5226', glass='#cfe6f2', cream='#f3e7c4';
+    // 床・下回り
+    add(c,N('box','#6d6f72',[0,-.04,0],[9.2,.18,2.3]));
+    add(c,N('box',navy,[0,-.3,0],[9.15,.38,2.34]));
+    for(const z of [1.17,-1.17]) add(c,N('box',gold,[0,-.1,z],[9.15,.03,.02],null,{spec:.6}));
+    // 側面の腰板（赤）＋クリームの帯＋金のライン。ホーム側はドア部分をあける
+    const sideLow=(z,gaps)=>{for(const [a,b] of gaps){const w=b-a,cx=x((a+b)/2);
+        add(c,N('box',red,[cx,.5,z],[w,.9,.06],null,{spec:.35}));}};
+    sideLow(1.13,[[-4.6,-4.25],[-3.35,3.35],[4.25,4.6]]);
+    sideLow(-1.13,[[-4.6,4.6]]);
+    for(const z of [1.165,-1.165]){
+      add(c,N('box',cream,[x(.6),.42,z],[4.6,.22,.02]));
+      add(c,N('box',gold,[0,.93,z],[9.2,.04,.02],null,{spec:.6}),N('box',gold,[0,.08,z],[9.2,.03,.02],null,{spec:.6}));
+      add(c,N('box',navy,[0,.02,z],[9.2,.08,.025]));
+      // 窓（ガラス）と柱、上の帯
+      add(c,N('box',glass,[0,1.42,z*.99],[9.0,.9,.02],null,{a:.22,spec:.9}));
+      add(c,N('box',red,[0,1.98,z],[9.2,.22,.06],null,{spec:.35}));
+      add(c,N('box','#3a6fb0',[0,2.1,z],[9.2,.03,.02]));
+    }
+    const pil=[-4.58,-4.25,-3.35,-2.4,-1.45,-.5,.45,1.4,2.35,3.35,4.25,4.58];
+    for(const xp of pil) for(const z of [1.13,-1.13]) add(c,N('box',dred,[x(xp),1.42,z],[.08,.95,.08],null,{spec:.3}));
+    // 窓のアーチ風の飾り（金）
+    for(let i=0;i<pil.length-1;i++){const a=pil[i],b=pil[i+1];if(b-a<.6)continue;
+      for(const z of [1.17,-1.17]) add(c,N('cyl8',gold,[x((a+b)/2),1.86,z],[(b-a)/2-.05,.02,.06],[Math.PI/2,0,0],{a:.9}));}
+    // 前後の妻面
+    for(const xe of [-4.6,4.6]){
+      add(c,N('box',red,[x(xe),.5,0],[.08,.9,2.3],null,{spec:.35}),N('box',red,[x(xe),1.98,0],[.08,.22,2.3]));
+      add(c,N('box',glass,[x(xe),1.42,0],[.02,.9,2.2],null,{a:.22,spec:.9}));
+      for(const z of [-.6,0,.6]) add(c,N('box',dred,[x(xe),1.42,z],[.08,.95,.08]));
+      add(c,N('box',navy,[x(xe),.02,0],[.09,.08,2.32]));
+    }
+    // 車両の端（先頭側）の丸い大きなライトとランタン
+    const he=x(4.66);
+    add(c,N('cyl',gold,[he,.55,0],[.32,.04,.32],[0,0,Math.PI/2],{spec:.8}),N('cyl','#2b2b2b',[he+sg*.01,.55,0],[.26,.04,.26],[0,0,Math.PI/2]));
+    const hl=N('sph','#fff3c4',[he+sg*.03,.55,0],[.16,.16,.05]);hl.isLamp=true;add(c,hl);
+    for(const z of [-.85,.85]){add(c,N('box',brass,[he+sg*.04,.6,z],[.12,.22,.12],null,{spec:.7}));const l=N('sph','#4a8ad8',[he+sg*.1,.55,z],[.06,.06,.06]);l.isLamp=true;add(c,l);}
+    // 屋根（上から車内が見えるよう半透明）＋紺のふち＋屋根の上の小さな電球
+    for(const z of [1.2,-1.2]) add(c,N('box',navy,[0,2.2,z],[9.4,.12,.1],null,{spec:.4}));
+    for(const xe of [-4.64,4.64]) add(c,N('box',navy,[x(xe),2.2,0],[.1,.12,2.5]));
+    add(c,N('box','#8c8f94',[0,2.28,0],[9.3,.05,2.4],null,{a:.14}));
+    add(c,N('box','#8c8f94',[0,2.45,0],[7.6,.25,1.2],null,{a:.12}));
+    for(let i=-3;i<=3;i++) for(const z of [-.62,.62]){const b=N('sph','#fff1c8',[i*1.05,2.62,z],[.06,.06,.06]);b.isLamp=true;add(c,b);}
+    // 車内の吊り下げランプ（ガラスの球）
+    for(const xx of [-1.6,1.6]){add(c,N('cyl8','#2a2a2a',[x(xx),2.1,0],[.01,.2,.01]));const g=N('sph',cream,[x(xx),1.92,0],[.2,.15,.2],null,{spec:.6});g.isLamp=true;add(c,g);}
+    // トロリーポール
+    add(c,N('cyl8','#2a2a2a',[x(2.6),2.95,0],[.035,2.4,.035],[0,0,sg*1.05]));
+    // ベンチ：背中合わせ、木の板張り、上に真ちゅうの手すり、青い鋳物の脚
+    for(const z of [-.31,.31]){
+      add(c,N('box',wood,[0,.45,z],[6.5,.07,.48],null,{spec:.35}));
+      for(let k=-2;k<=2;k++) add(c,N('box',dwood,[0,.487,z+k*.09],[6.5,.004,.012]));
+    }
+    add(c,N('box',dwood,[0,.22,0],[6.3,.4,.7]));
+    for(const z of [-.06,.06]) add(c,N('box',wood,[0,.78,z],[6.5,.62,.05],null,{spec:.3}));
+    add(c,N('cyl8',brass,[0,1.13,0],[.03,6.5,.03],[0,0,Math.PI/2],{spec:.9}));
+    for(const xp of [-3.15,-1.6,0,1.6,3.15]) add(c,N('cyl8',brass,[x(xp),1.0,0],[.025,.28,.025],null,{spec:.9}));
+    for(const xe of [-3.28,3.28]) add(c,N('box','#2f5f9e',[x(xe),.38,0],[.06,.76,1.0],null,{spec:.4}));
+    // ホーム側のドア（到着中は開いていて、出発前に閉まる）
+    c.doors=[];
+    for(const [xc,xo] of [[-3.8,-2.9],[3.8,2.9]]){
+      const d=G0(); d.p=[x(xo),0,1.2];
+      add(d,N('box',red,[0,.5,0],[.86,.9,.04],null,{spec:.35}),N('box',glass,[0,1.42,0],[.86,.9,.02],null,{a:.3,spec:.9}),
+        N('box',gold,[0,.93,.025],[.86,.04,.01]),N('box',dred,[sg*(xc<0?.41:-.41),1.0,.03],[.05,1.8,.05]));
+      add(c,d); c.doors.push({n:d,closed:x(xc),open:x(xo)});
+    }
+    // ホーム側のドアの真ちゅうの手すり
+    for(const xd of [-4.25,-3.35,3.35,4.25]) add(c,N('cyl8',brass,[x(xd),.95,1.16],[.022,1.1,.022],null,{spec:.9}));
+    // 連結部スペース
+    add(c,N('box','#7a7c80',[x(-3.95),.052,0],[1.1,.01,2.1]));
+    // 台車・車輪
+    for(const xb of [-2.9,2.9]){add(c,N('box','#1d1d1d',[x(xb),-.62,0],[1.7,.25,1.5]));
+      for(const dx of [-.5,.5]) for(const z of [-.42,.42]) add(c,N('cyl','#2b2b2b',[x(xb+dx),-.62,z],[.3,.1,.3],[Math.PI/2,0,0],{spec:.5}));}
+    // 車内を見やすく：止まっている間は、屋根・天井のランプ・手前側の上半分・窓ガラスを出さない（入線中・出発時は全部見せる）
+    c.xray=[]; const hide=n=>{ c.xray.push(n); n.vis=false; };
+    for(const n of c.ch){
+      const y=n.p[1], z=n.p[2];
+      if(y>=1.8 && Math.abs(z)<1.3 && n.c && (n.a<1||n.isLamp) && !(n.g===GEO.cyl8&&y>2.5)) hide(n);      // 屋根の板・屋根の電球・吊り下げランプ
+      else if(y>=1.0 && z>0.9) hide(n);                                                                   // 手前側の上半分（柱・飾り・帯）
+      else if(n.a<1 && !n.isLamp && n.g!==GEO.cyl8) hide(n);                                              // 半透明の窓ガラス（壁）
+    }
+    for(const d of c.doors||[]) for(const m of d.n.ch) if(m.a<1) hide(m);                                // ドアのガラス
+    for(const n of c.ch) if(n.g===GEO.cyl8&&Math.abs(n.p[1]-2.1)<.01&&Math.abs(n.p[2])<.01) hide(n);      // ランプのひも
+    return c;
+  }
+
+  // ---------- 人 ----------
+  const SKIN=['#f2c9a0','#e8b98f','#d9a47c','#f5d3b3','#c68f67'];
+  const HAIR=['#2b211c','#3a2a22','#5a3a2a','#1a1a1a','#8a6a4a','#bbbbbb'];
+  const PANTS=['#2f3a52','#3b3b4a','#5a4a3a','#1f2a3a','#6b6b6b','#3a5a6b'];
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  function makePerson(p,o={}){
+    const k=p.t==='kid'?(0.5+((p.age||7)-3)/9*.27):p.teen?0.93:(0.94+(p.h||0)*0.035);
+    const wf=p.b==='slim'?.82:p.b==='large'?1.35:1;
+    const root=G0();root.s=[k,k,k];
+    const sk=o.skin||pick(SKIN), shirt=o.shirt||p.c||'#e8743b', pants=o.pants||pick(PANTS), hair=o.hair||(pick(HAIR));
+    const hips=G0();hips.p=[0,.9,0];add(root,hips);
+    const torso=N('cyl',shirt,[0,.3,0],[.17*wf,.62,.12*wf]);
+    const chest=N('sph',shirt,[0,.6,0],[.18*wf,.08,.13*wf]);
+    const head=N('sph',sk,[0,.81,0],[.105,.12,.11]);
+    const hr=N('sph',hair,[0,.86,-.015],[.112,.09,.115]);
+    add(hips,torso,chest,head,hr);
+    if(o.vest){ // キャストの衣装：白シャツ＋黒ベスト＋黒ネクタイ＋黒の太めのパンツ
+      add(hips,N('cyl',o.vest,[0,.33,0],[.18,.5,.13]),N('box','#0e0e0e',[0,.5,.13],[.035,.2,.01]),
+        N('sph','#f4f4f4',[-.08,.62,.11],[.04,.03,.02]),N('box','#111',[.2,.05,.02],[.08,.12,.05]));
+      for(const yy of [.22,.32,.42]) add(hips,N('sph','#cfcfcf',[.03,yy,.135],[.012,.012,.008]));
+    }
+    const leg=(sd)=>{const th=G0();th.p=[sd*.085,0,0];
+      add(th,N('cyl8',pants,[0,-.22,0],o.vest?[.085,.44,.085]:[.068,.44,.068]));
+      const sh=G0();sh.p=[0,-.44,0];add(sh,N('cyl8',pants,[0,-.21,0],o.vest?[.08,.42,.08]:[.058,.42,.058]),N('box','#2a2420',[0,-.44,.04],[.1,.06,.2]));
+      add(th,sh);add(hips,th);return [th,sh];};
+    const [tl,sl]=leg(-1),[tr,sr]=leg(1);
+    const arm=(sd)=>{const a=G0();a.p=[sd*.21,.56,0];add(a,N('cyl8',shirt,[0,-.2,0],o.vest?[.06,.4,.06]:[.045,.4,.045]));add(hips,a);return a;};
+    const al=arm(-1),ar=arm(1);
+    let cup=null; if(o.cupOK){ cup=G0();
+      add(cup,N('cyl8','#ffffff',[0,-.46,.08],[.07,.18,.07],null,{spec:.4}),N('cyl8','#e05a2a',[0,-.47,.08],[.072,.05,.072]));
+      cup.top=N('cyl8','#7a3a12',[0,-.372,.08],[.062,.006,.062]); add(cup,cup.top);   // 中の飲み物が見える（フタなし）
+      cup.lidN=G0(); add(cup.lidN,N('sph','#ffffff',[0,-.37,.08],[.075,.035,.075],null,{spec:.7}),N('cyl8','#2d8bd8',[0,-.29,.08],[.012,.16,.012])); add(cup,cup.lidN);
+      add(ar,cup); cup.vis=false; }
+    let chair=null;
+    if(p.t==='wc'){chair=G0();
+      add(chair,N('box','#2f6fd0',[0,.47,0],[.46,.06,.44]),N('box','#2f6fd0',[0,.78,-.22],[.44,.55,.05]));   // 青いシート
+      for(const sd of [-1,1]){ add(chair,N('cyl','#d9dde2',[sd*.27,.34,-.05],[.34,.03,.34],[0,0,Math.PI/2],{spec:.8}),   // 大きな銀色の車輪
+          N('cyl','#2b2b2b',[sd*.285,.34,-.05],[.3,.035,.3],[0,0,Math.PI/2]),N('cyl8','#c0c4c8',[sd*.2,1.0,-.28],[.025,.35,.025],null,{spec:.8}),
+          N('box','#c0c4c8',[sd*.15,.12,.3],[.12,.03,.1]));
+        add(chair,N('cyl8','#222',[sd*.18,.07,.24],[.07,.04,.07],[0,0,Math.PI/2])); }
+      root.s=[1,1,1]; add(root,chair);}
+    const shadow=N('disc','#000000',[0,.012,0],[.32/k,1,.32/k],null,{a:.26});add(root,shadow);
+    const ring=N('disc','#ffffff',[0,.02,0],[.42/k,1,.42/k],null,{a:.55,vis:false});add(root,ring);
+    if(o.ring){ring.c=hex(o.ring);ring.vis=true;}
+    return {root,hips,tl,sl,tr,sr,al,ar,k,chair,torso,ring,cup,meshes:[torso,chest,head]};
+  }
+  function makeStroller(n){
+    if(n===2){ const r=G0(), a=makeStroller(1), b=makeStroller(1); a.root.p=[-.27,0,0]; b.root.p=[.27,0,0]; add(r,a.root,b.root); r.twinB=b.root; return {root:r}; }
+    const r=G0();
+    const col=['#e86a9a','#f0a030','#4fb3a5','#8a6ad8'][Math.floor(Math.random()*4)];
+    add(r,N('box',col,[0,.45,0],[.44,.26,.6],null,{spec:.3}),N('sph',col,[0,.68,-.14],[.26,.26,.3],null,{spec:.3}),   // 目立つ色の幌
+      N('sph','#f6d2b0',[0,.62,.06],[.1,.1,.1]),N('sph','#fff3a0',[0,.67,.04],[.11,.06,.11]),
+      N('cyl8','#c0c4c8',[0,.78,-.42],[.025,.55,.025],[0.5,0,0],{spec:.8}),N('box','#222',[0,1.02,-.54],[.44,.05,.05]));
+    for(const sd of [-1,1]) for(const z of [-.22,.22]) add(r,N('cyl','#222',[sd*.21,.12,z],[.12,.04,.12],[0,0,Math.PI/2]),N('cyl','#d9dde2',[sd*.215,.12,z],[.06,.045,.06],[0,0,Math.PI/2]));
+    add(r,N('disc','#000',[0,.012,0],[.38,1,.45],null,{a:.25}));
+    return {root:r};
+  }
+
+  // ---------- 車両の組み立て ----------
+  function buildTrain(){
+    if(train){detach(train);}
+    train=G0();{ const body=buildCar(sx); body.s=[KC,1,1]; carObj=G0(); add(carObj,body); carObj.doors=body.doors; }   // 車体だけ縮める（車内の人・ベビーカーは縮めない）
+    partner=buildCar(-sx);partner.p=[X(CARP),0,0]; partner.s=[KC,1,1];
+    // 連結器：車両どうしは少し離れていて、連結器でつながっている
+    { const cx=X(CARP/2), gap=Math.abs(CARP)-9.2*KC;
+      add(train,carObj,partner,
+        N('box','#2a2a2a',[cx,-.28,0],[gap+.5,.12,.16],null,{spec:.5}),
+        N('box','#1d1d1d',[cx-X(gap/2-.05),-.28,0],[.14,.26,.3]),N('box','#1d1d1d',[cx+X(gap/2-.05),-.28,0],[.14,.26,.3]),
+        N('cyl8','#3a3a3a',[cx,-.28,0],[.1,.22,.1],null,{spec:.5}),
+        N('box','#1a1a1a',[cx,.2,.85],[gap+.1,.03,.03]),N('box','#1a1a1a',[cx,.2,-.85],[gap+.1,.03,.03])); }
+    add(ROOT,train);
+  }
+  function fillPartner(){ // 相方の車両にもゲスト
+    const n=10+Math.floor(Math.random()*8);
+    for(let i=0;i<n;i++){const row=i%2, c=Math.floor(i/2)*2+Math.floor(Math.random()*1.5);
+      if(c>18) break;
+      const P=makePerson({t:Math.random()<.18?'kid':'adult',c:pick(['#e8743b','#3b82c4','#7a5bc7','#2f9e6e','#d24d78','#c9a13a','#4aa3a8']),h:Math.random()*2});
+      poseSit(P);P.root.p=[ -sx*(BENCH0+(c+1)*CELLW*2)/KC, .05, row?.3:-.3];P.root.r=[0,row?0:Math.PI,0];P.root.s=[SITW/KC,1,1];   // 車両が縮めてあるので人は元の太さに戻し、座っている見た目で少し広げる
+      P.root.isPax=true; add(partner,P.root);}
+  }
+  function poseSit(P,phase){P.tl.r[0]=P.tr.r[0]=-1.45;P.sl.r[0]=P.sr.r[0]=1.45;P.al.r[0]=P.ar.r[0]=-.45;P.hips.p[1]=.47/P.k;}
+
+  // ---------- スタッフ ----------
+  function buildStaff(){
+    staff.forEach(s=>detach(s.root));staff=[];
+    const costume={shirt:'#f6f6f2',pants:'#151515',vest:'#141414',skin:'#e8b98f',hair:'#2b211c',ring:'#d1a33a'};   /* キャスト：白シャツ＋黒ベスト＋足元に金色の輪 */
+    const disp=makePerson({t:'adult',h:1},costume);disp.root.p=[X(PX),0,3.95];disp.root.r=[0,Math.PI,0];add(ROOT,disp.root);staff.push(disp); /* キャストはゲートの内側（キューライン側） */
+    mate=null;   // もう1人のローダー（CPU）はいない。対戦では本物の相手が向こうの車両を担当
+    const pre=makePerson({t:'adult',h:2},costume);pre.root.p=[PLS.jw+1.25,0,JZ];pre.root.r=[0,-Math.PI/2,0];add(ROOT,pre.root);staff.push(pre);   /* プレグルーパー */
+    if(avatar) detach(avatar.P.root);
+    const av=makePerson({t:'adult',h:1},{shirt:'#f6f6f2',pants:'#151515',vest:'#141414',skin:'#e8b98f',hair:'#2b211c',ring:'#e74c3c'});
+    /* ローダーは出口ゲート付近からスタート */ avatar={P:av,x:X(3.0*KC),z:3.65,path:[],tk:'',head:Math.PI,phase:0,point:0};av.root.p=[avatar.x,0,avatar.z];add(ROOT,av.root);
+  }
+
+  // ---------- ラベル ----------
+  function label(id,cls){const d=document.createElement('div');d.className='lbl3 '+(cls||'');$('lbls').appendChild(d);const o={d,id,p:[0,0,0],on:true,txt:''};lbls.push(o);return o;}
+  let L={};
+  function buildLabels(){ $('lbls').innerHTML='';lbls=[];L={};
+    L.top=label('top','bench');L.bot=label('bot','bench');L.door=label('door','door');L.space=label('space','bench');
+    L.disp=label('disp','staff');L.pre=label('pre','staff');L.wait=label('wait','waitz');L.mate=label('mate','staff');L.you=label('you','you');
+    L.g=gateXL().map((_,i)=>label('g'+i,'gt'));
+  }
+
+  // ---------- ゲート ----------
+  function buildGates(){
+    gatesN.forEach(g=>detach(g.n));gatesN=[];
+    const awf=st==='awf';
+    mateGN=[];
+    const mk=(xl,list,i)=>{const n=G0();n.p=[X(xl),0,GATEZ];
+      const col=awf?'#2c4236':'#e6e1d3';
+      add(n,N('box',col,[-.55,.6,0],[.09,1.2,.09],null,{spec:.3}),N('box',col,[.55,.6,0],[.09,1.2,.09],null,{spec:.3}));
+      const hinge=G0();hinge.p=[.5,0,0];   // 支柱（ちょうつがい）は右側。扉は左へのびる
+      const bar=N('box',col,[-.5,1.05,0],[1.0,.06,.05],null,{spec:.4});
+      const bar2=N('box',col,[-.5,.15,0],[1.0,.06,.05],null,{spec:.4});
+      const mesh=N('box',awf?'#3a3a3a':'#8d8a80',[-.5,.6,0],[.94,.86,.012],null,{a:awf?.35:.45});
+      for(const xx of [-.04,-.96]) add(hinge,N('box',col,[xx,.6,0],[.05,.9,.05]));
+      const pnl=N('cyl','#c9a24a',[-.5,.6,.02],[.17,.02,.17],[Math.PI/2,0,0],{spec:.6});
+      add(hinge,bar,bar2,mesh,pnl);add(n,hinge);add(env,n);
+      list.push({n,hinge,bar,bar2,pnl,ang:0});};
+    gateXL().forEach((xl,i)=>mk(xl,gatesN,i));
+    mateXL().forEach((xl,i)=>mk(xl,mateGN,i));
+  }
+
+  // ---------- セットアップ ----------
+  function setup(){
+    if(!ready) return;
+    sx = pos==='front'?-1:1;
+    ROOT.ch.length=0; ents.clear(); env=null;
+    buildEnv(); buildTrain(); buildGates(); buildStaff(); buildLabels();
+    camMode='over'; setCam(true);
+    lighting = tod==='night' ? {
+      sun:norm([-.3,-1,-.4]), sunC:[.32,.36,.5], sky:[.26,.28,.42], gnd:[.14,.13,.15], fog:[.10,.12,.22], fn:40, ff:120, lampC:[1.7,1.25,.75], carC:[1.4,1.1,.75]
+    } : {
+      sun:norm([-.35,-1,-.55]), sunC:[.95,.92,.85], sky:[.7,.74,.8], gnd:[.42,.4,.38], fog: st==='pd'?[.85,.92,.95]:[.9,.92,.95], fn:40, ff:120, lampC:[0,0,0], carC:[0,0,0]
+    };
+    cv.style.background = tod==='night' ? 'linear-gradient(180deg,#141a33,#232a48)' : (st==='pd'?'linear-gradient(180deg,#cfe6ee,#e9f3f6)':'linear-gradient(180deg,#e2e6ea,#f1f2f3)');
+    for(const n of allNodes(env)) if(n.isWin) n.e = tod==='night'? n.c.map(v=>v*.75):[0,0,0];
+    for(const l of lamps) if(l.n) l.n.e = tod==='night'?[1,.9,.6]:[.1,.1,.08];
+    for(const n of allNodes(env)) if(n.isLamp) n.e = n.c.map(v=>v*(tod==='night'?.8:.45));
+  }
+  const norm=v=>{const l=Math.hypot(...v);return v.map(a=>a/l);};
+  function allNodes(n,out=[]){out.push(n);for(const c of n.ch) allNodes(c,out);return out;}
+
+  // ---------- 電車 ----------
+  function newTrain(){
+    if(!ready) return;
+    for(const [k,e] of [...ents]) if(e.inCar){detach(e.P.root);ents.delete(k);}
+    buildTrain(); fillPartner();
+    for(const car of [carObj,partner]) for(const d of car.doors) d.n.p[0]=d.closed;
+    if(mate){mate.loadDur=null;mate.c=0;mate.ready=false;}
+    if(avatar){avatar.thumb=false;avatar.chk=null;}
+    if(avatar){avatar.goGate=null;}
+    for(const n of allNodes(train)) if(n.isLamp) n.e = tod==='night'?[1,.95,.7]:[.3,.3,.2];
+    // 2駅だけの折り返し運転：同じ線路を戻ってきて止まり、また同じ方向へ出ていく
+    train.p[0]=-30; trainAnim={from:-30,to:0,t:0,d:3.3,ease:'out'};
+    syncNow(true);
+  }
+  function depart(){
+    if(!ready) return;
+    for(const e of ents.values()) if(e.T&&e.T.type==='seat'&&!e.inCar){ e.path=[]; arriveAt(e,true); }
+    trainAnim={from:0,to:-30,t:0,d:1.9,ease:'in'};
+  }
+
+  // ---------- エンティティ ----------
+  function spawn(key,T,g,idx){
+    let P;
+    if(idx==='st') P=makeStroller(g.nSt===2&&!g.folded?2:1);
+    else P=makePerson(g.people[idx],{cupOK:true});
+    const e={key,g,idx,P,x:0,z:0,head:Math.PI,path:[],pose:'stand',phase:Math.random()*6,inCar:false,T:null,tk:'',leaving:false,isSt:idx==='st',isWc:idx!=='st'&&g.people[idx].t==='wc'};
+    add(ROOT,P.root);ents.set(key,e);return e;
+  }
+  function setInCar(e,v){ if(e.inCar===v) return; detach(e.P.root); if(v){add(carObj,e.P.root);} else add(ROOT,e.P.root); e.inCar=v; }
+  function zoneOf(e){ if(e.inCar||(Math.abs(e.x)<4.65*KC&&e.z<1.15&&e.z>-1.15)) return e.z<0?'A':'B'; return e.z<GATEZ?'P':'Q'; }
+  function seatsFor(x){
+    const g=x.g,res={},ppl=[];g.people.forEach((p,i)=>{if(p.t!=='wc')ppl.push(i);});
+    let k=0;
+    for(const sgm of x.segs){let c=sgm.s;while(k<ppl.length){const p=g.people[ppl[k]],u=(p.w||(p.t==='kid'?2:4))*(g.squeezed?SQ:1);if(c+u>sgm.s+sgm.len+.01)break;
+      res[ppl[k]]={x:seatX(c+u/2),z:sgm.r===0?-.3:.3,row:sgm.r,cc:c+u/2,u};c+=u;k++;}}
+    while(k<ppl.length){const last=x.segs[x.segs.length-1]||{r:1,s:0,len:0};res[ppl[k]]={x:seatX(last.s+last.len),z:last.r===0?-.3:.3,row:last.r};k++;}
+    // ベビーカー・車いすは連結部の広いスペース（ベンチの端と車両の端のあいだ）に置く。代表者がすわるベンチの側
+    const rep=(x.segs.find(s=>s.s===0)||x.segs[0]||{r:1}).r, sg=rep===0?-1:1, SPX=X(-3.95*KC);
+    g.people.forEach((p,i)=>{if(p.t==='wc')res[i]={x:SPX,z:sg*(g.stroller&&!g.folded?.68:.5),row:rep,space:true};});
+    if(g.stroller&&!g.folded) res.st={x:SPX,z:sg*(g.wc?.15:.5),row:rep,space:true};   // 1台たたんだ2台持ちも同じ場所
+    else if(g.stroller&&g.folded){ const f=res[ppl[0]]||{x:X(0),row:1}; res.st={x:f.x,z:f.row===0?-.82:.82,row:f.row,folded:true}; }
+    return res;
+  }
+  function spotsFor(g,cxl,cz,per=5,dz=.55,sq=1){ // 立って待つ位置
+    const res={}, items=g.people.map((p,i)=>({i,w:p.t==='kid'?.36:p.t==='wc'?.7:.5}));
+    if(g.stroller) items.push({i:'st',w:g.nSt===2?1.1:.6});
+    const rows=[];let cur=[],wsum=0;
+    for(const it of items){it.w*=sq;if(cur.length>=per){rows.push(cur);cur=[];}cur.push(it);} if(cur.length) rows.push(cur);
+    rows.forEach((r,ri)=>{const tot=r.reduce((a,b)=>a+b.w,0);let xx=cxl-tot/2;
+      for(const it of r){res[it.i]={x:X(xx+it.w/2),z:cz+ri*dz};xx+=it.w;}});
+    return res;
+  }
+  function desired(){
+    const D=new Map();
+    // 電車が止まったら（アンロード中）、乗っているゲストは全員立って、ホーム（電車とゲートのあいだ）に降りて待つ
+    if(G&&G.car&&G.phase==='unload'){
+      const items=[]; for(const g of (G.unloadList||[])){ if(!G.car.groups[g.id]) continue; g.people.forEach((p,i)=>items.push([g,i])); if(g.stroller&&!g.folded) items.push([g,'st']); }
+      // 出口ゲートに向かって、ホームの上をゆっくり列になって進む（止まって待たずに、前が進めば少しずつ進む）
+      const gs=gateXL(), ex=gs[gs.length-1], dir=ex>0?-1:1;
+      items.forEach(([g,i],k)=>{ const col=Math.floor(k/2), row=k%2, lx=ex+dir*(.35+col*.5);
+        D.set(g.id+':'+i,{type:'spot',g,i,tag:'exitwait',x:X(lx),z:(row?2.3:1.85)+(col%2?.08:0),face:Math.PI}); });
+    }
+    else if(G&&G.car) for(const id in G.car.groups){const x=G.car.groups[id],S=seatsFor(x);
+      x.g.people.forEach((p,i)=>{const s=S[i];if(s)D.set(x.g.id+':'+i,Object.assign({type:'seat',g:x.g,i},s));});
+      if(S.st) D.set(x.g.id+':st',Object.assign({type:'seat',g:x.g,i:'st'},S.st));}
+    if(!G) return D;
+    const line=[]; if(G.phase==='load'&&G.cur) line.push(G.cur); for(const q of G.queue.slice(0,8)) line.push(q);
+    const putG=(g,cxl,cz,tag,per,dz,sq)=>{const S=spotsFor(g,cxl,cz,per,dz,sq);for(const k in S) D.set(g.id+':'+k,Object.assign({type:'spot',g,i:k==='st'?'st':+k,tag},S[k]));};
+    // 担当車両の列：先頭は入口ゲートの前。分岐点より後ろの本線には、相方の車両へ行くグループもまざって並ぶ
+    const items=g=>{const it=g.people.map((p,i)=>({i,w:p.t==='kid'?.42:p.t==='wc'?.85:.55})); if(g.stroller) it.splice(1,0,{i:'st',w:g.nSt===2?1.35:.8}); return it;};
+    const place=(pl,g,d0)=>{let d=d0;for(const it of items(g)){const q=plAt(PLS[pl],d+it.w/2);
+        D.set(g.id+':'+it.i,{type:'spot',g,i:it.i,x:X(q.x),z:q.z,face:Math.atan2(sx*q.fx,q.fz),pl,s:d+it.w/2});d+=it.w;} return d+.9;};   // グループとグループのあいだは大きくあける（どこまでが同じグループか分かるように）
+    // アメリカのリア：曲がり角まで進まず、まっすぐの所で待つ（ゲートへ向かう曲がり角の手前から並ぶ）
+    // アメリカのリア車両の列（下の列）は、曲がり角まで進まずまっすぐの所で待つ。フロント操作中の相方の列も同じ
+    const rearWait=(BOTZ-3.95)+.9;
+    let dO = (st==='awf'&&pos==='rear') ? rearWait : .05, dP = (st==='awf'&&pos==='front') ? rearWait : .05;
+    for(const g of line){
+      if(g===G.cur && g.waited){ dO=Math.max(dO, place('O',g,.05)); continue; }   // 待機場から呼んだベビーカーの方は、まっすぐ入口ゲートの前へ
+      dO=place('O',g,dO);
+    }
+    { const w=waitArea(); (G.aside||[]).concat(G.carry||[]).forEach((g,k)=>{ const per=Math.max(2,Math.floor(w.w/.42)); putG(g,w.x,w.z-w.d/2+.2+k*.25,'aside',per,.3,.8); }); }   // 待機場の中にまとまって待つ
+    return D;
+  }
+  function routeTo(e,T){
+    const pts=[];let z=zoneOf(e);
+    if(T.type==='seat'){
+      e.pl=null;
+      const door=(T.space||(T.g.anch&&!T.folded))?'coup':(T.g.boardDoor||'coup');
+      const dx=X(DOOR[door]), be=X(BEND[door]);
+      if(z==='A'||z==='B') pts.push([e.x,z==='A'?-.85:.85]);   // 車内での移動はいったん足元の通路へ
+      if(z==='Q'){const gx=X(gateXL()[0]);pts.push([gx,CZ],[gx,2.8]);z='P';}
+      if(z==='P'){pts.push([dx,1.75],[dx,.85]);z='B';}
+      if(T.space){pts.push([T.x,T.z]);return pts;}
+      if(T.folded){ if(T.row===1){pts.push([T.x,.85]);} else {if(z!=='A')pts.push([be,.85],[be,-.85]);pts.push([T.x,-.85]);} return pts; }
+      if(T.row===1){if(z==='A')pts.push([be,-.85],[be,.85]);pts.push([T.x,.85],[T.x,T.z]);}
+      else{if(z!=='A')pts.push([be,.85],[be,-.85]);pts.push([T.x,-.85],[T.x,T.z]);}
+      return pts;
+    }
+    // 電車から降りて、出口ゲートの前で待つ（車両の端側のドアから降りる）
+    if(T.tag==='exitwait'){
+      if(z==='A'||z==='B'){ const dn=Math.abs(e.x-X(DOOR.end))<Math.abs(e.x-X(DOOR.coup))?'end':'coup';   // 近いほうのドアから降りる
+        const dx=X(DOOR[dn]), be=X(BEND[dn]); pts.push([e.x,z==='A'?-.85:.85]); if(z==='A') pts.push([be,-.85],[be,.85]); pts.push([dx,.85],[dx,1.45]); }
+      pts.push([T.x,T.z]); e.pl=null; e.s=null; return pts;
+    }
+    // 立って待つ位置へ
+    if(z==='A'||z==='B'){const dx=X(DOOR.coup);pts.push([e.x,z==='A'?-.85:.85]);pts.push([dx,.85],[dx,1.75]);z='P';}
+    if(z==='P'){const gx=X(gateXL()[0]);pts.push([gx,2.8],[gx,CZ]);}
+    const wa=waitArea(), sP=Math.max(.05,wa.z-3.95), lx=PLS.our[0][0];
+    if(T.tag==='aside' && e.pl==='O' && e.s!=null){ pts.push(...plPath('O',e.s,'O',sP)); pts.push([T.x,T.z]); e.pl=null; e.s=null; e.inPocket=true; return pts; }
+    if(T.pl && e.inPocket){ pts.push([X(lx),wa.z]); pts.push(...plPath('O',sP,T.pl,T.s)); e.inPocket=false; }
+    else if(T.pl && e.pl && e.s!=null) pts.push(...plPath(e.pl,e.s,T.pl,T.s));
+    else pts.push([T.x,T.z]);
+    if(T.tag==='aside') e.inPocket=true;
+    e.pl=T.pl||null; e.s=T.pl?T.s:null;
+    return pts;
+  }
+  function routeExit(e){
+    const pts=[],z=zoneOf(e),dir=e.g.exitDir||'R';
+    let door = dir==='L'?'coup':((G.called||Math.random()<.45)?'end':'coup');
+    if(e.isSt||e.isWc) door='coup';
+    const dx=X(DOOR[door]),be=X(BEND[door]);
+    if(z==='A'||z==='B'){pts.push([e.x,z==='A'?-.85:.85]);if(z==='A')pts.push([be,-.85],[be,.85]);pts.push([dx,.85],[dx,1.75]);}
+    if(dir==='L'){pts.push([X(-4.3*KC),2.45],[X(-7*KC),2.45],[X(-14),2.45]);}
+    else{const gs=gateXL();let gi=gs.length-1;if(st==='pd'&&G.gates[1]==='open'&&Math.random()<.5)gi=1;
+      const gx=X(gs[gi]);pts.push([gx,2.55],[gx,EXZ],[X(30),EXZ]);}   // 出口ゲートを出て、柵で作られた出口通路を車両の端の方へ
+    return pts;
+  }
+  function arriveAt(e,snap){
+    const T=e.T;if(!T) return;
+    if(snap){e.x=T.x;e.z=T.z;}
+    if(T.type==='seat'){
+      if(e.isSt){e.pose='stand';e.head=T.z<0?Math.PI:0;}
+      else if(e.isWc){e.pose='wc';e.head=0;}
+      else if(T.space){e.pose='stand';}
+      else{e.pose='sit';e.head=T.row===0?Math.PI:0;}
+      setInCar(e,true);
+    } else {e.pose=e.isWc?'wc':'stand';e.head=(T.face!=null?T.face:Math.PI);}
+  }
+  function syncNow(fresh){
+    const D=desired();
+    for(const [k,T] of D){
+      let e=ents.get(k);
+      const tk=T.type+':'+T.x.toFixed(2)+':'+T.z.toFixed(2);
+      if(!e){
+        e=spawn(k,T,T.g,T.i);
+        if(T.type==='seat'){e.T=T;e.tk=tk;arriveAt(e,true);}
+        else{const s0=Math.min(PLS.O.L,Math.max(T.s+1,PLS.Olane+1.5)+Math.random()*2.5),q=plAt(PLS.O,s0);e.x=X(q.x);e.z=q.z;e.pl='O';e.s=s0;e.T=T;e.tk=tk;e.path=routeTo(e,T);e.pose='walk';}
+        continue;
+      }
+      if(e.leaving){e.leaving=false;}
+      if(e.tk!==tk){e.T=T;e.tk=tk;
+        if(e.inCar){setInCar(e,false);}
+        e.path=routeTo(e,T);}
+    }
+    for(const [k,e] of ents){
+      if(D.has(k)||e.leaving) continue;
+      e.leaving=true;e.T=null;e.tk='';
+      if(e.inCar&&trainAnim&&trainAnim.to<0) continue; // 電車と一緒に去る
+      if(e.inCar){setInCar(e,false);}
+      if(e.g.exitDir) e.path=routeExit(e);
+      else if(e.g.isMate){ // 相方の車両の列のゲストは、相方の入口ゲートからその車両へ
+        const p=e.pl?plPath(e.pl,e.s,'P',.05):[]; e.path=p.concat([[X(MG),CZ],[X(MG),2.6],[X(MG+.1),1.4]]); e.toMateCar=true;
+      }
+      else e.path=plPath(e.pl||'O',e.s!=null?e.s:PLS.Olane,'O',PLS.O.L);
+    }
+  }
+
+  // ---------- タップ（ゲスト選択・ゲート） ----------
+  function onTap(ev){
+    const r=cv.getBoundingClientRect(),nx=((ev.clientX-r.left)/r.width)*2-1,ny=-(((ev.clientY-r.top)/r.height)*2-1);
+    const e=cam.eye,t=cam.tgt;let f=norm([t[0]-e[0],t[1]-e[1],t[2]-e[2]]);
+    let rt=norm([f[1]*0-f[2]*1,f[2]*0-f[0]*0,f[0]*1-f[1]*0]); rt=norm([-f[2],0,f[0]]);
+    const up=[rt[1]*f[2]-rt[2]*f[1],rt[2]*f[0]-rt[0]*f[2],rt[0]*f[1]-rt[1]*f[0]];
+    const th=Math.tan(cam.fov*Math.PI/360),asp=W/H;
+    const d=norm([f[0]+rt[0]*nx*th*asp+up[0]*ny*th,f[1]+rt[1]*nx*th*asp+up[1]*ny*th,f[2]+rt[2]*nx*th*asp+up[2]*ny*th]);
+    const hit=(c,rad)=>{const oc=[c[0]-e[0],c[1]-e[1],c[2]-e[2]];const tt=oc[0]*d[0]+oc[1]*d[1]+oc[2]*d[2];if(tt<0)return 1e9;
+      const q=[e[0]+d[0]*tt-c[0],e[1]+d[1]*tt-c[1],e[2]+d[2]*tt-c[2]];return Math.hypot(...q)<rad?tt:1e9;};
+    let best=1e9,bg=null,bgate=-1;
+    for(const en of ents.values()){if(!en.inCar||en.isSt)continue;const w=en.P.root.wm;const c=[w[12],w[13]+(en.pose==='sit'?.75:.9),w[14]];
+      const tt=hit(c,.33);if(tt<best){best=tt;bg=en.g;bgate=-1;}}
+    gatesN.forEach((gn,i)=>{const tt=hit([gn.n.p[0],.6,gn.n.p[2]],.6);if(tt<best){best=tt;bgate=i;bg=null;}});
+    if(bgate>=0){ const b=document.querySelector(`.gate[data-g="${bgate}"]`); if(b) b.click(); return; }
+    if(bg) selectGroup(bg);
+  }
+  function selectGroup(g){
+    if(!G||G.phase!=='load'){toast('ローディング中にできます');return;}
+    if(g.anch){toast('ベビーカー・車いすはそのままでOK');return;}
+    G.sel = G.sel===g.id ? null : g.id; blip(900);
+    if(G.sel!=null) toast('このグループを選びました');
+  }
+
+  // ---------- カメラ ----------
+  let fpYaw=0;
+  function camPreset(){ // 画面の縦横比に合わせて、見せたい範囲が収まる距離を計算
+    if(camMode==='fp'&&avatar){ // キャスト目線
+      const eye=[avatar.x,1.62,avatar.z], ph=G?G.phase:'arrive', lx=PLS.our?PLS.our[0][0]:-3.7;
+      // 場面ごとに「見るべき所」を向く：アンロード＝車両、ローディング＝列の先頭とゲート、ゲートOK＝確認中のゲート
+      let look;
+      if(avatar.goGate!=null) look=[X(gateXL()[avatar.goGate]),.9,GATEZ];
+      else if(ph==='load') look=[X(lx-3.5),.9,5.2];
+      else if(ph==='gate'&&avatar.thumb) look=[staff[0]?staff[0].root.p[0]:X(PX),1.2,3.6];
+      else look=[avatar.x+X(2.6),1.0,.6];
+      const y=Math.atan2(look[0]-eye[0],look[2]-eye[2])+fpYaw, dist=Math.hypot(look[0]-eye[0],look[2]-eye[2])||1;
+      const pitch=Math.atan2(look[1]-eye[1],dist);
+      avatar.fpHead=y;
+      return {eye,tgt:[eye[0]+Math.sin(y)*Math.cos(pitch),eye[1]+Math.sin(pitch),eye[2]+Math.cos(y)*Math.cos(pitch)],fov:72};
+    }
+    const asp=W/H, fov=asp<.8?54:asp<1.2?46:40, th=Math.tan(fov*Math.PI/360);
+    let tgt,dir,hw,hh;
+    if(camMode==='car'){tgt=[X(.05),.3,.25];dir=norm([0,.92,.4]);hw=3.75;hh=2.2;}
+    else{ // 縦長の画面では、上から見下ろす角度を深くして空と床の余白を減らす
+      const tall=asp<.75; tgt=[X(-1.7*KC),.3,tall?2.7:2.65]; dir=norm(tall?[0,.93,.37]:[0,.9,.44]); hw=tall?5.6:5.8; hh=tall?4.8:3.9;}
+    const d=Math.max(hw/(th*asp),hh/th)*1.02;
+    return {eye:[tgt[0]+dir[0]*d,tgt[1]+dir[1]*d,tgt[2]+dir[2]*d],tgt,fov};
+  }
+  function setCam(snap){const p=camPreset();if(snap){cam.eye=p.eye.slice();cam.tgt=p.tgt.slice();cam.fov=p.fov;}}
+  function toggleCam(){camMode=camMode==='over'?'car':'over'; fpYaw=0; if(avatar) avatar.P.root.vis=camMode!=='fp'; return camMode;}
+
+  // ---------- 毎フレーム ----------
+  function frame(ts){
+    requestAnimationFrame(frame);
+    if(!ready||!env) return;
+    if(!$('sGame').classList.contains('on')) return;
+    const dt=Math.min(.05,(ts-tPrev)/1000||.016);tPrev=ts;
+    if(ts-lastSync>120&&G){lastSync=ts;syncNow();}
+    // 電車
+    { const open = !!G && ['unload','load','gate'].includes(G.phase) && !G.go3 && !(trainAnim&&trainAnim.to===0);
+      for(const car of [carObj,partner]) if(car&&car.doors) for(const d of car.doors){ const tg=open?d.open:d.closed; d.n.p[0]+=(tg-d.n.p[0])*Math.min(1,dt*3); } }
+    if(trainAnim){trainAnim.t+=dt;let u=Math.min(1,trainAnim.t/trainAnim.d);
+      const k=trainAnim.ease==='out'?1-Math.pow(1-u,3):u*u*u;train.p[0]=trainAnim.from+(trainAnim.to-trainAnim.from)*k;
+      if(u>=1)trainAnim=null;}
+    // ゲート
+    gatesN.forEach((gn,i)=>{const s=G&&G.gates?G.gates[i]:'closed';const tgt=s==='open'?1.45:0;gn.ang+=(tgt-gn.ang)*Math.min(1,dt*6);
+      gn.hinge.r[1]= i===0 ? -gn.ang : gn.ang;   // 入口ゲートは電車側（奥）へ、出口・サポートゲートはキューライン側（手前）へ開く
+      const ok=s==='ok';gn.pnl.c=ok?[.3,.8,.45]:[.79,.64,.29];gn.pnl.e=ok?[.1,.35,.15]:s==='open'?[.25,.18,0]:[0,0,0];});
+    // エンティティ
+    const sel=G?G.sel:null, special=(G&&G.phase==='unload'&&G.cur)?G.cur.id:null;
+    for(const [k,e] of ents){
+      if(e.path.length){
+        const tg=e.path[0],dx=tg[0]-e.x,dz=tg[1]-e.z,d=Math.hypot(dx,dz);
+        let rem=d;for(let i=1;i<e.path.length;i++)rem+=Math.hypot(e.path[i][0]-e.path[i-1][0],e.path[i][1]-e.path[i-1][1]);
+        const spd=(e.T&&e.T.tag==='exitwait'?.55:1.5+Math.min(rem,12)*.22), step=spd*dt;   // 降りてホームを歩くゲストはゆっくり
+        if(d>.001){const h=Math.atan2(dx,dz);let dh=h-e.head;while(dh>Math.PI)dh-=Math.PI*2;while(dh<-Math.PI)dh+=Math.PI*2;e.head+=dh*Math.min(1,dt*12);}
+        if(d<=step){e.x=tg[0];e.z=tg[1];e.path.shift();}else{e.x+=dx/d*step;e.z+=dz/d*step;}
+        e.pose=e.isWc?'wc':'walk';e.phase+=dt*spd*5.5;
+        if(!e.path.length){ if(e.leaving){ if(e.toMateCar&&mate&&!e.isSt) mate.boarded=(mate.boarded||0)+1; detach(e.P.root);ents.delete(k);continue;} arriveAt(e,false); }
+      }
+      const y=(Math.abs(e.x)<4.65*KC&&e.z<1.15&&e.z>-1.15)?.05:0;
+      e.P.root.p=[e.x,y,e.z];e.P.root.r=[0,e.head,0];
+      if(e.isSt){ e.P.root.s = e.g.folded ? [.45,1.15,.4] : [1,1,1]; if(e.P.root.twinB) e.P.root.twinB.vis=!e.g.foldOne; }   // たたんだベビーカー（2台持ちで1台だけたたんだら1台に）
+      if(e.P.cup){ const pp=e.g.people[e.idx]; e.P.cup.vis=!!(pp&&(pp.drink||pp.lid)); if(e.P.cup.lidN) e.P.cup.lidN.vis=!!(pp&&pp.lid); if(e.P.cup.top) e.P.cup.top.vis=!!(pp&&pp.drink); if(e.P.cup.vis&&e.pose!=='walk') e.P.ar.r[0]=-.9; }
+      applyPose(e.P,e.pose,e.phase);
+      const isSel=sel!=null&&e.g.id===sel, isSp=special!=null&&e.g.id===special, isCur=G&&G.phase==='load'&&G.cur&&e.g.id===G.cur.id;
+      const hl = isSel?[.45,.38,0]:isSp?[0,.25,.45]:[0,0,0];
+      for(const m of e.P.meshes||[]) m.e=hl;
+      // 足元の輪：ゲート前のグループと、すぐ後ろの2組は、グループの色の輪で「どこまでが同じグループか」分かるように
+      const isNear=!e.inCar&&!e.leaving&&G&&(G.phase==='load'||G.phase==='unload'||G.phase==='arrive')&&((G.cur&&e.g.id===G.cur.id)||(G.queue||[]).slice(0,2).includes(e.g));
+      if(e.P.ring){ e.P.ring.vis = isSel||isSp||isCur||isNear; e.P.ring.c = isSel?[1,.85,.1]:isSp?[.3,.8,1]:hex(e.g.col||'#ffffff'); }
+    }
+    // スタッフ
+    if(avatar){ if(G&&G.phase!=='gate'){avatar.thumb=false;avatar.chk=null;} moveAvatar(Math.min(.5,(ts-(avatar.lt||ts))/1000)); avatar.lt=ts; }   // あなたの動きも実時間で
+    if(mate) moveMate(Math.min(.5,(ts-(mate.lt||ts))/1000)), mate.lt=ts;
+    else if(partner){ // 向こうの車両：ひとりで遊ぶときは空。対戦中は相手の車内の人数だけ座っている
+      const pax=partner.ch.filter(c=>c.isPax), n=(typeof VS!=='undefined'&&VS&&VS.opp)?Math.min(pax.length,Math.round((VS.opp.heads||0)*pax.length/18)):0;
+      pax.forEach((p,i)=>p.vis=i<n); }
+    mateGN.forEach((gn,i)=>{const s=mate?mate.gates[i]:'closed';const tgt=s==='open'?1.45:0;gn.ang+=(tgt-gn.ang)*Math.min(1,dt*6);gn.hinge.r[1]=gn.ang*(i===0?1:-1)*sx;
+      gn.pnl.c=s==='ok'?[.3,.8,.45]:[.79,.64,.29];gn.pnl.e=s==='ok'?[.1,.35,.15]:[0,0,0];});
+    staff.forEach((s,i)=>{ if(s!==(mate&&mate.P)) applyPose(s,'stand',0); });
+    if(thumbT>0){thumbT-=dt;staff[0]&&(staff[0].ar.r[0]=-2.2);}
+    // カメラ
+    const cp=camPreset(), cs=Math.min(1,dt*(camMode==='fp'?12:4));for(let i=0;i<3;i++){cam.eye[i]+=(cp.eye[i]-cam.eye[i])*cs;cam.tgt[i]+=(cp.tgt[i]-cam.tgt[i])*cs;}cam.fov+=(cp.fov-cam.fov)*cs;
+    draw();
+    updLabels(); updIcons();
+  }
+  const SITW=1.15;   // 見た目：座ると肩はばを広げて、となりとぎゅうぎゅうに見せる
+  function applyPose(P,pose,ph){
+    if(!P.tl) return;
+    if(P.k) P.root.s[0]=P.k*(pose==='sit'?SITW:1);
+    if(pose==='walk'){const s=Math.sin(ph);P.tl.r[0]=s*.55;P.tr.r[0]=-s*.55;P.sl.r[0]=Math.max(0,-s)*.75;P.sr.r[0]=Math.max(0,s)*.75;P.al.r[0]=-s*.45;P.ar.r[0]=s*.45;P.hips.p[1]=.9+Math.abs(Math.cos(ph))*.025;}
+    else if(pose==='sit'||pose==='wc'){poseSit(P);if(pose==='wc')P.hips.p[1]=.52;}
+    else{P.tl.r[0]=P.tr.r[0]=P.sl.r[0]=P.sr.r[0]=0;P.al.r[0]=P.ar.r[0]=0;P.hips.p[1]=.9;}
+  }
+  // ローダー（あなた）の動き：出口ゲート付近 → 出口ゲートを開けて連結部へ（アンローディング）→ 入口ゲートを開けてキューラインの近くへ（ローディング）
+  function avTarget(){
+    const a=avatar, ph=G?G.phase:'arrive', gs=G&&G.gates?G.gates:[];
+    if(a.thumb){ const ex=gateXL().length-1; return {x:X(gateXL()[ex]-.75),z:CZ,face:-sx*Math.PI/2,k:'thumb'}; }   // 最後のサムアップは出口ゲート付近で（ディスパッチャーの方を向いて）
+    if(a.goGate!=null) return {x:X(gateXL()[a.goGate]+(a.goGate===gateXL().length-1?-.75:.75)),z:CZ,face:Math.PI,k:'g'+a.goGate};   // ゲートOKはキューライン側から
+    if(ph==='arrive'||(ph==='unload'&&gs[gs.length-1]!=='open')) return {x:X(3.0*KC),z:CZ,face:Math.PI,k:'exitwait'};
+    if(ph==='unload'&&gs[0]!=='open') return {x:X(CARP/2+.22),z:1.9,face:sx*Math.PI/2,k:'coupling'};   // 連結部で相方と背中合わせ、自分の車両の方を向く
+    return {x:X(-3.0*KC),z:CZ,face:0,k:'load'};
+  }
+  function avRoute(a,T){ // 柵をまたぐときは開いているゲートを通る
+    const pts=[], fromQ=a.z>GATEZ, toQ=T.z>GATEZ;
+    if(fromQ!==toQ){
+      const gs=gateXL().map(X); const st8=G&&G.gates?G.gates:[];
+      let best=null,bd=1e9;
+      gs.forEach((gx,i)=>{const open=st8[i]==='open'||st8[i]==='ok';const d=Math.abs(gx-a.x)+Math.abs(gx-T.x)+(open?0:50);if(d<bd){bd=d;best=gx;}});
+      pts.push([best,fromQ?3.6:2.8],[best,toQ?3.6:2.8]);
+    }
+    pts.push([T.x,T.z]);return pts;
+  }
+  function moveAvatar(dt){
+    const a=avatar, T=avTarget();
+    if(a.tk!==T.k){a.tk=T.k;a.path=avRoute(a,T);}
+    if(a.path.length){
+      const tg=a.path[0],dx=tg[0]-a.x,dz=tg[1]-a.z,d=Math.hypot(dx,dz),step=2.6*dt;
+      if(d>.001){a.head=Math.atan2(dx,dz);}
+      if(d<=step){a.x=tg[0];a.z=tg[1];a.path.shift();}else{a.x+=dx/d*step;a.z+=dz/d*step;}
+      a.phase+=dt*12;applyPose(a.P,'walk',a.phase);
+    } else {
+      let dh=T.face-a.head;while(dh>Math.PI)dh-=Math.PI*2;while(dh<-Math.PI)dh+=Math.PI*2;a.head+=dh*Math.min(1,dt*6);
+      applyPose(a.P,'stand',0);
+    }
+    if(a.chk && !a.path.length && a.tk==='g'+a.chk.i){   // ゲートの前に着いたら、ガチャガチャ→指差し
+      const c=a.chk; c.t+=dt;
+      const gn=gatesN[c.i]; if(gn&&c.t<c.dur*.6) gn.hinge.r[1]+=Math.sin(c.t*40)*.04;
+      if(!c.shook&&c.t>.1){c.shook=true;c.onShake&&c.onShake();}
+      if(c.t<c.dur*.6){a.P.ar.r[0]=-1.2;a.P.al.r[0]=-1.2;} else {a.P.ar.r[0]=-2.6;}
+      if(c.t>=c.dur){a.chk=null;c.onDone();}
+    }
+    a.thumbUp = !!(a.thumb && !a.path.length && a.tk==='thumb');
+    if(a.thumbUp){a.P.ar.r[0]=-2.9;a.P.ar.r[2]=-.25*sx;} else a.P.ar.r[2]=0;
+    if(a.point>0){a.point-=dt;a.P.ar.r[0]=-2.6;}
+    a.P.root.p=[a.x,0,a.z];a.P.root.r=[0,a.head,0];
+  }
+  // ---------- 相方のローダー（もう1両の担当）：自分と同じ流れで、少しだけタイミングがずれて動く ----------
+  function mateTarget(){ // 相方は自分の車両を、自分のペースで（こちらの進み具合とは関係なく）
+    const m=mate, ph=G?G.phase:'arrive', gx=i=>X(mateXL()[i]), N_=m.gates.length, EXITI=N_-1;
+    if(ph==='arrive'){ m.c=0; m.done={}; m.ready=false; m.boarded=0; if(m.gates.some(x=>x!=='closed')) m.gates=m.gates.map(()=> 'closed'); return {x:gx(EXITI),z:CZ,face:Math.PI,k:'wait'}; }
+    const c=m.c;
+    if(!m.done.exit){ if(c>.8){ m.gates[EXITI]='open'; if(N_===3) m.gates[1]='open'; m.done.exit=true; m.point=.8; } return {x:gx(EXITI)+X(.75),z:CZ,face:Math.PI,k:'exit'}; }
+    if(c<7.5) return {x:X(CARP/2-.22),z:1.9,face:-sx*Math.PI/2,k:'coup'};                 // アンローディング
+    if(!m.done.ent){ m.gates[0]='open'; if(N_===3) m.gates[1]='closed'; m.done.ent=true; m.point=.8; }
+    let walking=false; for(const e of ents.values()) if(e.toMateCar&&e.path.length){walking=true;break;}   // 相方の車両へ向かっているゲストが乗り終わるまで待つ
+    if((!(ph==='gate'||ph==='go') && c<70) || walking) return {x:X(MG-.45),z:CZ,face:0,k:'load'};   // ローディング（こちらがゲートOKを始める頃に、相方もゲートOKへ）
+    if(!m.done.closeExit){ m.gates[EXITI]='closed'; m.done.closeExit=true; }
+    const nx=m.gates.findIndex(x=>x!=='ok');                                   // 入口→（サポート）→出口の順にゲートOK
+    if(nx<0){ // 出口ゲート付近でディスパッチャーへサムアップ
+      const th={x:X(mateXL()[EXITI]+.75),z:CZ,face:sx*Math.PI/2,k:'thumb'};
+      m.ready = !m.path.length && m.tk==='thumb' && Math.hypot(m.x-th.x,m.z-th.z)<.1;
+      return th; }
+    const tg={x:gx(nx)+(nx===EXITI?X(.75):-X(.75)),z:CZ,face:Math.PI,k:'g'+nx};   // キューライン側からゲートOK
+    if(!m.path.length&&m.tk===tg.k&&Math.hypot(m.x-tg.x,m.z-tg.z)<.1){ m.hold=(m.hold||0)+m.dt; m.chkG=nx; if(m.hold>(m.chkDur||(m.chkDur=1+Math.random()))){m.gates[nx]='ok';m.hold=0;m.chkDur=0;m.chkG=null;} }
+    return tg;
+  }
+  function mateRoute(m,T){
+    const pts=[], fromQ=m.z>GATEZ, toQ=T.z>GATEZ;
+    if(fromQ!==toQ){ const xs=mateXL().map(X); let best=xs[0],bd=1e9;
+      xs.forEach((gx,i)=>{const open=m.gates[i]!=='closed';const d=Math.abs(gx-m.x)+Math.abs(gx-T.x)+(open?0:50);if(d<bd){bd=d;best=gx;}});
+      pts.push([best,fromQ?CZ:2.75],[best,toQ?CZ:2.75]); }
+    pts.push([T.x,T.z]); return pts;
+  }
+  function moveMate(dt){
+    const m=mate; m.dt=dt; m.c=(m.c||0)+dt; if(m.loadDur==null) m.loadDur=16+Math.random()*8; const T=mateTarget();
+    if(m.tk!==T.k){m.tk=T.k;m.path=mateRoute(m,T);}
+    if(m.path.length){const tg=m.path[0],dx=tg[0]-m.x,dz=tg[1]-m.z,d=Math.hypot(dx,dz),st8=2.4*dt;
+      if(d>.001) m.head=Math.atan2(dx,dz);
+      if(d<=st8){m.x=tg[0];m.z=tg[1];m.path.shift();}else{m.x+=dx/d*st8;m.z+=dz/d*st8;}
+      m.phase+=dt*12;applyPose(m.P,'walk',m.phase);}
+    else{let dh=T.face-m.head;while(dh>Math.PI)dh-=Math.PI*2;while(dh<-Math.PI)dh+=Math.PI*2;m.head+=dh*Math.min(1,dt*6);applyPose(m.P,'stand',0);}
+    if(m.point>0){m.point-=dt;m.P.ar.r[0]=-2.6;}
+    if(m.chkG!=null&&m.hold>0){ const gn=mateGN[m.chkG]; if(gn&&m.hold<.7) gn.hinge.r[1]+=Math.sin(m.hold*40)*.04; m.P.ar.r[0]= m.hold<.7?-1.2:-2.6; }
+    if(m.ready&&G&&(G.phase==='gate'||G.phase==='go')) m.P.ar.r[0]=-2.9;   // 相方のサムアップ
+    m.P.root.p=[m.x,0,m.z];m.P.root.r=[0,m.head,0];
+    // 相方の車両のゲスト：降りて、また乗ってくる（見た目）
+    if(partner&&G){const pax=partner.ch.filter(c=>c.isPax);const ph=G.phase;
+      let shown=pax.length;
+      const c=m.c||0;
+      if(ph==='arrive') shown=pax.length;
+      else if(c<7.5) shown=Math.max(0,Math.round(pax.length*(1-c/7)));
+      else shown=Math.min(pax.length, m.boarded||0);   // 列から乗った人だけが座る
+      pax.forEach((p,i)=>p.vis=i<shown);}
+  }
+  function pointGate(i){if(!avatar)return;if(G&&G.phase!=='gate')return;avatar.goGate=i;avatar.point=1.2;}
+  function checkGate(i,onShake,onDone){ if(!avatar){onDone();return;} avatar.goGate=i; avatar.chk={i,t:0,dur:1+Math.random(),onShake,onDone,shook:false}; }
+  function mateReady(){ return !!(mate&&mate.ready); }
+  function myThumbUp(){ return !avatar || !!avatar.thumbUp; }
+  function thumb(on){thumbT=1.5;if(avatar){avatar.thumb=!!on;avatar.goGate=null;}}
+
+  // ---------- 描画 ----------
+  const OPQ=[],TRN=[];
+  function walk(n,pm){if(n.vis===false)return;trsTo(n.lm,n.p,n.r,n.s);mulTo(n.wm,pm,n.lm);
+    if(n.g){const w=n.wm;for(let c=0;c<3;c++){const l=Math.hypot(w[c*4],w[c*4+1],w[c*4+2])||1;n.nm[c*3]=w[c*4]/l;n.nm[c*3+1]=w[c*4+1]/l;n.nm[c*3+2]=w[c*4+2]/l;}
+      (n.a<1?TRN:OPQ).push(n);}
+    for(const c of n.ch) walk(c,n.wm);}
+  const IDM=I16();
+  function draw(){
+    { const r=cv.getBoundingClientRect(); if(Math.abs(r.width-W)>.5||Math.abs(r.height-H)>.5) resize(); }
+    gl.viewport(0,0,cv.width,cv.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    const P=persp(cam.fov*Math.PI/180,W/H,.1,150),V=lookAt(cam.eye,cam.tgt,[0,1,0]);mulTo(VP,P,V);
+    const Lg=lighting;
+    gl.uniformMatrix4fv(U.uVP,false,VP);gl.uniform3fv(U.uSun,Lg.sun);gl.uniform3fv(U.uSunC,Lg.sunC);gl.uniform3fv(U.uSky,Lg.sky);gl.uniform3fv(U.uGnd,Lg.gnd);
+    gl.uniform3fv(U.uFog,Lg.fog);gl.uniform3fv(U.uEye,cam.eye);gl.uniform1f(U.uFn,Lg.fn);gl.uniform1f(U.uFf,Lg.ff);
+    const lp=[],lc=[];
+    lamps.forEach(l=>{lp.push(...l.p);lc.push(...Lg.lampC);});
+    lp.push(train.p[0],2.0,0);lc.push(...Lg.carC);
+    while(lp.length<12){lp.push(0,-50,0);lc.push(0,0,0);}
+    gl.uniform3fv(U.uLP,new Float32Array(lp.slice(0,12)));gl.uniform3fv(U.uLC,new Float32Array(lc.slice(0,12)));
+    OPQ.length=0;TRN.length=0;walk(ROOT,IDM);
+    let last=null;
+    const bind=g=>{if(g===last)return;last=g;gl.bindBuffer(gl.ARRAY_BUFFER,g.vb);gl.vertexAttribPointer(A.P,3,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ARRAY_BUFFER,g.nb);gl.vertexAttribPointer(A.N,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,g.ib);};
+    const one=n=>{bind(n.g);gl.uniformMatrix4fv(U.uM,false,n.wm);gl.uniformMatrix3fv(U.uNM,false,n.nm);gl.uniform3fv(U.uC,n.c);gl.uniform3fv(U.uE,n.e);gl.uniform1f(U.uA,n.a);gl.uniform1f(U.uSpec,n.spec);gl.drawElements(gl.TRIANGLES,n.g.n,gl.UNSIGNED_SHORT,0);};
+    gl.disable(gl.BLEND);gl.depthMask(true);OPQ.forEach(one);
+    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
+    const e=cam.eye;TRN.sort((a,b)=>Math.hypot(b.wm[12]-e[0],b.wm[13]-e[1],b.wm[14]-e[2])-Math.hypot(a.wm[12]-e[0],a.wm[13]-e[1],a.wm[14]-e[2]));
+    TRN.forEach(one);gl.depthMask(true);gl.disable(gl.BLEND);
+  }
+  function proj(p){const m=VP,x=p[0],y=p[1],z=p[2];const w=m[3]*x+m[7]*y+m[11]*z+m[15];if(w<=.1)return null;
+    return [(((m[0]*x+m[4]*y+m[8]*z+m[12])/w)*.5+.5)*W,(1-(((m[1]*x+m[5]*y+m[9]*z+m[13])/w)*.5+.5))*H];}
+  function setL(o,p,txt,on=true){o.on=on;if(!on){o.d.style.display='none';return;}const q=proj(p);if(!q){o.d.style.display='none';return;}
+    o.d.style.display='block';o.d.style.transform=`translate(${q[0]}px,${q[1]}px) translate(-50%,-100%)`;if(o.txt!==txt){o.txt=txt;o.d.innerHTML=txt;}}
+  // 特別なゲストの頭の上に小さなマーク（ベビーカー・車いす・飲み物）
+  const icons=new Map();
+  function updIcons(){
+    const seen=new Set(); const fp=camMode==='fp';
+    for(const [k,e] of ents){
+      let txt='',cls='';
+      if(e.isSt) continue;   // ベビーカーのマークは出さない
+      else { const p=e.g.people[e.idx]; if(!p) continue;
+        if(p.t==='wc') continue;   // 車いすのマークは出さない
+        else if(p.drink&&!e.inCar){ const near=e.g===G.cur||G.queue.slice(0,4).includes(e.g); if(!near) continue; txt='⚠🥤<b>フタなし</b>';cls='open'; }
+        } // フタ付きの飲み物はマークを出さない
+      if(!txt) continue;
+      const w=e.P.root.wm, q=proj([w[12],w[13]+(e.isSt?1.25:e.pose==='sit'?1.45:2.05),w[14]]);
+      if(!q) continue;
+      seen.add(k); let d=icons.get(k);
+      if(!d){ d=document.createElement('div'); $('lbls').appendChild(d); icons.set(k,d); }
+      if(d._t!==txt){ d._t=txt; d.innerHTML=`<span class="in">${txt}</span>`; d.className='ico3 '+cls; }
+      d.style.transform=`translate(${q[0]}px,${q[1]}px) translate(-50%,-100%)${fp?' scale(1.25)':''}`;
+    }
+    for(const [k,d] of icons) if(!seen.has(k)){ d.remove(); icons.delete(k); }
+  }
+  function updLabels(){
+    if(!G) return;const tx=train.p[0],moving=!!trainAnim;
+    { const show=moving||G.phase==='arrive'||G.phase==='go'; for(const car of [carObj&&carObj.ch[0],partner]) if(car&&car.xray&&car._xs!==show){ car._xs=show; for(const n of car.xray) n.vis=show; } }   // 入線中・出発時は外装を全部見せる
+    const NL=window.__showLbl&&window.__showLbl();
+    setL(L.top,[tx+X(1.8*KC),1.25,-.95],'上のベンチ',NL&&!moving&&camMode==='car');
+    setL(L.bot,[tx+X(1.8*KC),1.25,.95],'下のベンチ',NL&&!moving&&camMode==='car');
+    const ent=G.car?entrance(G.car):'coup';
+    setL(L.door,[tx+X(DOOR[ent]),2.0,1.15],'▼ 入口',G.phase==='load'&&!moving);
+    setL(L.space,[tx+X(-3.95*KC),1.3,0],'連結部スペース',NL&&!moving&&camMode==='car');
+    { const w=waitArea(); setL(L.wait,[X(w.x),.2,w.z+w.d/2+.25],'ベビーカー待機',NL&&camMode==='over'); }
+    setL(L.pre,[staff[1].root.p[0],2.05,staff[1].root.p[2]],'プレグルーパー',NL&&camMode==='over');
+    setL(L.disp,[staff[0].root.p[0],2.05,staff[0].root.p[2]],'ディスパッチャー',NL&&camMode==='over');
+    if(mate) setL(L.mate,[mate.x,2.05,mate.z],'相方ローダー',NL&&camMode==='over');
+    if(avatar) setL(L.you,[avatar.x,2.3,avatar.z],'▼',camMode!=='fp');
+    const nm=i=>i===0?'入口':i===G.gates.length-1?'出口':'サポート';
+    L.g.forEach((o,i)=>{const s=G.gates[i];setL(o,[X(gateXL()[i]),1.25,GATEZ-.1],`${nm(i)}<b>${s==='open'?'開':s==='ok'?'OK☝':'閉'}</b>`,NL);o.d.className='lbl3 gt '+(s||'');});
+  }
+
+  // そのグループのだれかが出口ゲートをこえて出口通路に出たか
+  function passedExit(gid){ let any=false, all=true; for(const [k,e] of ents){ if(e.g.id!==gid) continue; any=true; if(e.z>GATEZ+.15) return true; } return !any; }
+  // 出口へ向かっているグループを、フロントの出口（ディスパッチャーの前）へ行き先変更
+  function reroute(gid){ for(const [k,e] of ents){ if(e.g.id!==gid||!e.leaving) continue; const pts=[]; if(e.z>2.0) pts.push([e.x,2.45]); pts.push([X(-4.3*KC),2.45],[X(-7*KC),2.45],[X(-14),2.45]); e.path=pts; } }
+  return {init,setup,newTrain,depart,toggleCam,passedExit,reroute,pointGate,checkGate,mateReady,myThumbUp,thumb,syncNow,get ready(){return ready;}};
+})();
+
+})();
+</script>
+</body>
+</html>
