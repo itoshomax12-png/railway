@@ -11,8 +11,8 @@
 ## ファイルと公開
 - ゲームは `index.html` 1ファイルだけ（HTML・CSS・JavaScript・自作の小さなWebGLエンジンが全部入り。外部ライブラリなし）。
 - 公開：GitHub Pages（このリポジトリの main ブランチ / root）。
-- 以前は claude.ai のアーティファクトで公開していた。そのときの `window.claude.use('db')`（ランキング・通信対戦）のコードが残っているが、claude.ai の外では使えないので、今はスコアは各端末（localStorage）にだけ残る。
-- **次の作業予定**：ランキングと通信対戦を Firebase（Firestore）につなぎ替える。
+- ランキングと通信対戦は Firebase（Firestore、プロジェクト railway-ranking）につないである。SDKは gstatic の compat 版（firebase-app-compat / firebase-firestore-compat 10.12.2）。設定は index.html の `FIREBASE_CONFIG`。
+- 通信できないときは、スコアは各端末（localStorage）にだけ残る。端末ごとのIDは localStorage の `erw_uid`、自分の記録IDは `erw_myids`。
   - コレクション `scores`：1件1記録 `{name, score, rank, lv, st, pos, tod, at}`。誰でも読める・追加だけできる（書き換え・削除は不可）。
   - コレクション `vs`：通信対戦の部屋。ドキュメントID `<4けたの番号>_h`（つくった人＝フロント）と `_g`（入った人＝リア）。
   - Firestoreのルール案（作成済み）：scores は keys を限定・name 1〜12文字・score は -20000〜20000 の整数・lv は整数、update/delete 禁止。vs は room が4文字のときだけ create/update 可。

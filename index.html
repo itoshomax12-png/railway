@@ -373,6 +373,8 @@ html,body,#app{height:100%;height:100dvh}
 .ginfo .gi-ppl small{font-size:10px;letter-spacing:0;color:#5b6170;font-weight:900}
 #iHold{background:#eef0f5;color:#3c4354}   /* 「← 左」のかわりに「次の電車でご案内」 */
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div id="app">
@@ -739,8 +741,19 @@ function loadBest(){try{const b=JSON.parse(localStorage.getItem('erw_best3')||'{
   $('best').textContent=s?('ハイスコア：'+s):'';}catch(e){}}
 loadBest();
 // ===== ランキング =====
+// みんなのランキング・通信対戦は Firebase（Firestore）に保存する
+const FIREBASE_CONFIG={
+  apiKey: "AIzaSyCqk7RMPqFXBwTBkGISrUL9xDTiDVDfM9s",
+  authDomain: "railway-ranking.firebaseapp.com",
+  projectId: "railway-ranking",
+  storageBucket: "railway-ranking.firebasestorage.app",
+  messagingSenderId: "229768996885",
+  appId: "1:229768996885:web:4a4de4be6a1b44dfeac61c"
+};
 let RDB=null, RUID=null;
-(async()=>{ try{ if(!window.claude||!window.claude.use) return; RDB=await window.claude.use('db'); const u=await window.claude.use('user'); RUID=u? await u.id():null; }catch(e){ RDB=null; } })();
+try{ if(window.firebase){ if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); RDB=firebase.firestore(); } }catch(e){ RDB=null; }
+try{ RUID=localStorage.getItem('erw_uid'); if(!RUID){ RUID='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); localStorage.setItem('erw_uid',RUID); } }catch(e){ RUID='u'+Math.random().toString(36).slice(2,10); }
+function myIds(){ try{ return JSON.parse(localStorage.getItem('erw_myids')||'[]'); }catch(e){ return []; } }
 function savedName(){ try{ return (localStorage.getItem('erw_name')||'').slice(0,12); }catch(e){ return ''; } }
 function keepName(n){ try{ localStorage.setItem('erw_name',n); }catch(e){} }
 function getName(){ const el=$('vsName'); return ((el&&el.value)||savedName()||'').trim().slice(0,12); }
@@ -751,11 +764,10 @@ function saveLocal(rec){ try{ const h=localHist(); h.push(rec); localStorage.set
 async function saveShared(rec){
   if(!RDB||!RUID) return 'local';
   try{
-    const ref=RDB.doc('scores/'+RUID); const snap=await withTimeout(ref.get(),10000);
-    const d=snap&&snap.exists?snap.data():null;
-    const list=(d&&Array.isArray(d.entries))?d.entries.slice():[];
-    list.push(rec);
-    await withTimeout(ref.set({entries:list.slice(-60), updated:Date.now()}),10000);
+    // 1回のシフト＝1件。書き換え・削除はできない（Firestoreのルール）
+    const doc={name:String(rec.name||'').slice(0,12), score:Math.round(rec.score)|0, rank:String(rec.rank||''), lv:rec.lv|0, st:String(rec.st), pos:String(rec.pos), tod:String(rec.tod), at:Date.now()};
+    const ref=await withTimeout(RDB.collection('scores').add(doc),10000);
+    try{ const ids=myIds(); ids.push(ref.id); localStorage.setItem('erw_myids',JSON.stringify(ids.slice(-200))); }catch(e){}
     return 'shared';
   }catch(e){ return 'local'; }
 }
@@ -769,11 +781,11 @@ async function renderRank(){
   const box=$('rkList'); box.textContent='読み込み中…'; let rows=[], note='';
   if(rkTab==='me'){ rows=localHist().slice(); note='この端末で遊んだ記録（新しい順）'; }
   else if(RDB){
-    try{ const q=await withTimeout(RDB.collection('scores').get(),10000);
-      for(const d of q.docs){ const e=(d.data()||{}).entries; if(Array.isArray(e)) for(const r of e){ if(r&&typeof r.score==='number') rows.push(Object.assign({},r,{_me:d.id===RUID})); } }
+    try{ const q=await withTimeout(RDB.collection('scores').where('lv','==',rkLv).get(),10000), mine=myIds();
+      for(const d of q.docs){ const r=d.data()||{}; if(typeof r.score==='number') rows.push(Object.assign({},r,{_me:mine.includes(d.id)})); }
       note='みんなの記録（上位30件）';
     }catch(e){ rows=localHist(); note='みんなのランキングに接続できないため、この端末の記録を表示中'; }
-  } else { rows=localHist(); note='みんなのランキングが使えない開き方のため、この端末の記録を表示中'; }
+  } else { rows=localHist(); note='通信できないため、この端末の記録を表示中'; }
   rows=rows.filter(r=>r.lv===rkLv);
   if(rkTab==='me') rows.sort((a,b)=>(b.at||0)-(a.at||0)); else rows.sort((a,b)=>b.score-a.score);
   rows=rows.slice(0,30);
@@ -835,7 +847,7 @@ function vsBegin(conf){ // 2人そろったら同じ設定で始める
 $('bVs').onclick=()=>{
   $('vsName').value=savedName(); $('vsName').style.borderColor='';
   $('vsMenu').style.display=''; $('vsWait').style.display='none'; $('ovVs').classList.add('on');
-  if(!RDB||!RUID){ $('vsInfo').innerHTML='この開き方では通信対戦が使えません。<br>claude.aiにログインして、このゲームのページを開いてください（共有で招待された人どうしで遊べます）。'; $('bVsMake').disabled=$('bVsJoin').disabled=true; }
+  if(!RDB||!RUID){ $('vsInfo').innerHTML='通信できないため、いまは通信対戦が使えません。<br>インターネットにつながっているか確かめてください。'; $('bVsMake').disabled=$('bVsJoin').disabled=true; }
 };
 $('bVsX').onclick=()=>{ if(VS){ vsPush({left:true}); } vsClose(); VS=null; $('ovVs').classList.remove('on'); };
 $('bVsMake').onclick=async()=>{
@@ -1787,7 +1799,7 @@ function end(){
   else { LASTREC={name:savedName()||'',score:G.score,rank:r,lv,st,pos,tod,at:Date.now()}; saveLocal(LASTREC);
   $('bReg').disabled=false; $('eName').value=savedName(); $('eName').style.borderColor='';
   if(RDB&&RUID){ $('eReg').style.display=''; $('eSave').textContent='📱 この端末に記録しました。名前を入れると、みんなのランキングにも載ります'; }
-  else { $('eReg').style.display='none'; $('eSave').textContent='📱 この端末に記録しました（みんなのランキングには登録できない開き方です）'; } }
+  else { $('eReg').style.display='none'; $('eSave').textContent='📱 この端末に記録しました（通信できないため、みんなのランキングには登録できません）'; } }
 }
 
 // ---------- render ----------
