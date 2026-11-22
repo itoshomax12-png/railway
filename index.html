@@ -1133,7 +1133,7 @@ function start(){
   setTimeout(()=>{ if(!E3.ready){ E3.init($('cv')) || ($('nogl').style.display='flex'); } E3.setup(); newTrain(); },30);
 }
 function newTrain(){
-  G.trip++; G.set=(G.set+1)%3;
+  G.trip++; G.set=(G.set+1)%3; G.s0=G.score;   // s0：この便が始まったときのスコア（便ごとの点数に使う）
   G.car=newCar(); G.t=0; G.phase='arrive'; G.count=0; G.trainMiss=[]; G.trainOpe=[]; G.order=[]; G.gateOrder=0; G.ins='free';
   G.gates=Array.from({length:STN[st].gates},(_,i)=>i===0?'closed':'closed');
   G.depart=false; G.thumbed=false; G.go3=false; G.waitMsg=false; G.waitInt=false; G.checkQ=[]; G.checking=null; G.unloadOk=0; G.unloadN=0; G.called=false; G.fw=[]; G.aside=[]; G.warnedAnch=false; clearTimeout(G.uT); $('bCallOut').classList.remove('sel'); $('bExitL').style.display=(st==='awf'&&pos==='rear')?'':'none';
@@ -1752,6 +1752,7 @@ function dispatch(){
     if(b&&!G.trainOpe.length&&h<=CARCAP){ b=Math.round(b*mul); pts+=b; G.stats.bonus+=b; notes.push([`${why.join('・')}（×${mul}）`,b]); }
     G.log.push({trip:G.trip, order:o.slice(), h, ope:G.trainOpe.length}); }
   G.score+=pts; G.stats.boarded+=h;
+  { const l=G.log[G.log.length-1]; if(l) l.pt=G.score-(G.s0||0); }   // この便の点数（便の途中の加点・減点もふくむ）
   $('hScore').textContent=G.score; if(VS) vsPush({trip:G.trip,score:G.score,heads:0});
   const gNow=G;
   setTimeout(()=>{
@@ -1780,6 +1781,9 @@ function end(){
   const r=pts>=105?'S':pts>=90?'A':pts>=70?'B':'C';
   $('eRank').textContent=r; $('eScore').textContent=G.score+' pt';
   $('eTable').innerHTML=
+    (TRIPS>1?`<tr><td colspan="2" style="text-align:left;font-weight:700">1便ずつのスコア</td></tr>`+
+      (G.log||[]).map(l=>`<tr><td>${l.trip}便目（${l.h}名${l.ope?'・⚠オペミス':''}）</td><td>${l.pt>0?'+':''}${l.pt||0} pt</td></tr>`).join('')+
+      `<tr><td colspan="2" style="padding:0;height:8px"></td></tr>`:'')+
     `<tr><td>ステーション / ポジション</td><td>${STN[st].short} / ${pos==='front'?'フロント':'リア'}</td></tr>`+
     `<tr><td>混雑レベル / 便数</td><td>${LV[lv].name} / ${TRIPS}便</td></tr>`+
     `<tr><td>ご案内したゲスト</td><td>${s.boarded}名</td></tr>`+
