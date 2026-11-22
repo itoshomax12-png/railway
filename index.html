@@ -1646,7 +1646,7 @@ function uiTick(){
   const show=(id,on)=>$(id).classList.toggle('show',!!on);
   show('ctxShift', ph==='load'&&sel);
   show('bOther', ph==='load'&&sel&&!!G.car.groups[G.sel]);
-  show('bSqueeze', ph==='load'&&G.car&&!!G.noRoom);
+  show('bSqueeze', ph==='load'&&G.car);   // 「詰めてもらう」はロード中ずっと出しておく（光るのは場所が足りないときだけ）
   const ol=ph==='load'&&cur&&!cur.foldAsked&&overLimit(cur);
   show('bFold', ol==='st'); show('bNextWc', ol==='wc');
   show('bAside', ph==='load'&&cur&&cur.anch&&!cur.waited&&!ol);
