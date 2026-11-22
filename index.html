@@ -226,6 +226,9 @@ body,button{font-family:"Zen Maru Gothic",system-ui,sans-serif;letter-spacing:.0
 .chipl{font-size:10.5px;color:rgba(255,255,255,.6);font-weight:700;flex:none}
 .chip{flex:none;background:var(--ivory);color:var(--txt);border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:12.5px;font-weight:700}
 .chip.sel{background:var(--gold);color:#fff;border-color:var(--gold)}
+/* 座る位置のボタンは押しやすいように大きめ */
+#pLoad .chips{gap:6px}
+#pLoad .chip{min-height:48px;padding:6px 4px;font-size:15px;font-weight:800;border-radius:14px}
 .chip:disabled{opacity:.3}
 .ctx{display:flex;flex-wrap:wrap;gap:5px}
 .ctx>*{flex:1 1 100%}
@@ -573,9 +576,9 @@ html,body,#app{height:100%;height:100dvh}
           <li><b>映像</b>：車内のグループをタップで選ぶ（ずれてもらう相手）</li>
           <li><b>車内アップ／全体</b>：カメラの切りかえ</li>
           <li><b>名前</b>：場所や人の名前を表示</li>
-          <li><b>状況で出るボタン</b>：<br>「左（右）にずれますか？」…選んだグループにずれてもらう<br>「反対側のベンチへお移りいただけますか？」…選んだグループに反対側のベンチへ移ってもらう（ベビーカー・車いすのグループは連結部スペースの反対側へ）<br>「皆さま少しずつお詰めいただけますか？」…座りきれないとき<br>「たためば乗れますが…」…ベビーカーが台数制限をこえたとき<br>「あとで（横で待機）」／「お待たせした方を呼ぶ」…ベビーカー・車いす（呼ぶと1回で乗車）<br>「フタのない飲み物のお願い」</li>
+          <li><b>状況で出るボタン</b>：<br>「左（右）にずれますか？」…選んだグループにずれてもらう<br>「反対側のベンチへお移りいただけますか？」…選んだグループに反対側のベンチへ移ってもらう（ベビーカー・車いすのグループは連結部スペースの反対側へ）<br>「皆さま少しずつお詰めいただけますか？」…車内が10名ほどになったら、または座りきれないとき<br>「たためば乗れますが…」…ベビーカーが台数制限をこえたとき<br>「あとで（横で待機）」／「お待たせした方を呼ぶ」…ベビーカー・車いす（呼ぶと1回で乗車）<br>「フタのない飲み物のお願い」</li>
           <li><b>ゲート</b>：タップで開け閉め。ロードの最後にもう一度押すとゲート確認へ</li>
-          <li><b>何名様ですか？</b>：ゲート前のグループに人数を聞く。聞いたあとは、ここに案内のボタン（詰めてもらう・横で待ってもらうなど）が出る</li>
+          <li><b>何名様ですか？</b>：ゲート前のグループに人数を聞く。聞いたあとは、ここに案内のボタン（横で待ってもらう・待機の方を呼ぶなど）が出る</li>
           <li><b>カウンター</b>：＋1／−で数える</li>
           <li><b>席の指示（左右）・次の電車で</b>：おまかせ（基本は左詰め）／右に寄せて座ってもらう／🚃次の電車でご案内</li>
           <li><b>席の指示（奥・手前）</b>：奥＝上のベンチ、手前＝下のベンチ。↻反対側へ＝ベビーカーグループの横へ</li>
@@ -1654,7 +1657,7 @@ function uiTick(){
   const show=(id,on)=>$(id).classList.toggle('show',!!on);
   show('ctxShift', ph==='load'&&sel);
   show('bOther', ph==='load'&&sel&&!!G.car.groups[G.sel]);
-  show('bSqueeze', ph==='load'&&G.car);   // 「詰めてもらう」はロード中ずっと出しておく（光るのは場所が足りないときだけ）
+  show('bSqueeze', ph==='load'&&G.car&&(G.noRoom||heads(G.car)>=10));   // 「詰めてもらう」は場所が足りないとき、または車内が10名ほどになったら（後半）出す。光るのは場所が足りないときだけ
   const ol=ph==='load'&&cur&&!cur.foldAsked&&overLimit(cur);
   show('bFold', ol==='st'); show('bNextWc', ol==='wc');
   show('bAside', ph==='load'&&cur&&cur.anch&&!cur.waited&&!ol);
@@ -1685,8 +1688,8 @@ function uiTick(){
 }
 setInterval(uiTick,250);
 // 人数を聞いたあとは「何名様ですか？」を消して、その場所に案内のボタンを出す（大事な順に2つまで。残りは今までどおり映像の下のはしに重ねる）
-// ずれてもらう・反対側のベンチは、映像で選んだグループに使うので映像の下のはしのまま
-const GUIDE=['bDrink','bFold','bNextWc','bAside','bRecall','bSqueeze'];
+// ずれてもらう・反対側のベンチは映像で選んだグループに使うので、詰めてもらうは後半に出るので、映像の下のはしのまま
+const GUIDE=['bDrink','bFold','bNextWc','bAside','bRecall'];   // 詰めてもらうは映像の下のはしのまま
 const CTXORD=[...$('ctx').children].map(e=>e.id);
 function placeGuide(on){
   $('askSlot').classList.toggle('guide',on);
