@@ -1683,7 +1683,7 @@ $('bAside').onclick=()=>{
     return;
   }
   if(G.cur&&G.cur.away){   // トイレに行った人がいるグループ：そろうまで横で待ってもらい、先に後ろの方をご案内
-    sayCast('おそろいになるまで、こちらで少々お待ちください。先に後ろの方をご案内させてください');
+    sayCast('おそろいになるまで、こちらで少々お待ちください。先に後ろの方をご案内して、この電車に間に合わなければ次の電車でご案内いたします');
     G.cur.waited=true; G.cur.awayWait=true; G.aside.push(G.cur); G.cur=null;
     $('group').className='group walkout'; drawQueue();
     setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk);
@@ -1711,6 +1711,7 @@ $('bRecall').onclick=()=>{
 };
 $('bHold').onclick=()=>{
   if(G.phase!=='load'||!G.cur) return;
+  if(G.cur.away&&!G.cur.anch&&!G.cur.waited){ $('bAside').onclick(); return; }   // トイレの方を待つグループは「そろうまで待ってもらう」で（間に合わなければ次の電車へ。この1つで両方の役割）
   // 次の電車にするのは、人数制限・台数制限などキャスト側の事情で仕方がないときだけ（座る側の希望では使わない）
   { const t=carryPush(G.cur); sayCast(`申し訳ございません、${tripName(t)}でご案内いたします。こちらで少々お待ちください`); }
   G.cur=null;
@@ -1728,7 +1729,7 @@ function uiTick(){
   const ol=ph==='load'&&cur&&!cur.foldAsked&&overLimit(cur);
   show('bFold', ol==='st'); show('bNextWc', ol==='wc');
   show('bAside', ph==='load'&&cur&&cur.asked&&(cur.anch||cur.away)&&!cur.waited&&!ol);   // 横で待ってもらうは、人数を聞いたあとに映像の下のはしに出す（ベビーカー・車いす／トイレの方を待つグループ）
-  if(cur&&cur.away&&!cur.anch) $('bAside').textContent='🚻 そろうまで横で待ってもらう'; else $('bAside').textContent='👶 横で待ってもらう';
+  if(cur&&cur.away&&!cur.anch) $('bAside').textContent='🚻 そろうまで待ってもらう（間に合わなければ次の電車）'; else $('bAside').textContent='👶 横で待ってもらう';
   show('bRecall', ph==='load'&&G.aside&&G.aside.length);
   show('bDrink', ph==='load'&&cur&&cur.asked&&hasDrink(cur)&&!cur.drinkAsked);
   placeGuide(true);
