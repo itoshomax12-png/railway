@@ -468,7 +468,7 @@ html,body,#app{height:100%;height:100dvh}
     <button class="pill" id="bHome" style="border:none;font:inherit;font-size:11px;font-weight:700">🏠</button>
   </div>
   <div class="dwell" id="dwell"><i></i><div class="m" id="mInt"></div><div class="m x" id="mX"></div><span id="dwT">0秒</span></div>
-  <div class="phase"><span id="phase">到着</span><span id="hLoad">車内 0名</span></div>
+  <div class="phase"><span id="phase">到着</span><span id="hLoad"></span></div>
   <div class="bubble" id="bubble"></div>
   <div class="ginfo" id="ginfo"></div>
   <div class="view" id="view">
@@ -1741,7 +1741,7 @@ function callAsk(){
   setTimeout(()=>{
     if(G.phase!=='load') return;
     const ans=g.far?`${g.answer}! (${g.answer}名)`:`${g.answer}人です！`;
-    sayGuest(ans); $('callInfo').innerHTML=`${pos}のグループ：<b>${g.answer}名</b>（車内 ${heads(G.car)}名／定員${CARCAP}名）`;
+    sayGuest(ans); $('callInfo').innerHTML=`${pos}のグループ：<b>${g.answer}名</b>`;
     $('bCallGo').disabled=false; $('bCallNext').disabled=false;
   },600);
 }
@@ -1889,7 +1889,7 @@ function render(){
   $('platform').innerHTML=G.gates.map((s,i)=>`<button class="gate ${s==='open'?'open':s==='ok'?'ok':s==='chk'?'chk':''}" data-g="${i}">${i===0?'入口ゲート':i===G.gates.length-1?'出口ゲート':'サポートゲート'}<small>${s==='open'?'開':s==='ok'?'ゲートOK ☝':s==='chk'?'確認中…':'閉'}</small></button>`).join('');
   $('platform').insertAdjacentHTML('afterbegin','<span style="color:#fff;font-size:9px;font-weight:900;text-align:center;line-height:1.2">🧍<br>ディス<br>パッチャー</span>');
   $('platform').querySelectorAll('.gate').forEach(b=>b.onclick=()=>gateTap(+b.dataset.g,b));
-  $('hLoad').textContent=`車内 ${heads(car)}名`;
+  // 車内の人数は画面に出さない（カウンターで数える）
 }
 function mini(html,k){return html.replace(/width="([\d.]+)" height="([\d.]+)"/g,(m,w,h)=>`width="${(w*k).toFixed(1)}" height="${(h*k).toFixed(1)}"`);}
 function drawQueue(){ // うしろに並んでいるゲストを小さく表示
