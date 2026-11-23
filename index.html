@@ -1127,8 +1127,14 @@ function findSeat0(car,g,mode,onlyRow){
   // ふつうのゲストは前のグループにぴったり続けて座る（すき間を作るのは、詰めない海外ゲストだけ）
   const gap = loose? rnd(2,6) : 0;
   const R=[reach(rows[0],rowDoor(car,0)),reach(rows[1],rowDoor(car,1))];
+  // 入口からの向き：おまかせ・奥・手前は、入口から遠い方から座る（連結部から入る→車両の端側／車両の端から入る→連結部側）
+  const sideFor=d=> (mode==='free'||mode==='row') ? (d==='coup'?'hi':'lo') : side;
   const single=[];
-  for(let r=0;r<2;r++){ if(onlyRow!=null&&r!==onlyRow) continue; const s0=placeIn(R[r],len,side,gap); if(s0!==null) single.push({r,s:s0});}
+  for(let r=0;r<2;r++){ if(onlyRow!=null&&r!==onlyRow) continue;
+    const d=rowDoor(car,r); let s0=placeIn(R[r],len,sideFor(d),gap), used=d;
+    // 連結部から入れる空きがなくても、車両の端のドアから入ればそのベンチの空いている所に座れる
+    if(s0===null&&d==='coup'&&mode!=='around'){ const Re=reach(rows[r],'end'); s0=placeIn(Re,len,sideFor('end'),gap); used='end'; if(s0!==null) R[r]=Re; }
+    if(s0!==null) single.push({r,s:s0,door:used}); }
   // 同じグループの人は同じベンチに座る。どちらのベンチにも入りきらない大人数のときだけ、2つのベンチに分かれる
   const wantSplit = !single.length && onlyRow==null && R[0]&&R[1]&&R[0].L+R[1].L>=len;
   if(wantSplit){
@@ -1145,7 +1151,7 @@ function findSeat0(car,g,mode,onlyRow){
     pick=single.slice().sort((x,y)=> adj(y)-adj(x) || x.s-y.s)[0];
   }
   else { pick=single.slice().sort((x,y)=> side==='hi'? y.s-x.s : x.s-y.s)[0]; }
-  return [{r:pick.r,s:pick.s,len}];
+  const res=[{r:pick.r,s:pick.s,len}]; res.door=pick.door; return res;
 }
 function seatFill(car,targetHeads){ // アンロード用に乗客を配置（18名前後）
   let tries=0;
@@ -1553,7 +1559,8 @@ $('bGo').onclick=()=>{
   else if(wantOk===false) setTimeout(()=>sayGuest('（希望の側には座れなかった…）',true),700);
   if(hasDrink(g)) opeMiss('フタなし飲み物を持ち込ませた',el);
   const entBefore=entrance(car), topBefore=rowDoor(car,0);
-  g.boardDoor = p.length ? rowDoor(car,p[0].r) : 'coup';
+  g.boardDoor = p.length ? (p.door||rowDoor(car,p[0].r)) : 'coup';
+  if(p.door==='end'&&rowDoor(car,p[0].r)==='coup') setTimeout(()=>toast('車両の端のドアからご案内'),600);
   put(car,g,p);
   if(g.wc) car.wc++; car.st+=stN(g);
   G.stats.counted++;
