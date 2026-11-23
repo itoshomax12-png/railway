@@ -118,6 +118,7 @@ button{font-family:inherit;border:none;cursor:pointer;touch-action:manipulation;
 /* overlay */
 .ov{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
 #ovPause{z-index:60}   /* 一時停止はほかの画面より上に */
+#ovQuit{z-index:70}   /* 一時停止中に「最初の画面に戻る」を押したときの確認は、さらに上に */
 #ovRank{z-index:50}   /* シフト終了の画面から開いたランキングが、その画面の下にかくれないように */
 .ov.on{display:flex}
 .card{background:var(--cream);border-radius:16px;padding:16px 14px;width:100%;text-align:center;border:3px solid var(--gold);max-height:100%;overflow:auto}
@@ -698,6 +699,7 @@ html,body,#app{height:100%;height:100dvh}
     <h2>⏸️ 一時停止中</h2>
     <div class="trivia" style="text-align:center">時間も電車もゲストも止まっています</div>
     <button class="btn red" style="width:100%" id="bResume">▶ 再開する</button>
+    <button class="btn" style="width:100%;margin-top:8px" id="bPauseHome">🏠 最初の画面に戻る</button>
   </div>
 </div>
 <div class="ov" id="ovQuit">
@@ -956,11 +958,13 @@ document.querySelectorAll('.hw-tabs button').forEach(b=>b.onclick=()=>{
 });
 $('bHome').onclick=()=>$('ovQuit').classList.add('on');
 $('bPause').onclick=()=>pauseGame(false); $('bResume').onclick=resumeGame;
+$('bPauseHome').onclick=()=>$('ovQuit').classList.add('on');   // 一時停止中でも、確認してから最初の画面へ（「つづける」なら一時停止のまま）
 // ほかのアプリに切りかえた・画面を消したときは、自動で一時停止（もどってきたら「再開する」を押す）
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) pauseGame(true); });
 window.addEventListener('pagehide',()=>pauseGame(true));
 document.querySelectorAll('[data-close="ovQuit"]').forEach(b=>b.onclick=()=>$('ovQuit').classList.remove('on'));
 $('bQuitYes').onclick=()=>{
+  PAUSED=false;
   clearInterval(tick); if(G) G.phase='quit'; setPanel(null);
   if(VS){ vsPush({left:true}); setTimeout(()=>{vsClose();VS=null;},1500); }
   document.querySelectorAll('.ov.on,.sheet.on').forEach(e=>e.classList.remove('on'));
