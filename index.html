@@ -286,6 +286,7 @@ html,body,#app{height:100%;height:100dvh}
 .rk .sub{grid-column:2/4;font-size:10.5px;opacity:.6}
 .rk.me{background:#fbf3dc;border-radius:8px}
 .hud{gap:4px}.hud .pill{padding:3px 7px}
+@media (max-width:340px){ .hud{gap:3px} .hud .pill{padding:3px 5px} }   /* とても細いスマホでも上のバー（⏸🏠まで）が入るように */
 /* セリフは映像の外（すぐ上）に出して、車内にかぶらないようにする */
 #sGame>.bubble{position:static;flex:0 0 auto;margin:0 0 4px;min-height:40px;box-sizing:border-box;background:var(--ivory);color:var(--txt);font-size:12.5px;font-weight:700;line-height:1.35;border-left:4px solid #9aa3b5;border-radius:10px;padding:4px 9px}
 #sGame>.bubble.cast{border-left-color:var(--red)}
@@ -470,6 +471,7 @@ html,body,#app{height:100%;height:100dvh}
     <span class="pill" id="hSet">第1編成</span>
     <span class="score" id="hScore">0</span>
     <span class="pill" id="hVs" style="display:none"></span>
+    <button class="pill" id="bPause" style="border:none;font:inherit;font-size:11px;font-weight:700">⏸️</button>
     <button class="pill" id="bHome" style="border:none;font:inherit;font-size:11px;font-weight:700">🏠</button>
   </div>
   <div class="dwell" id="dwell"><i></i><div class="m" id="mInt"></div><div class="m x" id="mX"></div><span id="dwT">0秒</span></div>
@@ -689,6 +691,13 @@ html,body,#app{height:100%;height:100dvh}
     <button class="btn" style="width:100%;margin-top:8px" data-close="ovLog">閉じる</button>
   </div>
 </div>
+<div class="ov" id="ovPause">
+  <div class="card">
+    <h2>⏸️ 一時停止中</h2>
+    <div class="trivia" style="text-align:center">時間も電車もゲストも止まっています</div>
+    <button class="btn red" style="width:100%" id="bResume">▶ 再開する</button>
+  </div>
+</div>
 <div class="ov" id="ovQuit">
   <div class="card">
     <h2>最初の画面に戻りますか？</h2>
@@ -761,6 +770,21 @@ const COLORS=['#e8743b','#3b82c4','#7a5bc7','#2f9e6e','#d24d78','#c9a13a','#4aa3
 const GCOL=['#1f6f78','#b5532a','#3f7f5e','#4b6aa8','#7a5b9c','#9c6b3f','#2a8f9c','#a8437a','#5e7d2a','#6b5bd1','#c07a2a','#2f5f8f'];
 
 let st='awf', pos='front', lv=0, tod='day', G=null, tick=null, audio=null, gid=0;
+// ---------- 一時停止 ----------
+// 止めている間は、時間（G.t）・3Dの動き・トイレの人の戻り時間・出発までの待ち時間を止める
+let PAUSED=false, pausedAt=0;
+function later(fn,ms){ setTimeout(function chk(){ if(PAUSED) return setTimeout(chk,200); fn(); },ms); }   // 一時停止中は待ってから実行
+function pauseGame(){
+  if(PAUSED||!G||VS||!$('sGame').classList.contains('on')||G.phase==='quit') return;
+  if(document.querySelector('.ov.on')) return;   // 便の結果などが出ているときは止めない
+  PAUSED=true; pausedAt=performance.now(); $('ovPause').classList.add('on');
+}
+function resumeGame(){
+  if(!PAUSED) return; const d=performance.now()-pausedAt;
+  if(G){ const all=[G.cur].concat(G.queue||[],G.aside||[],G.carry||[]).filter(Boolean).concat(G.car?Object.values(G.car.groups).map(x=>x.g):[]);
+    all.forEach(g=>{ if(g.awayBack) g.awayBack+=d; }); }   // トイレの人が戻るまでの時間も止めていた分だけのばす
+  PAUSED=false; $('ovPause').classList.remove('on');
+}
 
 // ---------- title ----------
 function seg(id,cb){$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{
@@ -928,6 +952,7 @@ document.querySelectorAll('.hw-tabs button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.hw-pg').forEach(p=>p.classList.toggle('on',p.dataset.hw===b.dataset.hw));
 });
 $('bHome').onclick=()=>$('ovQuit').classList.add('on');
+$('bPause').onclick=pauseGame; $('bResume').onclick=resumeGame;
 document.querySelectorAll('[data-close="ovQuit"]').forEach(b=>b.onclick=()=>$('ovQuit').classList.remove('on'));
 $('bQuitYes').onclick=()=>{
   clearInterval(tick); if(G) G.phase='quit'; setPanel(null);
@@ -1150,6 +1175,7 @@ function settleRows(car){
 
 // ---------- game flow ----------
 function start(){
+  PAUSED=false; $('ovPause').classList.remove('on'); $('bPause').style.display=VS?'none':'';   // 通信対戦では一時停止できない
   $('bCam').textContent=$('bCam2').textContent='🔍 車内アップ'; camCar=false;   // シフトの最初はいつも全体のカメラ
   { const b=$('iR'); b.dataset.ins=pos==='front'?'R':'L'; b.textContent=pos==='front'?'右 →':'← 左'; }   // リアは「← 左」（リアのおまかせは右詰めなので）
   TRIPS = TN===1?1:3;
@@ -1185,7 +1211,7 @@ function newTrain(){
   { const due=G.carry.filter(g=>!g.forTrip||g.forTrip<=G.trip); G.carry=G.carry.filter(g=>!due.includes(g)); G.queue=due.concat(G.queue); } G.sel=null;   // この電車の番になった方だけ先頭へ（あとの電車の方は待機場で待つ）
   while(G.queue.length<10) G.queue.push(makeGroup());
   drawQueue();
-  setTimeout(()=>{
+  later(()=>{
     G.phase='unload'; bell(1);
     sayCast('おかえりなさい！お忘れ物のないよう、お降りください');
     clearInterval(tick); tick=setInterval(loop,250);
@@ -1215,6 +1241,7 @@ function checkAwayBack(){
   }
 }
 function loop(){
+  if(PAUSED) return;
   checkFrontWatch(); checkAwayBack();
   if(G.depart) return;
   G.t+=0.25*LV[lv].speed;
@@ -1383,7 +1410,7 @@ $('bThumb').onclick=()=>{
     // ディスパッチインターバルより早くても、ゲートOK・サムアップがそろえばすぐ出発
     if(G.go3) return; G.go3=true;
     sayDisp(VS?'（2人のサムアップを確認…）':'（サムアップを確認…）');
-    setTimeout(()=>{ G.depart=true; dispatch(); },3000/LV[lv].speed);
+    later(()=>{ G.depart=true; dispatch(); },3000/LV[lv].speed);
   };
   wait();
 };
@@ -2677,6 +2704,7 @@ const E3=(()=>{
     requestAnimationFrame(frame);
     if(!ready||!env) return;
     if(!$('sGame').classList.contains('on')) return;
+    if(PAUSED){ tPrev=ts; return; }   // 一時停止中は動かさない（画面はそのまま）
     const dt=Math.min(.05,(ts-tPrev)/1000||.016);tPrev=ts;
     if(ts-lastSync>120&&G){lastSync=ts;syncNow();}
     // 電車
