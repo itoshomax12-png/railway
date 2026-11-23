@@ -118,6 +118,7 @@ button{font-family:inherit;border:none;cursor:pointer;touch-action:manipulation;
 /* overlay */
 .ov{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
 #ovPause{z-index:60}   /* 一時停止はほかの画面より上に */
+#ovRank{z-index:50}   /* シフト終了の画面から開いたランキングが、その画面の下にかくれないように */
 .ov.on{display:flex}
 .card{background:var(--cream);border-radius:16px;padding:16px 14px;width:100%;text-align:center;border:3px solid var(--gold);max-height:100%;overflow:auto}
 .card h2{margin:0 0 6px;font-size:17px;color:var(--red)}
