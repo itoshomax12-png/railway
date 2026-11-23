@@ -294,7 +294,6 @@ html,body,#app{height:100%;height:100dvh}
 #sGame>.bubble{position:static;flex:0 0 auto;margin:0 0 4px;min-height:40px;box-sizing:border-box;background:var(--ivory);color:var(--txt);font-size:12.5px;font-weight:700;line-height:1.35;border-left:4px solid #9aa3b5;border-radius:10px;padding:4px 9px}
 #sGame>.bubble.cast{border-left-color:var(--red)}
 .camb{top:6px}
-#bCam{display:none}   /* 映像の右上のカメラ切りかえは出さない（ロード中にカウンターの横の大きいボタンで切りかえる） */
 .lblb{top:40px}
 /* ---- 読みやすさ：セリフ ---- */
 #sGame>.bubble{display:flex;align-items:flex-start;gap:7px;min-height:44px;padding:5px 30px 5px 6px;position:relative;left:auto;right:auto;top:auto;z-index:2;cursor:pointer;background:#fffdf7;border:1px solid rgba(0,0,0,.08);border-left-width:5px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
@@ -363,16 +362,9 @@ html,body,#app{height:100%;height:100dvh}
 /* カウンターの左：案内のボタン（最大2つ） */
 #pLoad #askSlot{height:76px;display:flex;flex-direction:column;gap:4px;min-width:0}
 #pLoad #ctx2{display:flex;flex:1;flex-direction:column;gap:4px;min-height:0}
-/* 案内のボタンがないときは、カメラの切りかえ（車内アップ／全体）を大きく出す */
-#pLoad #bCam2{display:none;flex:1;min-height:0;font-size:15px;font-weight:800}
+/* 「何名様ですか？」はいつもカウンターの左に出す */
 #pLoad #ctx2:empty{display:none}
-#pLoad #ctx2:empty + #bCam2{display:block}
-/* ボタンの入れ替え：人数を聞く前は、座る位置と「どうぞ」のかわりに大きな「何名様ですか？」。聞いたら座る位置と「どうぞ」に入れ替わる。
-   全体の高さは同じなので、映像やカウンターの位置は動かない */
-#pLoad #bAsk{display:none}
-#pLoad.asking #chips,#pLoad.asking #bGo{display:none}
-#pLoad.asking #bAsk{display:block;font-size:20px;font-weight:900}
-#pLoad.asking .gorow{height:calc(var(--chipsH) + 5px + 44px)}
+#pLoad #askSlot #bAsk{flex:1;min-height:0;font-size:15px;font-weight:800}
 #pLoad{--chipsH:104px}
 /* サムアップを押せたとき：緑にして、へこんだ見た目に */
 #bThumb.done{background:#2f9e6e !important;border-color:#2f9e6e !important;color:#fff !important;transform:translateY(3px);box-shadow:none !important;animation:thumbPop .35s ease-out}
@@ -505,7 +497,7 @@ html,body,#app{height:100%;height:100dvh}
   <!-- ローディング -->
   <div class="panel" id="pLoad">
     <div class="g2">
-      <div id="askSlot"><div id="ctx2"></div><button class="btn" id="bCam2">🔍 車内アップ</button></div>
+      <div id="askSlot"><div id="ctx2"></div><button class="btn" id="bAsk">🗣 何名様ですか？</button></div>
       <div class="counter">
         <button id="bMinus">−</button>
         <div class="n"><span id="cN">0</span><small>カウンター</small></div>
@@ -534,7 +526,6 @@ html,body,#app{height:100%;height:100dvh}
     <div class="gorow">
       <button class="btn" id="bMore">⋯</button>
       <button class="btn red" id="bGo">どうぞ、ご乗車ください</button>
-      <button class="btn" id="bAsk">🗣 何名様ですか？</button>
     </div>
   </div>
   <div class="sheet" id="sheetMore">
@@ -586,13 +577,13 @@ html,body,#app{height:100%;height:100dvh}
           <div class="m-bar"><i class="m-n">2</i></div>
           <div class="m-say"><b>🙋 あなた</b> 何名様ですか？ <i class="m-n">3</i></div>
           <div class="m-info">ゲート前 <b>4名</b> <span class="w">⚠🥤フタなし</span><span class="y">👶ベビーカー</span><i class="m-n">4</i></div>
-          <div class="m-view">映像（車内・ゲート・列）<i class="m-n">5</i><span class="m-lbl">🏷名前 <i class="m-n">7</i></span>
+          <div class="m-view">映像（車内・ゲート・列）<i class="m-n">5</i><span class="m-cam">🔍車内アップ <i class="m-n">6</i></span><span class="m-lbl">🏷名前 <i class="m-n">7</i></span>
             <div class="m-ctx">状況で出るボタン（重なって出る）<i class="m-n">8</i></div></div>
           <div class="m-row"><span class="m-b">出口ゲート</span><span class="m-b">入口ゲート</span><i class="m-n">9</i></div>
-          <div class="m-row"><span class="m-b">🔍 車内アップ<i class="m-n">6</i></span><span class="m-b dk">− 4 ＋1<i class="m-n">11</i></span></div>
+          <div class="m-row"><span class="m-b">🗣 何名様ですか？<i class="m-n">10</i></span><span class="m-b dk">− 4 ＋1<i class="m-n">11</i></span></div>
           <div class="m-row"><span class="m-b g">おまかせ</span><span class="m-b">右 →</span><span class="m-b">🚃 次の電車で</span><i class="m-n">12</i></div>
           <div class="m-row"><span class="m-b">奥（上）</span><span class="m-b">手前（下）</span><span class="m-b">↻ 反対側へ</span><i class="m-n">13</i></div>
-          <div class="m-row"><span class="m-b s">⋯<i class="m-n">14</i></span><span class="m-b red">どうぞ、ご乗車ください<i class="m-n">15</i></span><span class="m-b">🗣 何名様ですか？<i class="m-n">10</i></span></div>
+          <div class="m-row"><span class="m-b s">⋯<i class="m-n">14</i></span><span class="m-b red">どうぞ、ご乗車ください<i class="m-n">15</i></span></div>
         </div>
         <ol class="hw-l">
           <li><b>上のバー</b>：ステーション・担当・便・スコア。🏠で最初の画面へ</li>
@@ -600,11 +591,11 @@ html,body,#app{height:100%;height:100dvh}
           <li><b>セリフ</b>：🙋あなた／🧑‍🤝‍🧑ゲスト／📣ディスパッチャー。<b>タップで履歴</b></li>
           <li><b>ゲート前のグループ</b>：人数と特徴。<span class="w">赤</span>＝対応しないとオペミス、<span class="y">黄</span>＝注意、緑＝OK</li>
           <li><b>映像</b>：車内のグループをタップで選ぶ（ずれてもらう相手）</li>
-          <li><b>車内アップ／全体</b>：カメラの切りかえ（ロード中に、カウンターの横の大きいボタンで。ロードが終わると全体にもどる）</li>
+          <li><b>車内アップ／全体</b>：カメラの切りかえ。ロードが始まると自動で車内アップに、ロードが終わると全体にもどる</li>
           <li><b>名前</b>：場所や人の名前を表示</li>
           <li><b>状況で出るボタン</b>：<br>「左（右）にずれますか？」…選んだグループにずれてもらう<br>「反対側のベンチへお移りいただけますか？」…選んだグループに反対側のベンチへ移ってもらう（ベビーカー・車いすのグループは連結部スペースの反対側へ）<br>「皆さま少しずつお詰めいただけますか？」…車内が10名ほどになったら、または座りきれないとき<br>「たためば乗れますが…」…ベビーカーが台数制限をこえたとき<br>「あとで（横で待機）」／「お待たせした方を呼ぶ」…ベビーカー・車いす（呼ぶと1回で乗車）<br>「フタのない飲み物のお願い」</li>
           <li><b>ゲート</b>：タップで開け閉め。ロードの最後にもう一度押すとゲート確認へ</li>
-          <li><b>何名様ですか？</b>：ゲート前のグループに人数を聞く。聞くと、座る位置のボタンと「どうぞ」に入れ替わる</li>
+          <li><b>何名様ですか？</b>：ゲート前のグループに人数を聞く（もう一度押すと、もう一度答えてくれる）</li>
           <li><b>カウンター</b>：＋1／−で数える</li>
           <li><b>席の指示（左右）・次の電車で</b>：おまかせ（フロントは左詰め・リアは右詰め）／フロントは「右 →」・リアは「← 左」に寄せて座ってもらう／🚃次の電車でご案内（乗れないときだけ出る）</li>
           <li><b>席の指示（奥・手前）</b>：奥＝上のベンチ、手前＝下のベンチ。↻反対側へ＝ベビーカーグループの横へ</li>
@@ -1194,7 +1185,7 @@ function settleRows(car){
 // ---------- game flow ----------
 function start(){
   PAUSED=false; $('ovPause').classList.remove('on'); $('bPause').style.display=VS?'none':'';   // 通信対戦では一時停止できない
-  $('bCam').textContent=$('bCam2').textContent='🔍 車内アップ'; camCar=false;   // シフトの最初はいつも全体のカメラ
+  $('bCam').textContent='🔍 車内アップ'; camCar=false;   // シフトの最初はいつも全体のカメラ
   { const b=$('iR'); b.dataset.ins=pos==='front'?'R':'L'; b.textContent=pos==='front'?'右 →':'← 左'; }   // リアは「← 左」（リアのおまかせは右詰めなので）
   TRIPS = TN===1?1:3;
   gid=0;
@@ -1335,9 +1326,9 @@ function checkFrontWatch(){
   }
 }
 let camCar=false;   // 車内アップ中か
-$('bCam').onclick=()=>{const m=E3.toggleCam(); camCar=m==='car'; $('bCam').textContent=$('bCam2').textContent=m==='over'?'🔍 車内アップ':'🗺 全体';};
-function camBack(){ if(camCar) $('bCam').onclick(); }   // ロードが終わったら全体のカメラにもどす（切りかえボタンはロード中だけ）
-$('bCam2').onclick=()=>$('bCam').onclick();   // カウンターの横の大きいカメラ切りかえ（映像の右上と同じ）
+$('bCam').onclick=()=>{const m=E3.toggleCam(); camCar=m==='car'; $('bCam').textContent=m==='over'?'🔍 車内アップ':'🗺 全体';};
+function camBack(){ if(camCar) $('bCam').onclick(); }   // ロードが終わったら全体のカメラにもどす
+function camCarUp(){ if(!camCar) $('bCam').onclick(); }   // アンロードが終わってロードに入ったら、自然と車内アップに
 $('bCallOut').onclick=()=>{
   if(G.phase!=='unload') return;
   if(G.called){sayCast('お出口は反対側にございます〜！');return;}
@@ -1438,6 +1429,7 @@ $('bThumb').onclick=()=>{
 
 // ---------- load ----------
 function startLoad(){
+  camCarUp();
   G.phase='load'; G.loadStarted=true; G.ins='free'; selIns();
   sayCast('お待たせいたしました！ご乗車のご案内です');
   setPanel('pLoad'); nextLoad();
@@ -1741,8 +1733,8 @@ function uiTick(){
   show('bDrink', ph==='load'&&cur&&cur.asked&&hasDrink(cur)&&!cur.drinkAsked);
   placeGuide(true);
   { $('iHold').style.display=''; $('chips').classList.remove('noHold'); $('bHold').style.display=''; $('bCall').style.gridColumn=''; }   // 「次の電車で」はいつも出す（トイレの方を待つときなどにも使う）
-  { const asking=!(cur&&cur.asked); $('pLoad').classList.toggle('asking',asking);   // 人数を聞く前は「何名様ですか？」、聞いたら座る位置と「どうぞ」
-    $('bAsk').disabled=!cur; $('bAsk').textContent=cur?'🗣 何名様ですか？':'（次のグループを待っています）'; }
+  { $('bAsk').disabled=!cur;   // 「何名様ですか？」はいつも出す（ゲート前にだれもいないときは押せない）
+    $('bAsk').textContent=cur?'🗣 何名様ですか？':'（次のグループを待っています）'; }
   $('iAround').disabled=!(G.car&&spaceRows(G.car).size>0);
   // 次にやること
   document.querySelectorAll('.nudge').forEach(e=>e.classList.remove('nudge'));
@@ -1770,7 +1762,7 @@ function uiTick(){
 setInterval(uiTick,250);
 // 人数を聞いたあとは「何名様ですか？」を消して、その場所に案内のボタンを出す（大事な順に2つまで。残りは今までどおり映像の下のはしに重ねる）
 // ずれてもらう・反対側のベンチは映像で選んだグループに使うので、詰めてもらうは後半に出るので、映像の下のはしのまま
-const GUIDE=['bFold','bNextWc'];   // 詰めてもらう・フタのない飲み物・横で待ってもらう・待機の方を呼ぶは映像の下のはし（カメラの切りかえをふさがないように）
+const GUIDE=[];   // 「何名様ですか？」がカウンターの左にいつもあるので、案内のボタンはすべて映像の下のはし   // 詰めてもらう・フタのない飲み物・横で待ってもらう・待機の方を呼ぶは映像の下のはし（カメラの切りかえをふさがないように）
 const CTXORD=[...$('ctx').children].map(e=>e.id);
 function placeGuide(on){
   const want=on?GUIDE.filter(id=>$(id).classList.contains('show')).slice(0,2):[];
