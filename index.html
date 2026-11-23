@@ -2521,10 +2521,14 @@ const E3=(()=>{
   function zoneOf(e){ if(e.inCar||(Math.abs(e.x)<4.65*KC&&e.z<1.15&&e.z>-1.15)) return e.z<0?'A':'B'; return e.z<GATEZ?'P':'Q'; }
   function seatsFor(x){
     const g=x.g,res={},ppl=[];g.people.forEach((p,i)=>{if(p.t!=='wc')ppl.push(i);});
+    // 座っている人の前は通れないので、先に乗りこむ人（列の前の人）ほど入口から遠い席に座る。
+    // 連結部側（ベンチのはし0の側）から入るときは、後ろの人から順に入口側の席をうめる
+    const door=(g.anch&&!g.folded)?'coup':(g.boardDoor||'coup');
+    const order=door==='coup'?ppl.slice().reverse():ppl;
     let k=0;
-    for(const sgm of x.segs){let c=sgm.s;while(k<ppl.length){const p=g.people[ppl[k]],u=(p.w||(p.t==='kid'?2:4))*(g.squeezed?SQ:1);if(c+u>sgm.s+sgm.len+.01)break;
-      res[ppl[k]]={x:seatX(c+u/2),z:sgm.r===0?-.3:.3,row:sgm.r,cc:c+u/2,u};c+=u;k++;}}
-    while(k<ppl.length){const last=x.segs[x.segs.length-1]||{r:1,s:0,len:0};res[ppl[k]]={x:seatX(last.s+last.len),z:last.r===0?-.3:.3,row:last.r};k++;}
+    for(const sgm of x.segs){let c=sgm.s;while(k<order.length){const p=g.people[order[k]],u=(p.w||(p.t==='kid'?2:4))*(g.squeezed?SQ:1);if(c+u>sgm.s+sgm.len+.01)break;
+      res[order[k]]={x:seatX(c+u/2),z:sgm.r===0?-.3:.3,row:sgm.r,cc:c+u/2,u};c+=u;k++;}}
+    while(k<order.length){const last=x.segs[x.segs.length-1]||{r:1,s:0,len:0};res[order[k]]={x:seatX(last.s+last.len),z:last.r===0?-.3:.3,row:last.r};k++;}
     // ベビーカー・車いすは連結部の広いスペース（ベンチの端と車両の端のあいだ）に置く。代表者がすわるベンチの側
     const rep=(x.segs.find(s=>s.s===0)||x.segs[0]||{r:1}).r, sg=rep===0?-1:1, SPX=X(-3.95*KC);
     g.people.forEach((p,i)=>{if(p.t==='wc')res[i]={x:SPX,z:sg*(g.stroller&&!g.folded?.68:.5),row:rep,space:true};});
