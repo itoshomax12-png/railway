@@ -518,6 +518,7 @@ html,body,#app{height:100%;height:100dvh}
       <div class="g2" id="ctxShift"><button class="btn" id="bShiftL">← 左へずれてもらう</button><button class="btn" id="bShiftR">右へずれてもらう →</button></div>
       <button class="btn" id="bFold">🙏 たたむ？次の電車？</button>
       <button class="btn" id="bNextWc">♿ 次の電車でご案内</button>
+      <button class="btn" id="bCallCtx">🗣 後ろの方に人数を聞く</button>
       <button class="btn" id="bSqueeze">🙏 詰めてもらう</button>
       <button class="btn" id="bAside">👶 横で待ってもらう</button>
       <button class="btn" id="bRecall">📣 待機の方を呼ぶ</button>
@@ -1733,7 +1734,9 @@ function uiTick(){
   show('bRecall', ph==='load'&&G.aside&&G.aside.length);
   show('bDrink', ph==='load'&&cur&&cur.asked&&hasDrink(cur)&&!cur.drinkAsked);
   placeGuide(true);
-  { $('iHold').style.display=''; $('chips').classList.remove('noHold'); $('bHold').style.display=''; $('bCall').style.gridColumn=''; }   // 「次の電車で」はいつも出す（トイレの方を待つときなどにも使う）
+  { const nb=ph==='load'&&cantBoard(cur);   // 「後ろの方に人数を聞く」は、今のグループがこの電車に乗れないときだけ（映像の下のはし・⋯の中）
+    show('bCallCtx',nb); $('bCall').style.display=nb?'':'none'; $('bHold').style.gridColumn=nb?'':'1 / -1';
+    $('iHold').style.display=''; $('chips').classList.remove('noHold'); $('bHold').style.display=''; }   // 「次の電車で」はいつも出す（トイレの方を待つときなどにも使う）
   { $('bAsk').disabled=!cur;   // 「何名様ですか？」はいつも出す（ゲート前にだれもいないときは押せない）
     $('bAsk').textContent=cur?'🗣 何名様ですか？':'（次のグループを待っています）'; }
   $('iAround').disabled=!(G.car&&spaceRows(G.car).size>0);
@@ -1801,6 +1804,13 @@ function callAsk(){
   },600);
 }
 $('bCall').onclick=()=>{if(G.phase!=='load'||!G.cur)return; callI=-1; $('sheetCall').classList.add('on'); callAsk();};
+$('bCallCtx').onclick=()=>$('bCall').onclick();
+// 今のグループ（人数を聞いたあと）が、この電車に乗れない：定員21名をこえる・座る場所がない
+function cantBoard(g){
+  const car=G&&G.car; if(!g||!g.asked||!car) return false;
+  if(G.noRoom||heads(car)+g.size>CARCAP) return true;
+  return !findSeat(car,Object.assign({},g,{noSplit:false}),'free');
+}
 $('bCallNext').onclick=callAsk;
 $('bCallGo').onclick=()=>{
   if(G.phase!=='load'||callI<0||callI>=G.queue.length) return;
