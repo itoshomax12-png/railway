@@ -117,6 +117,7 @@ button{font-family:inherit;border:none;cursor:pointer;touch-action:manipulation;
 .sheet h3{margin:0 0 6px;font-size:13px}
 /* overlay */
 .ov{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+#ovPause{z-index:60}   /* 一時停止はほかの画面より上に */
 .ov.on{display:flex}
 .card{background:var(--cream);border-radius:16px;padding:16px 14px;width:100%;text-align:center;border:3px solid var(--gold);max-height:100%;overflow:auto}
 .card h2{margin:0 0 6px;font-size:17px;color:var(--red)}
@@ -774,9 +775,10 @@ let st='awf', pos='front', lv=0, tod='day', G=null, tick=null, audio=null, gid=0
 // 止めている間は、時間（G.t）・3Dの動き・トイレの人の戻り時間・出発までの待ち時間を止める
 let PAUSED=false, pausedAt=0;
 function later(fn,ms){ setTimeout(function chk(){ if(PAUSED) return setTimeout(chk,200); fn(); },ms); }   // 一時停止中は待ってから実行
-function pauseGame(){
+function pauseGame(auto){
   if(PAUSED||!G||VS||!$('sGame').classList.contains('on')||G.phase==='quit') return;
-  if(document.querySelector('.ov.on')) return;   // 便の結果などが出ているときは止めない
+  if(auto){ if(['ovTrip','ovEnd'].some(id=>$(id).classList.contains('on'))) return; }   // 便の結果・シフトの結果のときは時間が止まっているのでそのまま
+  else if(document.querySelector('.ov.on')) return;   // 便の結果などが出ているときは止めない
   PAUSED=true; pausedAt=performance.now(); $('ovPause').classList.add('on');
 }
 function resumeGame(){
@@ -952,7 +954,10 @@ document.querySelectorAll('.hw-tabs button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.hw-pg').forEach(p=>p.classList.toggle('on',p.dataset.hw===b.dataset.hw));
 });
 $('bHome').onclick=()=>$('ovQuit').classList.add('on');
-$('bPause').onclick=pauseGame; $('bResume').onclick=resumeGame;
+$('bPause').onclick=()=>pauseGame(false); $('bResume').onclick=resumeGame;
+// ほかのアプリに切りかえた・画面を消したときは、自動で一時停止（もどってきたら「再開する」を押す）
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) pauseGame(true); });
+window.addEventListener('pagehide',()=>pauseGame(true));
 document.querySelectorAll('[data-close="ovQuit"]').forEach(b=>b.onclick=()=>$('ovQuit').classList.remove('on'));
 $('bQuitYes').onclick=()=>{
   clearInterval(tick); if(G) G.phase='quit'; setPanel(null);
