@@ -1251,6 +1251,7 @@ function checkAwayBack(){
     if(all.includes(g)){ // まだ列や待機中 → 合流。人数は本当に言ったとおりになる
       g.people.push(np); g.size++; g.units+=np.w||0;
       if(g===G.cur){ sayGuest('（トイレに行っていた人が戻ってきて、グループに合流した）',true); renderInfo(g); drawGroup(g,''); }
+      if((G.aside||[]).includes(g)) toast('トイレの方が戻りました → 📣 待機の方を呼ぶ');
       drawQueue();
     } else { // もう乗った・降りたあと → ひとりで戻ってきて、次に案内
       const ng=makeGroup(); ng.people=[np]; ng.size=1; ng.kids=0; ng.baby=false; ng.wc=false; ng.stroller=false; ng.nSt=0; ng.anch=false; ng.units=np.w||4; ng.answer=1; ng.intl=g.intl; ng.col=g.col; ng.returned=true;
@@ -1389,11 +1390,13 @@ function gateTap(i,el){
     if(G.phase==='load'){
       // ローディング終了 → ゲート確認へ
       G.gatesAtLoad=G.gates.slice(); G.phase='gate'; camBack(); if(G.cur){G.queue.unshift(G.cur);G.cur=null;$('group').innerHTML='';$('tags').innerHTML='';renderInfo(null);}
+      { const still=G.aside.filter(x=>x.away); if(still.length){ still.forEach(x=>carryPush(x)); G.aside=G.aside.filter(x=>!x.away); drawQueue();
+          setTimeout(()=>sayCast('まだおそろいでない方は、次の電車でご案内いたします'),600); } }   // トイレの方がまだ戻らない＝仕方がないので次の電車へ（ミスではない）
       if(G.aside.length){ // 横で待っていたゲストを乗せられなかった＝大きなミス
-        const n=G.aside.length;
+        const n=G.aside.length, onlyAnch=G.aside.every(x=>x.anch);
         G.aside.forEach(x=>carryPush(x));G.aside=[];drawQueue();
         G.stats.asideMiss=(G.stats.asideMiss||0)+n;
-        miss(`横で待っていた${n>1?n+'組の':''}ベビーカー・車いすを乗せ忘れ（大きなミス）`,100*n,el);
+        miss(`横で待っていた${n>1?n+'組の':''}${onlyAnch?'ベビーカー・車いす':'方'}を乗せ忘れ（大きなミス）`,100*n,el);
         setTimeout(()=>sayCast('大変申し訳ございません、次の電車で最初にご案内いたします'),1200);
       }
       setPanel('pGate');
@@ -1687,18 +1690,27 @@ $('bAside').onclick=()=>{
     setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk);
     return;
   }
-  toast('ゲート前にベビーカー・車いすはいません');
+  if(G.cur&&G.cur.away){   // トイレに行った人がいるグループ：そろうまで横で待ってもらい、先に後ろの方をご案内
+    sayCast('おそろいになるまで、こちらで少々お待ちください。先に後ろの方をご案内させてください');
+    G.cur.waited=true; G.cur.awayWait=true; G.aside.push(G.cur); G.cur=null;
+    $('group').className='group walkout'; drawQueue();
+    setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk);
+    return;
+  }
+  toast('ゲート前に横で待っていただく方はいません');
 };
 // 横で待ってもらった方を、好きなタイミングで呼ぶ（ふつうのゲスト → ベビーカー → ふつうのゲスト、もOK）
 $('bRecall').onclick=()=>{
   if(G.phase!=='load') return;
+  if(G.aside.length&&!G.aside.some(x=>!x.away)){ toast('まだおそろいではありません（トイレの方を待っています）'); return; }
   if(G.aside.length){
+    { const k=G.aside.findIndex(x=>!x.away); if(k>0) G.aside.unshift(G.aside.splice(k,1)[0]); }   // そろっている方から呼ぶ
     if(G.cur) G.queue.unshift(G.cur);   // ゲート前の方は入れ替えず、そのまま列の先頭で待ってもらう
     // ボタン1回でご乗車：人数はもう伺っているのでカウンターに足して、そのまま「どうぞ」（席の指示は今選んでいるもの）
     const g=G.cur=G.aside.shift(); g.asked=true; g.askedOnce=true;
     G.countAtAsk=G.count; G.count=Math.min(30,G.count+g.size); updCount();
     drawGroup(g,'walkin','queue'); drawQueue();
-    sayCast(`お待たせいたしました！${g.wc?'車いす':'ベビーカー'}のお客様、どうぞ`);
+    sayCast(g.anch?`お待たせいたしました！${g.wc?'車いす':'ベビーカー'}のお客様、どうぞ`:'お待たせいたしました！おそろいですね、どうぞ');
     if(hasDrink(g)&&!g.drinkAsked){ toast('🥤 フタなし飲み物があります'); return; }   // 飲み物のお願いが先
     setTimeout(()=>{ if(G.cur===g&&G.phase==='load') $('bGo').onclick(); },350);
     return;
@@ -1723,12 +1735,12 @@ function uiTick(){
   show('bSqueeze', ph==='load'&&G.car&&(G.noRoom||heads(G.car)>=10));   // 「詰めてもらう」は場所が足りないとき、または車内が10名ほどになったら（後半）出す。光るのは場所が足りないときだけ
   const ol=ph==='load'&&cur&&!cur.foldAsked&&overLimit(cur);
   show('bFold', ol==='st'); show('bNextWc', ol==='wc');
-  show('bAside', ph==='load'&&cur&&cur.asked&&cur.anch&&!cur.waited&&!ol);   // 横で待ってもらうは、人数を聞いたあとに映像の下のはしに出す
+  show('bAside', ph==='load'&&cur&&cur.asked&&(cur.anch||cur.away)&&!cur.waited&&!ol);   // 横で待ってもらうは、人数を聞いたあとに映像の下のはしに出す（ベビーカー・車いす／トイレの方を待つグループ）
+  if(cur&&cur.away&&!cur.anch) $('bAside').textContent='🚻 そろうまで横で待ってもらう'; else $('bAside').textContent='👶 横で待ってもらう';
   show('bRecall', ph==='load'&&G.aside&&G.aside.length);
   show('bDrink', ph==='load'&&cur&&cur.asked&&hasDrink(cur)&&!cur.drinkAsked);
   placeGuide(true);
-  { const hold=ph==='load'&&holdNeeded(cur); $('iHold').style.display=hold?'':'none'; $('chips').classList.toggle('noHold',!hold);
-    $('bHold').style.display=hold?'':'none'; $('bCall').style.gridColumn=hold?'':'1 / -1'; }   // ⋯の中の「次の電車でご案内」も、乗れないとき（仕方がないとき）だけ
+  { $('iHold').style.display=''; $('chips').classList.remove('noHold'); $('bHold').style.display=''; $('bCall').style.gridColumn=''; }   // 「次の電車で」はいつも出す（トイレの方を待つときなどにも使う）
   { const asking=!(cur&&cur.asked); $('pLoad').classList.toggle('asking',asking);   // 人数を聞く前は「何名様ですか？」、聞いたら座る位置と「どうぞ」
     $('bAsk').disabled=!cur; $('bAsk').textContent=cur?'🗣 何名様ですか？':'（次のグループを待っています）'; }
   $('iAround').disabled=!(G.car&&spaceRows(G.car).size>0);
@@ -1746,6 +1758,7 @@ function uiTick(){
     if(!cur.asked) t=$('bAsk');
     else if(hasDrink(cur)&&!cur.drinkAsked) t=$('bDrink');
     else if(G.cur&&heads(G.car)+G.cur.size>CARCAP) t=$('iHold');
+    else if(cur.away&&!cur.anch&&!cur.waited) t=$('bAside');   // トイレの方がいない：そろうまで横で待ってもらう（または次の電車で）
     else if(G.noRoom) t=$('bSqueeze');
     else if(!cur.foldAsked&&overLimit(cur)) t=overLimit(cur)==='st'?$('bFold'):$('bNextWc');
     else if(cur.anch&&G.queue.some(q=>!q.anch)&&!cur.waited) t=$('bAside');
@@ -1759,12 +1772,6 @@ setInterval(uiTick,250);
 // ずれてもらう・反対側のベンチは映像で選んだグループに使うので、詰めてもらうは後半に出るので、映像の下のはしのまま
 const GUIDE=['bFold','bNextWc'];   // 詰めてもらう・フタのない飲み物・横で待ってもらう・待機の方を呼ぶは映像の下のはし（カメラの切りかえをふさがないように）
 const CTXORD=[...$('ctx').children].map(e=>e.id);
-// 「🚃 次の電車で」（⋯の中もふくむ）は、今のグループがこの電車に乗れないとき（定員をこえる・座る場所がない）だけ出す。キャスト側の事情で仕方がないときだけ使う
-function holdNeeded(g){
-  const car=G&&G.car; if(!g||!g.asked||!car) return false;
-  if(G.noRoom||heads(car)+g.size>CARCAP) return true;
-  return !findSeat(car,Object.assign({},g,{noSplit:false}),'free');
-}
 function placeGuide(on){
   const want=on?GUIDE.filter(id=>$(id).classList.contains('show')).slice(0,2):[];
   const box=$('ctx2'), now=[...box.children].map(e=>e.id);
