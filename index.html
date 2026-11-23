@@ -358,6 +358,10 @@ html,body,#app{height:100%;height:100dvh}
 /* カウンターの左：案内のボタン（最大2つ） */
 #pLoad #askSlot{height:76px;display:flex;flex-direction:column;gap:4px;min-width:0}
 #pLoad #ctx2{display:flex;flex:1;flex-direction:column;gap:4px;min-height:0}
+/* 案内のボタンがないときは、カメラの切りかえ（車内アップ／全体）を大きく出す */
+#pLoad #bCam2{display:none;flex:1;min-height:0;font-size:15px;font-weight:800}
+#pLoad #ctx2:empty{display:none}
+#pLoad #ctx2:empty + #bCam2{display:block}
 /* ボタンの入れ替え：人数を聞く前は、座る位置と「どうぞ」のかわりに大きな「何名様ですか？」。聞いたら座る位置と「どうぞ」に入れ替わる。
    全体の高さは同じなので、映像やカウンターの位置は動かない */
 #pLoad #bAsk{display:none}
@@ -495,7 +499,7 @@ html,body,#app{height:100%;height:100dvh}
   <!-- ローディング -->
   <div class="panel" id="pLoad">
     <div class="g2">
-      <div id="askSlot"><div id="ctx2"></div></div>
+      <div id="askSlot"><div id="ctx2"></div><button class="btn" id="bCam2">🔍 車内アップ</button></div>
       <div class="counter">
         <button id="bMinus">−</button>
         <div class="n"><span id="cN">0</span><small>カウンター</small></div>
@@ -590,7 +594,7 @@ html,body,#app{height:100%;height:100dvh}
           <li><b>セリフ</b>：🙋あなた／🧑‍🤝‍🧑ゲスト／📣ディスパッチャー。<b>タップで履歴</b></li>
           <li><b>ゲート前のグループ</b>：人数と特徴。<span class="w">赤</span>＝対応しないとオペミス、<span class="y">黄</span>＝注意、緑＝OK</li>
           <li><b>映像</b>：車内のグループをタップで選ぶ（ずれてもらう相手）</li>
-          <li><b>車内アップ／全体</b>：カメラの切りかえ</li>
+          <li><b>車内アップ／全体</b>：カメラの切りかえ（ロード中は、カウンターの横の大きいボタンでも切りかえられる）</li>
           <li><b>名前</b>：場所や人の名前を表示</li>
           <li><b>状況で出るボタン</b>：<br>「左（右）にずれますか？」…選んだグループにずれてもらう<br>「反対側のベンチへお移りいただけますか？」…選んだグループに反対側のベンチへ移ってもらう（ベビーカー・車いすのグループは連結部スペースの反対側へ）<br>「皆さま少しずつお詰めいただけますか？」…車内が10名ほどになったら、または座りきれないとき<br>「たためば乗れますが…」…ベビーカーが台数制限をこえたとき<br>「あとで（横で待機）」／「お待たせした方を呼ぶ」…ベビーカー・車いす（呼ぶと1回で乗車）<br>「フタのない飲み物のお願い」</li>
           <li><b>ゲート</b>：タップで開け閉め。ロードの最後にもう一度押すとゲート確認へ</li>
@@ -1145,6 +1149,7 @@ function settleRows(car){
 
 // ---------- game flow ----------
 function start(){
+  $('bCam').textContent=$('bCam2').textContent='🔍 車内アップ';   // シフトの最初はいつも全体のカメラ
   { const b=$('iR'); b.dataset.ins=pos==='front'?'R':'L'; b.textContent=pos==='front'?'右 →':'← 左'; }   // リアは「← 左」（リアのおまかせは右詰めなので）
   TRIPS = TN===1?1:3;
   gid=0;
@@ -1282,7 +1287,8 @@ function checkFrontWatch(){
     if(E3.passedExit(g.id)){ G.fw=G.fw.filter(x=>x!==g); miss(`${g.wc?'車いす':'ベビーカー'}のゲストが出口から出てしまった`,20,$('bExitL')); }
   }
 }
-$('bCam').onclick=()=>{const m=E3.toggleCam();$('bCam').textContent=m==='over'?'🔍 車内アップ':'🗺 全体';};
+$('bCam').onclick=()=>{const m=E3.toggleCam(); $('bCam').textContent=$('bCam2').textContent=m==='over'?'🔍 車内アップ':'🗺 全体';};
+$('bCam2').onclick=()=>$('bCam').onclick();   // カウンターの横の大きいカメラ切りかえ（映像の右上と同じ）
 $('bCallOut').onclick=()=>{
   if(G.phase!=='unload') return;
   if(G.called){sayCast('お出口は反対側にございます〜！');return;}
