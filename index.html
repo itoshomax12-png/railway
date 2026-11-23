@@ -1068,7 +1068,9 @@ function spaceRows(car){const out=new Set();for(const x of Object.values(car.gro
 // 連結部の入口：手前側にベビーカー等を置くとふさがる。奥側に置いたときは入口はそのまま使える
 function entrance(car){return spaceRows(car).has(1)?'end':'coup';}
 // そのベンチへ入る入口：奥側にベビーカー等があると、その前は通れないので奥のベンチへは車両の端の入口から
-function rowDoor(car,r){ if(entrance(car)==='end') return 'end'; if(r===0&&spaceRows(car).has(0)) return 'end'; return 'coup'; }
+// 車いすだけを奥（上）に置いたときは、奥のベンチへの入口は変えない（連結部から入れる）。ベビーカーを奥に置いたときだけ車両の端から
+function blockRows(car){const out=new Set();for(const x of Object.values(car.groups)){const g=x.g; if(g.anch&&!g.folded&&!(g.wc&&!stN(g))) out.add(g.spaceRow??1);} return out;}
+function rowDoor(car,r){ if(entrance(car)==='end') return 'end'; if(r===0&&blockRows(car).has(0)) return 'end'; return 'coup'; }
 function runs(row){const out=[];let s=-1;for(let i=0;i<=CELLS;i++){if(i<CELLS&&row[i]===null){if(s<0)s=i;}else if(s>=0){out.push([s,i-1]);s=-1;}}return out;}
 function fitsAt(row,s,len){if(s<0||s+len>CELLS)return false;for(let i=s;i<s+len;i++)if(row[i]!==null)return false;return true;}
 function put(car,g,segs){ if(g.anch){ const s0=segs.find(x=>x.s===0)||segs[0]; g.spaceRow = s0? s0.r : (g.spaceRow??1); }for(const sg of segs)for(let i=sg.s;i<sg.s+sg.len;i++)car.rows[sg.r][i]=g.id;
@@ -1744,7 +1746,7 @@ function uiTick(){
 setInterval(uiTick,250);
 // 人数を聞いたあとは「何名様ですか？」を消して、その場所に案内のボタンを出す（大事な順に2つまで。残りは今までどおり映像の下のはしに重ねる）
 // ずれてもらう・反対側のベンチは映像で選んだグループに使うので、詰めてもらうは後半に出るので、映像の下のはしのまま
-const GUIDE=['bFold','bNextWc','bRecall'];   // 詰めてもらう・フタのない飲み物・横で待ってもらうは映像の下のはし（カメラの切りかえをふさがないように）
+const GUIDE=['bFold','bNextWc'];   // 詰めてもらう・フタのない飲み物・横で待ってもらう・待機の方を呼ぶは映像の下のはし（カメラの切りかえをふさがないように）
 const CTXORD=[...$('ctx').children].map(e=>e.id);
 // 「🚃 次の電車で」（⋯の中もふくむ）は、今のグループがこの電車に乗れないとき（定員をこえる・座る場所がない）だけ出す。キャスト側の事情で仕方がないときだけ使う
 function holdNeeded(g){
