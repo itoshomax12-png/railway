@@ -574,6 +574,7 @@ html,body,#app{height:100%;height:100dvh}
       <button class="btn red" id="bCallGo">この方をご案内</button>
       <button class="btn" id="bCallNext">さらに後ろの方に聞く</button>
     </div>
+    <button class="btn" style="width:100%;margin-top:6px;display:none" id="bCallDrink">🥤 フタのない飲み物のお願い</button>
     <button class="btn" style="width:100%;margin-top:6px" id="bCallX">やめる（今の方のまま）</button>
   </div>
   <div class="sheet" id="sheetStuck">
@@ -1640,20 +1641,24 @@ $('sBack').onclick=()=>{
 };
 $('sClose').onclick=()=>$('sheetStuck').classList.remove('on');
 const hasDrink=g=>!!(g&&g.people.some(p=>p.drink));
-$('bDrink').onclick=()=>{
-  if(G.phase!=='load'||!G.cur) return;
-  const g=G.cur;
+$('bDrink').onclick=()=>{ if(G.phase==='load'&&G.cur) askDrink(G.cur); };
+function askDrink(g){   // g：ゲート前の方（G.cur）か、後ろに並んでいる方（後ろの方に人数を聞く）
+  const here=()=>G.phase==='load'&&(G.cur===g||G.queue.includes(g));
   if(!hasDrink(g)){ if(g.people.some(p=>p.lid)){ sayCast('お飲み物は…'); setTimeout(()=>sayGuest('フタ付きです！'),500); G.t+=1; } else toast('フタなし飲み物の人はいません'); return;}
   if(g.drinkAsked) return; g.drinkAsked=true;
   sayCast('恐れ入ります、フタのないお飲み物はお持ち込みいただけません。お飲みいただくか、捨てていただくことはできますか？');
+  g.drinkBusy=true; callBtns();
+  const done=line=>{ g.people.forEach(p=>p.drink=false); g.drinkBusy=false; if(here()){ sayGuest(line); if(G.cur===g) renderInfo(g); } callBtns(); };
   setTimeout(()=>{
-    if(G.cur!==g||G.phase!=='load') return;
+    if(!here()) return;
     const r=Math.random();
-    if(r<.5){ sayGuest('あ、すみません！飲み切ります…（ごくごく）'); G.t+=3; setTimeout(()=>{ g.people.forEach(p=>p.drink=false); if(G.cur===g){sayGuest('飲み終わりました！'); renderInfo(g);} },1800); }
-    else if(r<.9){ sayGuest('じゃあ、捨ててきます！'); G.t+=4; setTimeout(()=>{ g.people.forEach(p=>p.drink=false); if(G.cur===g){sayGuest('捨ててきました！'); renderInfo(g);} },2200); }
-    else { sayGuest('まだ飲みたいので、飲み切ってから次の電車にします'); setTimeout(()=>{ if(G.cur!==g||G.phase!=='load')return; g.people.forEach(p=>p.drink=false); carryPush(g); G.cur=null; setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk); },1000); }
+    if(r<.5){ sayGuest('あ、すみません！飲み切ります…（ごくごく）'); G.t+=3; setTimeout(()=>done('飲み終わりました！'),1800); }
+    else if(r<.9){ sayGuest('じゃあ、捨ててきます！'); G.t+=4; setTimeout(()=>done('捨ててきました！'),2200); }
+    else { sayGuest('まだ飲みたいので、飲み切ってから次の電車にします'); setTimeout(()=>{ if(!here())return; g.people.forEach(p=>p.drink=false); g.drinkBusy=false; carryPush(g);
+        if(G.cur===g){ G.cur=null; setTimeout(()=>{ if(G.phase==='load') nextLoad(); },LV[lv].walk); }
+        else { G.queue.splice(G.queue.indexOf(g),1); drawQueue(); $('callInfo').textContent='このグループは次の電車に'; callBtns(true); } },1000); }
   },900);
-};
+}
 $('bAside').onclick=()=>{
   if(G.phase!=='load') return;
   if(G.cur&&G.cur.anch){
@@ -1679,9 +1684,9 @@ $('bRecall').onclick=()=>{
   if(G.aside.length){
     { const k=G.aside.findIndex(x=>!x.away); if(k>0) G.aside.unshift(G.aside.splice(k,1)[0]); }   // そろっている方から呼ぶ
     if(G.cur) G.queue.unshift(G.cur);   // ゲート前の方は入れ替えず、そのまま列の先頭で待ってもらう
-    // ボタン1回でご乗車：人数はもう伺っているのでカウンターに足して、そのまま「どうぞ」（席の指示は今選んでいるもの）
+    // ボタン1回でご乗車：そのまま「どうぞ」（席の指示は今選んでいるもの）
     const g=G.cur=G.aside.shift(); g.asked=true; g.askedOnce=true;
-    G.countAtAsk=G.count; G.count=Math.min(30,G.count+g.size); updCount();
+    G.countAtAsk=G.count;   // カウンターはすべて手動（自動では足さない）
     drawGroup(g,'walkin','queue'); drawQueue();
     sayCast(g.anch?`お待たせいたしました！${g.wc?'車いす':'ベビーカー'}のお客様、どうぞ`:'お待たせいたしました！おそろいですね、どうぞ');
     if(hasDrink(g)&&!g.drinkAsked){ toast('🥤 フタなし飲み物があります'); return; }   // 飲み物のお願いが先
@@ -1771,16 +1776,16 @@ function callAsk(){
   callI++;
   const lim=Math.min(6,G.queue.length);
   while(callI<lim && G.queue[callI].anch) callI++;   // ベビーカー・車いすの方は最後にご案内するので飛ばす
-  if(callI>=lim){ $('callInfo').textContent='これ以上後ろの方には聞けません'; $('bCallGo').disabled=true; $('bCallNext').disabled=true; return; }
+  if(callI>=lim){ $('callInfo').textContent='これ以上後ろの方には聞けません'; $('bCallGo').disabled=true; $('bCallNext').disabled=true; $('bCallDrink').style.display='none'; return; }
   const g=G.queue[callI]; G.t+=2;
   const pos=['すぐ後ろ','2組うしろ','3組うしろ','4組うしろ','5組うしろ','6組うしろ'][callI]||'うしろ';
   sayCast(callI===0?'後ろの方、何名様ですか？':'さらに後ろの方、何名様ですか？');
-  $('callInfo').textContent='…'; $('bCallGo').disabled=true; $('bCallNext').disabled=true;
+  $('callInfo').textContent='…'; $('bCallGo').disabled=true; $('bCallNext').disabled=true; $('bCallDrink').style.display='none';
   setTimeout(()=>{
     if(G.phase!=='load') return;
     const ans=g.far?`${g.answer}! (${g.answer}名)`:`${g.answer}人です！`;
-    sayGuest(ans); $('callInfo').innerHTML=`${pos}のグループ：<b>${g.answer}名</b>`;
-    $('bCallGo').disabled=false; $('bCallNext').disabled=false;
+    sayGuest(ans); $('callInfo').innerHTML=`${pos}のグループ：<b>${g.answer}名</b>`+(hasDrink(g)?'　<span style="background:#d0302a;color:#fff;border-radius:5px;padding:0 5px">⚠🥤フタなし</span>':'');
+    $('bCallNext').disabled=false; callBtns();
   },600);
 }
 $('bCall').onclick=()=>{if(G.phase!=='load'||!G.cur)return; callI=-1; $('sheetCall').classList.add('on'); callAsk();};
@@ -1792,6 +1797,13 @@ function cantBoard(g){
   return !findSeat(car,Object.assign({},g,{noSplit:false}),'free');
 }
 $('bCallNext').onclick=callAsk;
+// 後ろの方の画面のボタン：フタなし飲み物があれば「お願い」を出す。お願いの返事を待っている間は「この方をご案内」は押せない
+function callBtns(gone){
+  const g=(callI>=0&&callI<G.queue.length)?G.queue[callI]:null, ok=!gone&&g&&G.phase==='load';
+  $('bCallDrink').style.display=ok&&hasDrink(g)?'':'none'; $('bCallDrink').disabled=!!(g&&(g.drinkAsked||g.drinkBusy));
+  $('bCallGo').disabled=!ok||!!(g&&g.drinkBusy);
+}
+$('bCallDrink').onclick=()=>{ const g=G.queue[callI]; if(g) askDrink(g); };
 $('bCallGo').onclick=()=>{
   if(G.phase!=='load'||callI<0||callI>=G.queue.length) return;
   $('sheetCall').classList.remove('on');
@@ -1800,7 +1812,7 @@ $('bCallGo').onclick=()=>{
   sayCast('では先にどうぞ、こちらへお進みください');
   drawGroup(g,'walkin','queue'); drawQueue();
   // 「この方をご案内」を押したら、そのまま乗車（席の指示は今選んでいるもの）。カウンターは自分で数える
-  if(hasDrink(g)&&!g.drinkAsked){ toast('🥤 フタなし飲み物があります'); return; }   // 飲み物のお願いが先
+  // フタなし飲み物のお願いをしないまま案内すると、ふつうの「どうぞ」と同じくオペミス
   setTimeout(()=>{ if(G.cur===g&&G.phase==='load') $('bGo').onclick(); },350);
 };
 $('bCallX').onclick=()=>$('sheetCall').classList.remove('on');
