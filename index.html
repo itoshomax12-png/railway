@@ -1186,7 +1186,7 @@ function start(){
   setTimeout(()=>{ if(!E3.ready){ E3.init($('cv')) || ($('nogl').style.display='flex'); } E3.setup(); newTrain(); },30);
 }
 function newTrain(){
-  G.trip++; G.set=(G.set+1)%3; thumbView(false); G.s0=G.score;   // s0：この便が始まったときのスコア（便ごとの点数に使う）
+  G.trip++; G.set=(G.set+1)%3; thumbView(false); G.overDone=false; G.s0=G.score;   // s0：この便が始まったときのスコア（便ごとの点数に使う）
   camBack(); G.car=newCar(); G.t=0; G.phase='arrive'; G.count=0; G.trainMiss=[]; G.trainOpe=[]; G.order=[]; G.gateOrder=0; G.ins='free';
   G.gates=Array.from({length:STN[st].gates},(_,i)=>i===0?'closed':'closed');
   G.depart=false; G.thumbed=false; G.go3=false; G.waitMsg=false; G.waitInt=false; G.checkQ=[]; G.checking=null; G.unloadOk=0; G.unloadN=0; G.called=false; G.fw=[]; G.aside=[]; G.warnedAnch=false; clearTimeout(G.uT); $('bCallOut').classList.remove('sel'); $('bExitL').style.display=(st==='awf'&&pos==='rear')?'':'none';
@@ -1546,6 +1546,9 @@ $('bGo').onclick=()=>{
   if(p.door==='end'&&rowDoor(car,p[0].r)==='coup') setTimeout(()=>toast('車両の端のドアからご案内'),600);
   put(car,g,p);
   if(g.wc) car.wc++; car.st+=stN(g);
+  // 21名をこえる案内をした時点でオペミス（出発を待たない。1便に1回）
+  if(heads(car)>CARCAP&&!G.overDone){ G.overDone=true; G.stats.over++; G.stats.ope=(G.stats.ope||0)+1; G.trainOpe.push('オーバーグルーピング（21名超え）');
+    add(-200,el); buzz([80,60,160]); toast('⚠ オペミス<br>オーバーグルーピング（21名超え）','bad'); blip(140); setTimeout(()=>blip(140),160); }
   G.stats.counted++;
   if(VS) vsPush({heads:heads(car)});
   (G.order=G.order||[]).push({n:g.size, st:stN(g), wc:!!g.wc, fold:!!(g.stroller&&g.folded), called:!!g.called, late:!!g.waited});
@@ -1835,7 +1838,7 @@ function dispatch(){
   bell(2); sayDisp('おーらぼー！');
   $('carwrap').classList.add('away'); E3.depart();
   let pts=h*10, notes=[];
-  if(h>CARCAP){pts-=200;G.stats.over++;G.stats.ope=(G.stats.ope||0)+1;G.trainOpe.push('オーバーグルーピング（21名超え）');notes.push(['⚠ オペミス：オーバーグルーピング（21名超え）',-200]);}
+  if(h>CARCAP){ if(G.overDone) notes.push(['⚠ オペミス：オーバーグルーピング（21名超え・案内した時点で）',-200]); else {pts-=200;G.stats.over++;G.stats.ope=(G.stats.ope||0)+1;G.trainOpe.push('オーバーグルーピング（21名超え）');notes.push(['⚠ オペミス：オーバーグルーピング（21名超え）',-200]);} }
   if(G.count!==h){pts-=25;notes.push([`カウンターずれ（${G.count}→${h}名）`,-25]);}
   else {G.stats.correct++;}
   if(h>=18&&h<=CARCAP){pts+=50;G.stats.full++;notes.push(['18名以上',50]);}
