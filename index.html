@@ -1819,6 +1819,9 @@ $('bCallGo').onclick=()=>{
   G.queue.unshift(G.cur); G.cur=g; g.asked=true; g.called=true; G.countAtAsk=G.count;
   sayCast('では先にどうぞ、こちらへお進みください');
   drawGroup(g,'walkin','queue'); drawQueue();
+  // 「この方をご案内」を押したら、そのまま乗車（席の指示は今選んでいるもの）。カウンターは自分で数える
+  if(hasDrink(g)&&!g.drinkAsked){ toast('🥤 フタなし飲み物があります'); return; }   // 飲み物のお願いが先
+  setTimeout(()=>{ if(G.cur===g&&G.phase==='load') $('bGo').onclick(); },350);
 };
 $('bCallX').onclick=()=>$('sheetCall').classList.remove('on');
 
