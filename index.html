@@ -1877,6 +1877,49 @@ function dispatch(){
 }
 $('bNext').onclick=()=>{$('ovTrip').classList.remove('on'); if(G.trip>=TRIPS) return end(); G.stopWarned=false; G.loadStarted=false; newTrain();};
 function orderStr(o){ if(!o.length) return '—'; return o.map(x=>(x.wc?'♿':'')+(x.st===2?'👶👶':x.st?'👶':'')+(x.fold?'（たたみ）':'')+x.n+'名').join(' → '); }
+// シフト終了のコメント：ランクごとにいくつか用意して、毎回ちがうものを出す。そのシフトで目立ったこと（ミス・満員など）があれば、そちらを出すことも
+const PICK=a=>a[Math.floor(Math.random()*a.length)];
+const END_CM={
+  S:['完璧！安全で速いローディング。トレーナーも任せられます。',
+     'え、もしかして現役のトレーナーさん？　ディスパッチャーが「もう全部この人でいいじゃん」って言ってました。',
+     'ゲストのワクワク感も安心感もフル乗車。これ以上どう詰めろと？',
+     'Sランク。あまりに手際がよくて、電車のほうが待たされてました。',
+     'この調子なら、明日から1人で2両見られますね（見られません）。',
+     'カウンターと車内の人数がぴったり。もはや人間カウンター。',
+     '完璧すぎて逆にあやしい。…練習、何回しました？'],
+  A:['安定したローダー！ベビーカーの席の空け方を工夫すればSも。',
+     'いい仕事！あと少しで「伝説のローダー」の仲間入り。',
+     'Aランク。Sまであと一歩…その一歩が遠いんですよね〜。',
+     '安心して任せられる！でもトレーナーは「Sじゃないんだ」とつぶやいていました。',
+     'おしい！満員まであと数名、ゲストの肩はまだ詰められた。',
+     'ほぼ完璧。ほぼ、ね。'],
+  B:['いい調子。カウンターは車内の合計、ゲストの申告より自分の目を信じて。',
+     'まずまず！でもディスパッチャーがちょっとそわそわしてました。',
+     'Bランク。悪くない。…悪くないだけ、とも言う。',
+     '電車は無事に出発しました。それがいちばん大事。次は点数も出発させよう。',
+     'ゲートOKまではたどり着いた！あとは中身で勝負。',
+     'のびしろですねぇ！（いい意味で）'],
+  C:['まずはアンロード→入口ゲート→ローディング→ゲートOKの流れを確認しよう。',
+     'おつかれさまでした！……次の電車のゲストが、まだ踏切で待っています。',
+     'Cランク。ここからが本当のスタート。「あそびかた」もいつでも見てね。',
+     'ディスパッチャーが無言でこっちを見ています。',
+     '大丈夫、最初はみんなそう。…たぶん。',
+     '🔰練習モードという、やさしい世界もあります。'],
+};
+function endComment(r,s){
+  const special=[];
+  if((s.ope||0)>=3) special.push('オペミス'+s.ope+'回。安全確認は、ゲームでも現場でもいちばん大事。リーダーに呼ばれる前に練習しよう。');
+  else if((s.ope||0)>=1) special.push('オペミスがありました。ゲストの安心感は、キャストの安全確認から。');
+  if((s.asideMiss||0)>0) special.push('横でお待ちのゲストが「わたしたちのこと、忘れてませんか…？」と言っています。');
+  if((s.over||0)>0) special.push('21名をこえました。電車は満員電車ではありません。');
+  if((s.stopSec||0)>=30) special.push('次の電車が踏切で'+s.stopSec+'秒お待ちでした。うしろの電車のゲストにもワクワク感を。');
+  if(s.full===TRIPS&&TRIPS>1) special.push('全部の便で18名以上！ベンチの空きを見のがさない、鷹の目のローダー。');
+  if(s.correct===TRIPS&&(s.ope||0)===0&&r!=='S') special.push('カウンターは全便ぴったり。数えるのは得意、あとはスピードだけ！');
+  if(s.boarded===0) special.push('ご案内したゲスト、0名。……電車、からっぽで出発しました。');
+  // 目立ったことがあれば半分くらいの確率でそちらを出す（大きな失敗は必ず出す）
+  if(special.length&&((s.ope||0)>=3||s.boarded===0||Math.random()<0.5)) return PICK(special);
+  return PICK(END_CM[r]);
+}
 function end(){
   const s=G.stats;
   let pts=100 - s.miss*4 - (s.ope||0)*12 - (s.asideMiss||0)*15 - s.over*13 - s.stopSec*0.8 + s.full*18/TRIPS - (TRIPS-s.correct)*6;   // 18名以上の便の加点は便数に関係なく最大+18
@@ -1901,11 +1944,7 @@ function end(){
     `<tr><td>出発タイミングボーナス</td><td>+${s.fast||0}</td></tr>`+
     `<tr><td colspan="2" style="text-align:left;font-weight:700;padding-top:8px">案内した順番</td></tr>`+
     (G.log||[]).map(l=>`<tr><td colspan="2" style="text-align:left;font-size:11px;line-height:1.5">${l.trip}便目（${l.h}名${l.ope?'・⚠オペミス':''}）：${orderStr(l.order)}</td></tr>`).join('');
-  const cm={S:'完璧！安全で速いローディング。トレーナーも任せられます。',
-            A:'安定したローダー！ベビーカーの席の空け方を工夫すればSも。',
-            B:'いい調子。カウンターは車内の合計、ゲストの申告より自分の目を信じて。',
-            C:'まずはアンロード→入口ゲート→ローディング→ゲートOKの流れを確認しよう。'}[r];
-  $('eComment').innerHTML='🎩 '+cm;
+  $('eComment').innerHTML='🎩 '+endComment(r,s);
   if(!PRAC) try{const b=JSON.parse(localStorage.getItem('erw_best4')||'{}'),k=lv+'_'+TRIPS;if(b[k]==null||G.score>b[k]){b[k]=G.score;localStorage.setItem('erw_best4',JSON.stringify(b));}}catch(e){}
   $('ovEnd').classList.add('on');
   $('eSave').textContent='記録を保存中…';
