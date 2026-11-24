@@ -395,6 +395,29 @@ html,body,#app{height:100%;height:100dvh}
 .hw-l li{counter-increment:hw;position:relative;padding:4px 0 4px 24px;border-bottom:1px dashed #e4ddcc}
 .hw-l li::before{content:counter(hw);position:absolute;left:0;top:5px;background:#ffd23f;color:#1d2433;border:1.5px solid #1d2433;border-radius:50%;width:17px;height:17px;line-height:14px;text-align:center;font-size:10px;font-weight:900}
 .howto{max-height:70vh}
+/* あそびかた：ゲームの流れ */
+.fl{font-size:13px;line-height:1.55;color:var(--ink,#2b2320)}
+.fl b{color:inherit}
+.fl-lead{text-align:center;font-weight:800;font-size:12px;opacity:.7;margin-bottom:8px}
+.fl-st{display:flex;gap:9px;position:relative;padding-bottom:10px}
+.fl-st:not(.end)::before{content:'';position:absolute;left:12px;top:26px;bottom:0;width:2px;background:#e4d6b3}
+.fl-st>i{flex:0 0 26px;height:26px;border-radius:50%;background:var(--red,#b0222a);color:#fff;font-style:normal;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:14px;position:relative;z-index:1}
+.fl-st h4{margin:2px 0 3px;font-size:14.5px;font-weight:900}
+.fl-st h4 small{font-size:11px;font-weight:700;opacity:.6}
+.fl-st p{margin:0 0 3px}
+.fl .k{display:inline-block;background:#fff;border:1.5px solid #d9c99d;border-radius:7px;padding:0 6px;margin:1px 0;font-weight:800;font-size:12px;white-space:nowrap}
+.fl .k.red{background:#b0222a;border-color:#b0222a;color:#fff}
+.fl em{white-space:nowrap;font-style:normal;color:#b0222a;font-weight:800;font-size:11.5px}
+.fl-note{font-size:11.5px;opacity:.75}
+.fl-h{margin:12px 0 5px;font-weight:900;font-size:13.5px;border-left:4px solid #c9a24a;padding-left:7px}
+.fl-t,.fl-t tbody,.fl-t tr,.fl-t th,.fl-t td{display:block;width:auto}
+.fl-t{font-size:12px}
+.fl-t tr{border-bottom:1px dashed #e4ddcc;padding:5px 0}
+.fl-t th{text-align:left;font-weight:900;font-size:12.5px;padding:0}
+.card .fl-t td{text-align:left;font-weight:400;border:none;padding:2px 0 0 22px;line-height:1.75}
+.fl-bad{margin:0;font-size:12px;background:#fdecea;border-radius:8px;padding:6px 8px;color:#8a1f1a;font-weight:700}
+.fl-o{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;font-size:12px;text-align:left}
+.bigtxt .fl{font-size:15px}.bigtxt .fl .k{font-size:14px}.bigtxt .fl-t,.bigtxt .fl-t th,.bigtxt .fl-bad,.bigtxt .fl-o{font-size:14px}
 .ginfo .gi-ppl{flex:0 0 auto;background:#fff;border-radius:7px;padding:1px 5px;font-size:15px;letter-spacing:-1px;border:2px solid #cfd5e3;display:flex;align-items:center;gap:3px}
 .ginfo .gi-ppl .kd{font-style:normal;font-size:11px}
 .ginfo .gi-ppl small{font-size:10px;letter-spacing:0;color:#5b6170;font-weight:900}
@@ -568,89 +591,46 @@ html,body,#app{height:100%;height:100dvh}
 <div class="ov" id="ovHow">
   <div class="card">
     <h2>あそびかた</h2>
-    <div class="howto">
-      <div class="hw-tabs"><button class="sel" data-hw="load">ロード</button><button data-hw="unload">アンロード</button><button data-hw="gate">ゲートOK</button><button data-hw="other">そのほか</button></div>
+    <div class="howto fl">
+      <div class="fl-lead">1便の流れ（3便なら3回くり返す）</div>
 
-      <!-- ロードの画面 -->
-      <div class="hw-pg on" data-hw="load">
-        <div class="mock">
-          <div class="m-hud"><span>AWF</span><span>フロント</span><span>1/3便</span><i class="m-n">1</i><span class="m-r">120 🏠</span></div>
-          <div class="m-bar"><i class="m-n">2</i></div>
-          <div class="m-say"><b>🙋 あなた</b> 何名様ですか？ <i class="m-n">3</i></div>
-          <div class="m-info">ゲート前 <b>4名</b> <span class="w">⚠🥤フタなし</span><span class="y">👶ベビーカー</span><i class="m-n">4</i></div>
-          <div class="m-view">映像（車内・ゲート・列）<i class="m-n">5</i><span class="m-cam">🔍車内アップ <i class="m-n">6</i></span><span class="m-lbl">🏷名前 <i class="m-n">7</i></span>
-            <div class="m-ctx">状況で出るボタン（重なって出る）<i class="m-n">8</i></div></div>
-          <div class="m-row"><span class="m-b">出口ゲート</span><span class="m-b">入口ゲート</span><i class="m-n">9</i></div>
-          <div class="m-row"><span class="m-b">🗣 何名様ですか？<i class="m-n">10</i></span><span class="m-b dk">− 4 ＋1<i class="m-n">11</i></span></div>
-          <div class="m-row"><span class="m-b g">おまかせ</span><span class="m-b">右 →</span><span class="m-b">🚃 次の電車で</span><i class="m-n">12</i></div>
-          <div class="m-row"><span class="m-b">奥（上）</span><span class="m-b">手前（下）</span><span class="m-b">↻ 反対側へ</span><i class="m-n">13</i></div>
-          <div class="m-row"><span class="m-b s">⋯<i class="m-n">14</i></span><span class="m-b red">どうぞ、ご乗車ください<i class="m-n">15</i></span></div>
-        </div>
-        <ol class="hw-l">
-          <li><b>上のバー</b>：ステーション・担当・便・スコア。🏠で最初の画面へ</li>
-          <li><b>時間のバー</b>：到着からの時間。白い線＝インターバル、赤い線＝踏切で止まる</li>
-          <li><b>セリフ</b>：🙋あなた／🧑‍🤝‍🧑ゲスト／📣ディスパッチャー。<b>タップで履歴</b></li>
-          <li><b>ゲート前のグループ</b>：人数と特徴。<span class="w">赤</span>＝対応しないとオペミス、<span class="y">黄</span>＝注意、緑＝OK</li>
-          <li><b>映像</b>：車内のグループをタップで選ぶ（ずれてもらう相手）</li>
-          <li><b>車内アップ／全体</b>：カメラの切りかえ。ロードが始まると自動で車内アップに、ロードが終わると全体にもどる</li>
-          <li><b>名前</b>：場所や人の名前を表示</li>
-          <li><b>状況で出るボタン</b>：<br>「左（右）にずれますか？」…選んだグループにずれてもらう<br>「反対側のベンチへお移りいただけますか？」…選んだグループに反対側のベンチへ移ってもらう（ベビーカー・車いすのグループは連結部スペースの反対側へ）<br>「皆さま少しずつお詰めいただけますか？」…車内が10名ほどになったら、または座りきれないとき<br>「たためば乗れますが…」…ベビーカーが台数制限をこえたとき<br>「あとで（横で待機）」／「お待たせした方を呼ぶ」…ベビーカー・車いす（呼ぶと1回で乗車）<br>「フタのない飲み物のお願い」</li>
-          <li><b>ゲート</b>：タップで開け閉め。ロードの最後にもう一度押すとゲート確認へ</li>
-          <li><b>何名様ですか？</b>：ゲート前のグループに人数を聞く（もう一度押すと、もう一度答えてくれる）</li>
-          <li><b>カウンター</b>：＋1／−で数える</li>
-          <li><b>席の指示（左右）・次の電車で</b>：おまかせ（フロントは左詰め・リアは右詰め）／フロントは「右 →」・リアは「← 左」に寄せて座ってもらう／🚃次の電車でご案内（乗れないときだけ出る）</li>
-          <li><b>席の指示（奥・手前）</b>：奥＝上のベンチ、手前＝下のベンチ。↻反対側へ＝ベビーカーグループの横へ</li>
-          <li><b>⋯</b>：後ろの方に人数を聞く（乗れそうなら先にご案内）／次の電車でご案内</li>
-          <li><b>どうぞ、ご乗車ください</b>：選んだ席の指示で乗ってもらう</li>
-        </ol>
-      </div>
+      <div class="fl-st"><i>1</i><div><h4>🚃 電車が来る</h4>
+        <p>止まるまで<span class="k">入口ゲート</span>は開けない<em>（オペミス）</em></p></div></div>
 
-      <!-- アンロードの画面 -->
-      <div class="hw-pg" data-hw="unload">
-        <div class="mock">
-          <div class="m-say"><b>🙋 あなた</b> お出口は反対側にございます</div>
-          <div class="m-view">映像（降りるゲスト）</div>
-          <div class="m-row"><span class="m-b">出口ゲート<i class="m-n">1</i></span><span class="m-b">サポート（PD）<i class="m-n">2</i></span><span class="m-b">入口ゲート<i class="m-n">3</i></span></div>
-          <div class="m-row"><span class="m-b">📣 お出口は反対側に<i class="m-n">4</i></span><span class="m-b">← フロントの出口へ<i class="m-n">5</i></span></div>
-        </div>
-        <ol class="hw-l">
-          <li><b>出口ゲート</b>：電車が止まったら最初に開ける</li>
-          <li><b>サポートゲート</b>（PDのみ）：開けると降りるのが早くなる</li>
-          <li><b>入口ゲート</b>：連結部があいたら開けてOK（全員降りてからご乗車）</li>
-          <li><b>お出口は反対側に</b>：降りるゲストへの声かけ</li>
-          <li><b>フロントの出口へ</b>（AWFリアのみ）：ベビーカー・車いすの方をディスパッチャーの前を通してフロントの出口へ</li>
-        </ol>
-      </div>
+      <div class="fl-st"><i>2</i><div><h4>⬇️ アンロード</h4>
+        <p><span class="k">出口ゲート</span>を開ける → <span class="k">📣 お出口は反対側</span></p>
+        <p>連結部があいたら<span class="k">入口ゲート</span>を開ける</p></div></div>
 
-      <!-- ゲートOKの画面 -->
-      <div class="hw-pg" data-hw="gate">
-        <div class="mock">
-          <div class="m-view">映像（ゲートを指差し確認）</div>
-          <div class="m-row"><span class="m-b">出口ゲート</span><span class="m-b">入口ゲート</span><i class="m-n">1</i></div>
-          <div class="m-row"><span class="m-b red">👍 サムアップ<i class="m-n">2</i></span></div>
-        </div>
-        <ol class="hw-l">
-          <li><b>ゲート</b>：<b>入口 →（サポート）→ 出口</b>の順にタップ。1つ1〜2秒かかる。順番ちがいはオペミス。まちがえて閉めたゲートは、サムアップ前ならもう一度タップで開けられる（入口を開けるとローディングに戻る）</li>
-          <li><b>サムアップ</b>：全部ゲートOKのあとに。3秒後に出発（対戦中は相手のサムアップもそろってから）。人数しだいで出発タイミングボーナス（21名なら早いほど、16〜20名はインターバル50秒ぴったりが高い）</li>
-        </ol>
-      </div>
+      <div class="fl-st"><i>3</i><div><h4>🧑‍🤝‍🧑 ロード <small>（1組ずつくり返す）</small></h4>
+        <p><span class="k">🗣 何名様ですか？</span> → <span class="k">＋1</span>で数える</p>
+        <p>座る位置を選ぶ → <span class="k red">どうぞ、ご乗車ください</span></p>
+        <p class="fl-note">車内の人数は出ません。カウンターで数えます</p></div></div>
 
-      <!-- そのほか -->
-      <div class="hw-pg" data-hw="other">
-        <b>スコア</b><br>
-        ・減点：オペミス（入口ゲートの早開け、21名超え、台数制限、ゲート確認の順番、フタなし飲み物）、出発の遅れ（踏切停止）、横で待たせた方の乗せ忘れ<br>
-        ・加点：乗車人数、21人に近いほど満員ボーナス（15人から。21人で+120）、出発タイミングボーナス（21名ぴったりなら早いほど高い／16〜20名はインターバル50秒ぴったりがいちばん高い／15名以下はなし）、ベビーカー2組／2台持ち／車いすの便（混雑レベルで倍率）<br>
-        ・超繁忙期はヒント（光るボタン）なし<br><br>
-        <b>🔰 練習モード</b>：最初の画面で選ぶ。時間制限なし（次の電車が踏切で止まらない）。スコアはランキングに残らない<br><br>
-        <b>🆚 通信対戦</b>：部屋をつくった人がフロント、4けたの番号で入った人がリア<br>
-        <b>🏆 ランキング</b>：1便・3便に分かれています。シフト終了後に名前を入れて登録<br>
-        <b>文字の大きさ</b>：最初の画面で「大きめ」を選べる
-      </div>
+      <div class="fl-st"><i>4</i><div><h4>☝️ ゲートOK</h4>
+        <p><span class="k">入口</span> →（サポート）→ <span class="k">出口</span>の順</p></div></div>
+
+      <div class="fl-st end"><i>5</i><div><h4>👍 出発</h4>
+        <p><span class="k red">👍 サムアップ</span> → 3秒後に出発</p>
+        <p class="fl-note">21名に近いほど高得点。時間のバーの赤い線をこえると、次の電車が踏切で止まり減点</p></div></div>
+
+      <div class="fl-h">こんなときは</div>
+      <table class="fl-t">
+        <tr><th>👶♿ ベビーカー・車いす</th><td>基本は最後。<span class="k">横で待ってもらう</span> → あとで<span class="k">📣 待機の方を呼ぶ</span><br><em>1両に👶2台・♿1台まで</em></td></tr>
+        <tr><th>🥤 フタなし飲み物</th><td><span class="k">フタのない飲み物のお願い</span></td></tr>
+        <tr><th>🚻 トイレの人</th><td><span class="k">そろうまで待ってもらう</span></td></tr>
+        <tr><th>😣 入りきらない</th><td><span class="k">🙏 詰めてもらう</span> <span class="k">🗣 後ろの方に人数を聞く</span> <span class="k">🚃 次の電車で</span></td></tr>
+        <tr><th>↔️ 席を動かしたい</th><td>車内のグループをタップ → <span class="k">ずれてもらう</span> <span class="k">反対側のベンチへ</span></td></tr>
+      </table>
+
+      <div class="fl-h">大きなミス</div>
+      <p class="fl-bad">入口ゲートの早開け／21名をこえる／ベビーカー・車いすの台数オーバー／ゲートOKの順番ちがい／フタなし飲み物／待たせた方の呼び忘れ</p>
+
+      <div class="fl-h">そのほか</div>
+      <div class="fl-o"><span>⏸️ 一時停止</span><span>🏠 最初の画面へ</span><span>🔍 カメラ切りかえ</span><span>🔰 練習＝時間制限なし</span><span>🆚 2人で通信対戦</span><span>🏆 ランキング（1便・3便）</span></div>
     </div>
     <button class="btn red" style="width:100%;margin-top:10px" data-close="ovHow">OK</button>
   </div>
 </div>
-
 <div class="ov" id="ovTrip">
   <div class="card">
     <h2 id="tTitle">いってらっしゃい！</h2>
