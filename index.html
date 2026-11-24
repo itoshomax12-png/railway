@@ -575,6 +575,7 @@ html,body,#app{height:100%;height:100dvh}
       <button class="btn" id="bCallNext">さらに後ろの方に聞く</button>
     </div>
     <button class="btn" style="width:100%;margin-top:6px;display:none" id="bCallDrink">🥤 フタのない飲み物のお願い</button>
+    <div class="seg" id="callSeat" style="margin:8px 0 4px"><button data-v="free" class="sel">おまかせ</button><button data-v="R" id="callSeatR">右 →</button><button data-v="oku">奥（上）</button><button data-v="temae">手前（下）</button></div>
     <button class="btn" style="width:100%;margin-top:6px" id="bCallX">やめる（今の方のまま）</button>
   </div>
   <div class="sheet" id="sheetStuck">
@@ -1032,7 +1033,7 @@ function makeGroup(forUnload){
   if(Math.random()<L.mis){
     if(g.baby&&Math.random()<.6) g.answer=g.size-1;
     else if(g.kids>0&&Math.random()<.6) g.answer=g.size-1;
-    else if(Math.random()<0.12){g.answer=g.size+1; g.away=true; g.awayBack=performance.now()+rnd(20,45)*1000;}   // トイレに行っている人を数えてしまう（まれ）。しばらくすると戻ってくる
+    else if(Math.random()<0.04){g.answer=g.size+1; g.away=true; g.awayBack=performance.now()+rnd(20,45)*1000;}   // トイレに行っている人を数えてしまう（まれ）。しばらくすると戻ってくる
   }
   return g;
 }
@@ -1043,11 +1044,12 @@ function newCar(){return {rows:[Array(CELLS).fill(null),Array(CELLS).fill(null)]
 // ベビーカー・車いすを置いた側（0＝奥/上、1＝手前/下）
 function spaceRows(car){const out=new Set();for(const x of Object.values(car.groups)) if(x.g.anch&&!x.g.folded) out.add(x.g.spaceRow??1);return out;}
 // 連結部の入口：手前側にベビーカー等を置くとふさがる。奥側に置いたときは入口はそのまま使える
-function entrance(car){return spaceRows(car).has(1)?'end':'coup';}
+// ベビーカー・車いすは関係なく台数で決める：2台（2台持ち・同じグループのベビーカーと車いすもふくむ）→ 車両の端から。1台を奥に → 入口は変えない。1台を手前に → 車両の端から（現場で確認済み）
+function spaceDevices(car){let n=0;for(const x of Object.values(car.groups)){const g=x.g; if(g.anch&&!g.folded) n+=stN(g)+(g.wc?1:0);} return n;}
+function entrance(car){return (spaceDevices(car)>=2||spaceRows(car).has(1))?'end':'coup';}
 // そのベンチへ入る入口：奥側にベビーカー等があると、その前は通れないので奥のベンチへは車両の端の入口から
 // 車いすだけを奥（上）に置いたときは、奥のベンチへの入口は変えない（連結部から入れる）。ベビーカーを奥に置いたときだけ車両の端から
-function blockRows(car){const out=new Set();for(const x of Object.values(car.groups)){const g=x.g; if(g.anch&&!g.folded&&!(g.wc&&!stN(g))) out.add(g.spaceRow??1);} return out;}
-function rowDoor(car,r){ if(entrance(car)==='end') return 'end'; if(r===0&&blockRows(car).has(0)) return 'end'; return 'coup'; }
+function rowDoor(car,r){ return entrance(car); }
 function runs(row){const out=[];let s=-1;for(let i=0;i<=CELLS;i++){if(i<CELLS&&row[i]===null){if(s<0)s=i;}else if(s>=0){out.push([s,i-1]);s=-1;}}return out;}
 function fitsAt(row,s,len){if(s<0||s+len>CELLS)return false;for(let i=s;i<s+len;i++)if(row[i]!==null)return false;return true;}
 function put(car,g,segs){ if(g.anch){ const s0=segs.find(x=>x.s===0)||segs[0]; g.spaceRow = s0? s0.r : (g.spaceRow??1); }for(const sg of segs)for(let i=sg.s;i<sg.s+sg.len;i++)car.rows[sg.r][i]=g.id;
@@ -1363,8 +1365,8 @@ function gateTap(i,el){
     if(G.phase==='load'){
       // ローディング終了 → ゲート確認へ
       G.gatesAtLoad=G.gates.slice(); G.phase='gate'; camBack(); if(G.cur){G.queue.unshift(G.cur);G.cur=null;$('group').innerHTML='';$('tags').innerHTML='';renderInfo(null);}
-      { const still=G.aside.filter(x=>x.away); if(still.length){ still.forEach(x=>carryPush(x)); G.aside=G.aside.filter(x=>!x.away); drawQueue();
-          setTimeout(()=>sayCast('まだおそろいでない方は、次の電車でご案内いたします'),600); } }   // トイレの方がまだ戻らない＝仕方がないので次の電車へ（ミスではない）
+      { const toilet=G.aside.filter(x=>x.awayWait); if(toilet.length){ toilet.forEach(x=>carryPush(x)); G.aside=G.aside.filter(x=>!x.awayWait); drawQueue();
+          setTimeout(()=>sayCast('おそろいの方は、次の電車でご案内いたします'),600); } }   // トイレの方を待っていたグループは、戻っていても・いなくても次の電車へ（減点なし）
       if(G.aside.length){ // 横で待っていたゲストを乗せられなかった＝大きなミス
         const n=G.aside.length, onlyAnch=G.aside.every(x=>x.anch);
         G.aside.forEach(x=>carryPush(x));G.aside=[];drawQueue();
@@ -1711,7 +1713,7 @@ function uiTick(){
   const show=(id,on)=>$(id).classList.toggle('show',!!on);
   show('ctxShift', ph==='load'&&sel);
   show('bOther', ph==='load'&&sel&&!!G.car.groups[G.sel]);
-  show('bSqueeze', ph==='load'&&G.car&&(G.noRoom||heads(G.car)>=10));   // 「詰めてもらう」は場所が足りないとき、または車内が10名ほどになったら（後半）出す。光るのは場所が足りないときだけ
+  show('bSqueeze', ph==='load'&&G.car&&(G.noRoom||(cur&&cur.asked&&heads(G.car)+cur.size<=CARCAP&&!findSeat(G.car,Object.assign({},cur,{noSplit:false}),'free'))));   // 「詰めてもらう」は、人数は大丈夫なのにスペース的に乗りきれないときだけ   // 「詰めてもらう」は場所が足りないとき、または車内が10名ほどになったら（後半）出す。光るのは場所が足りないときだけ
   const ol=ph==='load'&&cur&&!cur.foldAsked&&overLimit(cur);
   show('bFold', ol==='st'); show('bNextWc', ol==='wc');
   show('bAside', ph==='load'&&cur&&cur.asked&&(cur.anch||cur.away)&&!cur.waited&&!ol);   // 横で待ってもらうは、人数を聞いたあとに映像の下のはしに出す（ベビーカー・車いす／トイレの方を待つグループ）
@@ -1788,7 +1790,13 @@ function callAsk(){
     $('bCallNext').disabled=false; callBtns();
   },600);
 }
-$('bCall').onclick=()=>{if(G.phase!=='load'||!G.cur)return; callI=-1; $('sheetCall').classList.add('on'); callAsk();};
+$('bCall').onclick=()=>{if(G.phase!=='load'||!G.cur)return; callI=-1;
+  // 座る位置：後ろの方を案内するときも選べる（はじめは今選んでいる座る位置。おまかせ・左右・奥・手前）
+  const side=pos==='front'?'R':'L'; $('callSeatR').dataset.v=side; $('callSeatR').textContent=side==='R'?'右 →':'← 左';
+  const cur=['free',side,'oku','temae'].includes(G.ins)?G.ins:'free';
+  document.querySelectorAll('#callSeat button').forEach(b=>b.classList.toggle('sel',b.dataset.v===cur));
+  $('sheetCall').classList.add('on'); callAsk();};
+document.querySelectorAll('#callSeat button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#callSeat button').forEach(x=>x.classList.toggle('sel',x===b)); blip(700); });
 $('bCallCtx').onclick=()=>$('bCall').onclick();
 // 今のグループ（人数を聞いたあと）が、この電車に乗れない：定員21名をこえる・座る場所がない
 function cantBoard(g){
@@ -1809,6 +1817,7 @@ $('bCallGo').onclick=()=>{
   $('sheetCall').classList.remove('on');
   const g=G.queue.splice(callI,1)[0];
   G.queue.unshift(G.cur); G.cur=g; g.asked=true; g.called=true; G.countAtAsk=G.count;
+  { const sb=document.querySelector('#callSeat button.sel'); if(sb){ G.ins=sb.dataset.v; selIns(); } }   // 選んだ座る位置で案内
   sayCast('では先にどうぞ、こちらへお進みください');
   drawGroup(g,'walkin','queue'); drawQueue();
   // 「この方をご案内」を押したら、そのまま乗車（席の指示は今選んでいるもの）。カウンターは自分で数える
@@ -1917,7 +1926,7 @@ const END_CM={
 };
 function endComment(r,s){
   const special=[];
-  if((s.ope||0)>=3) special.push('オペミス'+s.ope+'回。安全確認は、ゲームでも現場でもいちばん大事。リーダーに呼ばれる前に練習しよう。','オペミス'+s.ope+'回。……トレーニングからやり直しましょう。');
+  if((s.ope||0)>=2) special.push('オペミス'+s.ope+'回。安全確認は、ゲームでも現場でもいちばん大事。リーダーに呼ばれる前に練習しよう。','オペミス'+s.ope+'回。……トレーニングからやり直しましょう。');
   else if((s.ope||0)>=1) special.push('オペミスがありました。ゲストの安心感は、キャストの安全確認から。');
   if((s.asideMiss||0)>0) special.push('横でお待ちのゲストが「わたしたちのこと、忘れてませんか…？」と言っています。');
   if((s.over||0)>0) special.push('21名をこえました。電車は満員電車ではありません。');
@@ -1927,16 +1936,17 @@ function endComment(r,s){
   if(s.boarded===0) special.push('ご案内したゲスト、0名。……電車、からっぽで出発しました。');
   // 目立ったことがあれば半分くらいの確率でそちらを出す（大きな失敗は必ず出す）
   if(r==='F'&&Math.random()<0.5) return PICK(END_CM.F);   // Fのときは、F用のコメントか、最悪だった理由に合わせたコメント
-  if(special.length&&((s.ope||0)>=3||s.boarded===0||Math.random()<0.5)) return PICK(special);
+  if(special.length&&((s.ope||0)>=2||Math.random()<0.5)) return PICK(special);
   return PICK(END_CM[r]);
 }
+const RANK_S=380, RANK_A=300, RANK_B=200;   // 1便あたりの平均点（21名で早めに出すと約400点、18名で約300点）
 function end(){
   const s=G.stats;
-  let pts=100 - s.miss*4 - (s.ope||0)*12 - (s.asideMiss||0)*15 - s.over*13 - s.stopSec*0.8 + s.full*18/TRIPS - (TRIPS-s.correct)*6;   // 18名以上の便の加点は便数に関係なく最大+18
-  // ランク：上から S・A・B・C。最悪なとき（スコアがマイナス・成績の点がとても低い・オペミス3回以上・0名で出発）は F
+  // ランク：スコアに比例（1便あたりの平均点で決める）。上から S・A・B・C、最悪なとき（スコアがマイナス・オペミス2回以上）は F
+  const avg=G.score/TRIPS;
   // ベビーカー・車いすのグループを1組も案内していないシフトは、最高でもA（たたんだベビーカーもふくむ）
   const hadAnch=(G.log||[]).some(l=>(l.order||[]).some(x=>x.st>0||x.wc||x.fold));
-  let r=(G.score<0||pts<30||(s.ope||0)>=3||s.boarded===0)?'F':pts>=105?'S':pts>=90?'A':pts>=70?'B':'C';
+  let r=(G.score<0||(s.ope||0)>=2)?'F':avg>=RANK_S?'S':avg>=RANK_A?'A':avg>=RANK_B?'B':'C';
   const capped=r==='S'&&!hadAnch; if(capped) r='A';
   $('eRank').textContent=r; $('eScore').textContent=G.score+' pt';
   $('eTable').innerHTML=
@@ -3010,8 +3020,8 @@ const E3=(()=>{
     setL(L.disp,[staff[0].root.p[0],2.05,staff[0].root.p[2]],'ディスパッチャー',NL&&camMode==='over');
     if(mate) setL(L.mate,[mate.x,2.05,mate.z],'相方ローダー',NL&&camMode==='over');
     if(avatar) setL(L.you,[avatar.x,2.3,avatar.z],'▼',camMode!=='fp');
-    const nm=i=>i===0?'入口':i===G.gates.length-1?'出口':'サポート';
-    L.g.forEach((o,i)=>{const s=G.gates[i];setL(o,[X(gateXL()[i]),1.25,GATEZ-.1],`${nm(i)}<b>${s==='open'?'開':s==='ok'?'OK☝':'閉'}</b>`,NL);o.d.className='lbl3 gt '+(s||'');});
+    const nm=i=>i===0?'入口':i===(G.gates||[]).length-1?'出口':'サポート';
+    L.g.forEach((o,i)=>{const s=(G.gates||[])[i];setL(o,[X(gateXL()[i]),1.25,GATEZ-.1],`${nm(i)}<b>${s==='open'?'開':s==='ok'?'OK☝':'閉'}</b>`,NL);o.d.className='lbl3 gt '+(s||'');});
   }
 
   // そのグループのだれかが出口ゲートをこえて出口通路に出たか
