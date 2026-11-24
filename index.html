@@ -1908,6 +1908,12 @@ const END_CM={
      'トレーニングからやり直しましょう。',
      'トレーナーから一言：「トレーニングからやり直しましょう」',
      'トレーニングからやり直しましょう。🔰練習モードでお待ちしています。'],
+  F:['Fランク。トレーニングからやり直しましょう。',
+     'Fランク。……トレーナーが、静かにトレーニングの予定表を持ってきました。',
+     'Fランク。電車は出ましたが、あなたの評価は踏切で止まっています。',
+     'ディスパッチャーが「おーらぼー！」を言うのをためらっていました。',
+     'Fランク。逆にここまで来ると才能。でもトレーニングからやり直しましょう。',
+     '今日のシフトは、なかったことにしましょう。🔰練習モードへどうぞ。'],
 };
 function endComment(r,s){
   const special=[];
@@ -1920,13 +1926,15 @@ function endComment(r,s){
   if(s.correct===TRIPS&&(s.ope||0)===0&&r!=='S') special.push('カウンターは全便ぴったり。数えるのは得意、あとはスピードだけ！');
   if(s.boarded===0) special.push('ご案内したゲスト、0名。……電車、からっぽで出発しました。');
   // 目立ったことがあれば半分くらいの確率でそちらを出す（大きな失敗は必ず出す）
+  if(r==='F'&&Math.random()<0.5) return PICK(END_CM.F);   // Fのときは、F用のコメントか、最悪だった理由に合わせたコメント
   if(special.length&&((s.ope||0)>=3||s.boarded===0||Math.random()<0.5)) return PICK(special);
   return PICK(END_CM[r]);
 }
 function end(){
   const s=G.stats;
   let pts=100 - s.miss*4 - (s.ope||0)*12 - (s.asideMiss||0)*15 - s.over*13 - s.stopSec*0.8 + s.full*18/TRIPS - (TRIPS-s.correct)*6;   // 18名以上の便の加点は便数に関係なく最大+18
-  const r=pts>=105?'S':pts>=90?'A':pts>=70?'B':'C';
+  // ランク：上から S・A・B・C。最悪なとき（点がとても低い・オペミス3回以上・0名で出発）は F
+  const r=(pts<30||(s.ope||0)>=3||s.boarded===0)?'F':pts>=105?'S':pts>=90?'A':pts>=70?'B':'C';
   $('eRank').textContent=r; $('eScore').textContent=G.score+' pt';
   $('eTable').innerHTML=
     (TRIPS>1?`<tr><td colspan="2" style="text-align:left;font-weight:700">1便ずつのスコア</td></tr>`+
