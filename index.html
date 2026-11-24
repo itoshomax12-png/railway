@@ -1933,8 +1933,8 @@ function endComment(r,s){
 function end(){
   const s=G.stats;
   let pts=100 - s.miss*4 - (s.ope||0)*12 - (s.asideMiss||0)*15 - s.over*13 - s.stopSec*0.8 + s.full*18/TRIPS - (TRIPS-s.correct)*6;   // 18名以上の便の加点は便数に関係なく最大+18
-  // ランク：上から S・A・B・C。最悪なとき（点がとても低い・オペミス3回以上・0名で出発）は F
-  const r=(pts<30||(s.ope||0)>=3||s.boarded===0)?'F':pts>=105?'S':pts>=90?'A':pts>=70?'B':'C';
+  // ランク：上から S・A・B・C。最悪なとき（スコアがマイナス・成績の点がとても低い・オペミス3回以上・0名で出発）は F
+  const r=(G.score<0||pts<30||(s.ope||0)>=3||s.boarded===0)?'F':pts>=105?'S':pts>=90?'A':pts>=70?'B':'C';
   $('eRank').textContent=r; $('eScore').textContent=G.score+' pt';
   $('eTable').innerHTML=
     (TRIPS>1?`<tr><td colspan="2" style="text-align:left;font-weight:700">1便ずつのスコア</td></tr>`+
