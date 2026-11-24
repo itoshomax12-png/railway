@@ -983,7 +983,15 @@ function say(kind,t){
 function sayGuest(t,narr){ say(narr?'narr':'guest',t); }
 function sayDisp(t){ say('disp',t); }
 function sayCast(t){ say('cast',t); }
-function toast(t,cls=''){const e=$('toast');e.className='toast on '+cls;e.innerHTML=t;clearTimeout(e._t);e._t=setTimeout(()=>e.className='toast',2200);}
+// オペミスの表示は長め（3.5秒）に出して、その間に来たほかの表示は、オペミスの表示が終わってから出す（上書きしない）
+let toastHold=0;
+function toast(t,cls=''){
+  const now=performance.now(), ope=String(t).startsWith('⚠ オペミス');
+  if(!ope&&now<toastHold){ setTimeout(()=>toast(t,cls),toastHold-now+150); return; }
+  const e=$('toast');e.className='toast on '+cls;e.innerHTML=t;clearTimeout(e._t);
+  const ms=ope?3500:2200; if(ope) toastHold=now+ms;
+  e._t=setTimeout(()=>e.className='toast',ms);
+}
 function pop(v,el){const r=(el||$('hScore')).getBoundingClientRect(),a=app.getBoundingClientRect();const e=document.createElement('div');e.className='pop'+(v<0?' neg':'');e.textContent=(v>0?'+':'')+v;e.style.left=(r.left-a.left+r.width/2-12)+'px';e.style.top=(r.top-a.top)+'px';$('sGame').appendChild(e);setTimeout(()=>e.remove(),1000);}
 function add(v,el){G.score+=v;$('hScore').textContent=G.score;pop(v,el);}
 function opeMiss(msg,el){ // オペミス（運営上の重大なミス）
